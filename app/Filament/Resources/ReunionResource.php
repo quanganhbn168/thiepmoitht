@@ -25,7 +25,7 @@ use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Actions\Action as FormAction;
 
 // Table Components
 use Filament\Tables\Columns\TextColumn;
@@ -179,7 +179,7 @@ class ReunionResource extends Resource
                         Tab::make('Lịch trình (Timeline)')
                             ->schema([
                                 Actions::make([
-                                    Action::make('importJson')
+                                    FormAction::make('importJson')
                                         ->label('Nhập nhanh nhiều tính năng từ mã JSON')
                                         ->icon('heroicon-m-code-bracket')
                                         ->color('warning')
