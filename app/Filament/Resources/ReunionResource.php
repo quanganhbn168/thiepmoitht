@@ -24,6 +24,8 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action;
 
 // Table Components
 use Filament\Tables\Columns\TextColumn;
@@ -176,6 +178,45 @@ class ReunionResource extends Resource
 
                         Tab::make('Lịch trình (Timeline)')
                             ->schema([
+                                Actions::make([
+                                    Action::make('importJson')
+                                        ->label('Nhập nhanh nhiều tính năng từ mã JSON')
+                                        ->icon('heroicon-m-code-bracket')
+                                        ->color('warning')
+                                        ->form([
+                                            Textarea::make('json_data')
+                                                ->label('Dán dữ liệu JSON vào đây')
+                                                ->placeholder('[
+  {
+    "time": "7h00 - 8h00",
+    "title": "Đón khách",
+    "description": "Nhạc sôi động",
+    "is_highlight": false
+  }
+]')
+                                                ->required()
+                                                ->rows(10),
+                                        ])
+                                        ->action(function (array $data, \Filament\Forms\Set $set, \Filament\Notifications\Notification $notification) {
+                                            $json = json_decode($data['json_data'], true);
+                                            if (is_array($json)) {
+                                                $newState = [];
+                                                foreach ($json as $item) {
+                                                    $newState[(string) \Illuminate\Support\Str::uuid()] = [
+                                                        'time' => $item['time'] ?? '',
+                                                        'title' => $item['title'] ?? '',
+                                                        'description' => $item['description'] ?? '',
+                                                        'is_highlight' => $item['is_highlight'] ?? false,
+                                                    ];
+                                                }
+                                                $set('content.timeline', $newState);
+                                                $notification->success()->title('Nhập JSON thành công!')->send();
+                                            } else {
+                                                $notification->danger()->title('Lỗi định dạng JSON')->body('Hãy chắc chắn mã bạn dán là một mảng JSON hợp lệ!')->send();
+                                            }
+                                        }),
+                                ])->alignEnd(),
+                                
                                 Repeater::make('content.timeline')
                                     ->label('Các hoạt động trong ngày')
                                     ->schema([
