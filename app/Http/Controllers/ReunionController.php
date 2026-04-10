@@ -8,6 +8,8 @@ use App\Models\ReunionRsvp;
 use App\Models\ReunionMessage;
 
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\File;
+use Carbon\Carbon;
 
 class ReunionController extends Controller
 {
@@ -44,7 +46,7 @@ class ReunionController extends Controller
                 'user_id' => 1
             ]
         );
-        $messages = \App\Models\ReunionMessage::where('reunion_id', $reunion->id)
+        $messages = ReunionMessage::where('reunion_id', $reunion->id)
                         ->where('is_approved', true)
                         ->orderBy('created_at', 'desc')
                         ->get();
@@ -69,7 +71,7 @@ class ReunionController extends Controller
                 'user_id' => 1
             ]
         );
-        $messages = \App\Models\ReunionMessage::where('reunion_id', $reunion->id)
+        $messages = ReunionMessage::where('reunion_id', $reunion->id)
                         ->where('is_approved', true)
                         ->orderBy('created_at', 'desc')
                         ->get();
@@ -117,7 +119,7 @@ class ReunionController extends Controller
         
         // Auto create folder if missing
         if (!is_dir($basePath)) {
-            \Illuminate\Support\Facades\File::makeDirectory($basePath . '/12A1', 0755, true, true);
+            File::makeDirectory($basePath . '/12A1', 0755, true, true);
         }
 
         $classDirs = $this->scanGalleryDir($basePath, $reunion->slug);
@@ -151,7 +153,7 @@ class ReunionController extends Controller
             'slogan' => $reunion->content['schoolInfo']['slogan'] ?? 'Trở Về Thanh Xuân',
         ];
 
-        \Carbon\Carbon::setLocale('vi');
+        Carbon::setLocale('vi');
         // Ưu tiên event_time (chứa cả giờ chính xác), dự phòng event_date cũ
         $eventDate = $reunion->event_time ?? $reunion->event_date;
 
@@ -192,7 +194,7 @@ class ReunionController extends Controller
             ['time' => '11h00-11h30', 'title' => 'Chụp ảnh dạo quanh trường xưa', 'description' => 'Di chuyển quanh sân trường, các góc lớp để cùng nhau lưu lại bức ảnh Thanh Xuân.', 'is_highlight' => true],
         ];
 
-        $messages = \App\Models\ReunionMessage::where('reunion_id', $reunion->id)
+        $messages = ReunionMessage::where('reunion_id', $reunion->id)
                         ->where('is_approved', true)
                         ->orderBy('created_at', 'desc')
                         ->get();
