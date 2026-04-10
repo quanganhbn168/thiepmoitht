@@ -135,9 +135,14 @@ class ReunionController extends Controller
 
         /* ... existing variable definitions ... */
 
+        $className = $reunion->class_name ?: '2003-2006';
+        $courseText = mb_stripos($className, 'niên khóa') !== false 
+            ? $className 
+            : 'Niên khóa ' . $className;
+
         $schoolInfo = [
             'name' => $reunion->school_name ?: 'Trường THPT Quế Võ 2',
-            'course' => 'Niên khóa ' . ($reunion->class_name ?: '2003-2006'),
+            'course' => $courseText,
             'years' => $reunion->graduation_year ? (str_contains($reunion->graduation_year, '-') ? $reunion->graduation_year : ((int)$reunion->graduation_year - 3) . ' - ' . $reunion->graduation_year) : '2003 - 2006',
             'anniversary' => $reunion->content['schoolInfo']['anniversary'] ?? '20 Năm',
             'slogan' => $reunion->content['schoolInfo']['slogan'] ?? 'Trở Về Thanh Xuân',
