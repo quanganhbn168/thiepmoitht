@@ -175,12 +175,26 @@ class ReunionController extends Controller
         $openLetter = $reunion->getContentValue('open_letter', '<p><strong>Trân trọng kính mời:</strong> Ban Giám hiệu các thời kỳ, quý thầy cô giáo cùng toàn thể các bạn cựu học sinh niên khóa 2003-2006.</p><p>Thời gian trôi qua thật nhanh... mới ngày nào chúng ta còn là những cô cậu học trò hồn nhiên dưới mái trường THPT Quế Võ Số 2 thân yêu, vậy mà đã tròn 20 năm kể từ ngày chia tay.</p><p>Hai mươi năm – mỗi người một hành trình, một ngả rẽ riêng. Nhưng chắc chắn rằng, trong sâu thẳm trái tim mỗi người vẫn luôn lưu giữ vẹn nguyên những ký ức của một thời áo trắng.</p><p>✨ Nhân dịp kỷ niệm <strong>20 năm ngày ra trường</strong>, Ban liên lạc trân trọng kính mời Ban Giám hiệu, quý thầy cô giáo cùng toàn thể các bạn khóa 2003–2006 trở về tham dự buổi hội ngộ đầy ý nghĩa.</p><p>💛 Đây là dịp để chúng ta cùng gặp lại nhau, ôn lại những kỷ niệm đẹp và bày tỏ lòng tri ân sâu sắc tới Ban Giám hiệu cùng quý thầy cô.</p><p>💐 Rất mong sự hiện diện của quý thầy cô và toàn thể các bạn để buổi hội ngộ thêm trọn vẹn, ấm áp và đáng nhớ.</p><p><strong>Hẹn gặp lại – Thanh xuân của chúng ta!</strong></p>');
         $greeting = $reunion->getContentValue('invitation_greeting', 'Quý thầy cô & Các bạn');
 
+        $timeline = $reunion->content['timeline'] ?? [
+            ['time' => '7h00-8h00', 'title' => 'Đón tiếp thầy cô và các bạn', 'description' => 'Giao lưu, nhận áo đồng phục và chụp ảnh lưu niệm tại backdrop.', 'is_highlight' => false],
+            ['time' => '8h00-8h30', 'title' => 'Văn nghệ chào mừng', 'description' => 'Các tiết mục văn nghệ đặc sắc do cựu học sinh biểu diễn.', 'is_highlight' => false],
+            ['time' => '8h30-8h45', 'title' => 'Phát biểu khai mạc', 'description' => 'Tuyên bố lý do, giới thiệu đại biểu và khai mạc chương trình.', 'is_highlight' => true],
+            ['time' => '8h45-9h00', 'title' => 'Phát biểu của Thầy Hiệu trưởng cũ', 'description' => 'Lắng nghe những chia sẻ đầy kỷ niệm từ Thầy hiệu trưởng nhiệm kỳ 2003-2006.', 'is_highlight' => false],
+            ['time' => '9h00-9h15', 'title' => 'Phát biểu của Thầy Hiệu trưởng đương nhiệm', 'description' => 'Thầy hiệu trưởng hiện tại phát biểu về sự phát triển của nhà trường.', 'is_highlight' => false],
+            ['time' => '9h15-9h30', 'title' => 'Phát biểu của Học sinh', 'description' => 'Đại diện cựu học sinh gửi lời tri ân sâu sắc tới mái trường và thầy cô.', 'is_highlight' => false],
+            ['time' => '9h30-10h00', 'title' => 'Tặng quà tri ân Thầy cô giáo', 'description' => 'Gửi tặng những món quà ý nghĩa đến các thầy cô nguyên là giáo viên giảng dạy khóa 2003-2006.', 'is_highlight' => true],
+            ['time' => '10h00-10h15', 'title' => 'Tặng quà Nhà trường', 'description' => 'Tập thể cựu học sinh dâng tặng hoa và kỷ vật cho trường THPT Quế Võ 2.', 'is_highlight' => false],
+            ['time' => '10h15-10h30', 'title' => 'Chúc mừng BGH', 'description' => 'Tập thể Ban tổ chức lên tặng hoa và chúc sức khỏe Ban Giám Hiệu.', 'is_highlight' => false],
+            ['time' => '10h30-10h45', 'title' => 'Trao bằng vinh danh BTC', 'description' => 'Vinh danh cảm ơn các cá nhân Tập thể BTC đã tích cực kết nối và xây dựng chương trình.', 'is_highlight' => false],
+            ['time' => '11h00-11h30', 'title' => 'Chụp ảnh dạo quanh trường xưa', 'description' => 'Di chuyển quanh sân trường, các góc lớp để cùng nhau lưu lại bức ảnh Thanh Xuân.', 'is_highlight' => true],
+        ];
+
         $messages = \App\Models\ReunionMessage::where('reunion_id', $reunion->id)
                         ->where('is_approved', true)
                         ->orderBy('created_at', 'desc')
                         ->get();
 
-        return view('reunions.que-vo-2', compact('classDirs', 'organizers', 'eventInfo', 'schoolInfo', 'openLetter', 'greeting', 'messages', 'reunion'));
+        return view('reunions.que-vo-2', compact('classDirs', 'organizers', 'eventInfo', 'schoolInfo', 'openLetter', 'greeting', 'timeline', 'messages', 'reunion'));
     }
 
     public function storeRsvpDemo(Request $request)

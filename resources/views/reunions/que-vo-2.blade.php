@@ -629,149 +629,37 @@
                 <div class="absolute left-[92px] sm:left-[110px] top-5 bottom-5 w-0.5 bg-gray-200 hidden sm:block">
                 </div>
 
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">7h00-8h00</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
-                        <h3 class="font-bold text-gray-800">Đón tiếp thầy cô và các bạn</h3>
-                        <p class="text-gray-500 text-sm mt-1">Giao lưu, nhận áo đồng phục và chụp ảnh lưu niệm tại
-                            backdrop.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">8h00-8h30</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
-                        <h3 class="font-bold text-gray-800">Văn nghệ chào mừng</h3>
-                        <p class="text-gray-500 text-sm mt-1">Các tiết mục văn nghệ đặc sắc do cựu học sinh biểu diễn.
-                        </p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-blue-600">8h30-8h45</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-blue-500 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-blue-50 rounded-xl p-4 shadow-sm border border-blue-100 pb-5">
-                        <h3 class="font-bold text-blue-800">Phát biểu khai mạc</h3>
-                        <p class="text-gray-600 text-sm mt-1">Tuyên bố lý do, giới thiệu đại biểu và khai mạc chương
-                            trình.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">8h45-9h00</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
-                        <h3 class="font-bold text-gray-800">Phát biểu của Thầy Hiệu trưởng cũ</h3>
-                        <p class="text-gray-500 text-sm mt-1">Lắng nghe những chia sẻ đầy kỷ niệm từ Thầy hiệu trưởng
-                            nhiệm kỳ 2003-2006.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">9h00-9h15</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
-                        <h3 class="font-bold text-gray-800">Phát biểu của Thầy Hiệu trưởng đương nhiệm</h3>
-                        <p class="text-gray-500 text-sm mt-1">Thầy hiệu trưởng hiện tại phát biểu về sự phát triển của
-                            nhà trường.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">9h15-9h30</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
-                        <h3 class="font-bold text-gray-800">Phát biểu của Học sinh</h3>
-                        <p class="text-gray-500 text-sm mt-1">Đại diện cựu học sinh gửi lời tri ân sâu sắc tới mái
-                            trường và thầy cô.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-blue-600">9h30-10h00</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-blue-500 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-blue-50 rounded-xl p-4 shadow-sm border border-blue-100 pb-5">
-                        <h3 class="font-bold text-blue-800">Tặng quà tri ân Thầy cô giáo</h3>
-                        <p class="text-gray-600 text-sm mt-1">Gửi tặng những món quà ý nghĩa đến các thầy cô nguyên là
-                            giáo viên giảng dạy khóa 2003-2006.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">10h00-10h15</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
-                        <h3 class="font-bold text-gray-800">Tặng quà Nhà trường</h3>
-                        <p class="text-gray-500 text-sm mt-1">Tập thể khóa tiến hành trao tặng kỷ niệm chương và quỹ hỗ
-                            trợ cho trường.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">10h15-10h30</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
-                    </div>
-                    <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
-                        <h3 class="font-bold text-gray-800">Tặng hoa Mạnh thường quân</h3>
-                        <p class="text-gray-500 text-sm mt-1">Vinh danh và cảm ơn các bạn cựu học sinh đã đóng góp lớn
-                            cho chương trình.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-blue-600">10h30-11h00</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-5 h-5 rounded-full bg-blue-600 border-[3px] border-blue-200"></div>
-                    </div>
-                    <div class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl p-4 shadow-lg text-white pb-5">
-                        <h3 class="font-bold text-lg text-white">Chụp ảnh tập thể khóa</h3>
-                        <p class="text-blue-100 text-sm mt-1">Tất cả chụp ảnh lưu niệm toàn khóa bằng flycam và kết thúc
-                            chương trình Lễ.</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-start" data-aos="fade-up">
-                    <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
-                            class="text-sm sm:text-base font-bold font-mono text-yellow-600">11h00</span></div>
-                    <div class="flex-shrink-0 flex flex-col items-center z-10">
-                        <div class="w-5 h-5 rounded-full bg-yellow-500 border-[3px] border-yellow-200"></div>
-                    </div>
-                    <div
-                        class="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-400 rounded-xl p-4 shadow-lg text-white pb-5">
-                        <h3 class="font-bold text-lg text-white">Tiệc liên hoan</h3>
-                        <p class="text-yellow-100 text-sm mt-1">Dùng tiệc mặn giao lưu, hát hò tự do thắt chặt tình cảm.
-                        </p>
-                    </div>
-                </div>
+                @if(!empty($timeline))
+                    @foreach($timeline as $item)
+                        @if($item['is_highlight'])
+                            <div class="flex gap-4 items-start" data-aos="fade-up">
+                                <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
+                                        class="text-sm sm:text-base font-bold font-mono text-blue-600">{{ $item['time'] }}</span></div>
+                                <div class="flex-shrink-0 flex flex-col items-center z-10">
+                                    <div class="w-5 h-5 rounded-full bg-blue-600 border-[3px] border-blue-200"></div>
+                                </div>
+                                <div class="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl p-4 shadow-lg text-white pb-5">
+                                    <h3 class="font-bold text-lg text-white">{{ $item['title'] }}</h3>
+                                    <p class="text-blue-100 text-sm mt-1">{{ $item['description'] }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <div class="flex gap-4 items-start" data-aos="fade-up">
+                                <div class="flex-shrink-0 w-20 sm:w-28 text-right pt-1"><span
+                                        class="text-sm sm:text-base font-bold font-mono text-yellow-600">{{ $item['time'] }}</span></div>
+                                <div class="flex-shrink-0 flex flex-col items-center z-10">
+                                    <div class="w-4 h-4 rounded-full border-[3px] border-yellow-400 bg-white"></div>
+                                </div>
+                                <div class="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100 pb-5">
+                                    <h3 class="font-bold text-gray-800">{{ $item['title'] }}</h3>
+                                    <p class="text-gray-500 text-sm mt-1">{{ $item['description'] }}</p>
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                @else
+                    <p class="text-center text-gray-500 py-10 font-accent italic">Chưa có thông tin lịch trình chi tiết.</p>
+                @endif
             </div>
         </div>
     </section>
@@ -790,10 +678,10 @@
             </div>
 
             <!-- Tabs Navigation -->
-            <div class="flex flex-wrap items-center justify-center gap-2 mb-8" data-aos="fade-up">
+            <div class="flex overflow-x-auto snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] items-center sm:justify-center gap-3 mb-8 px-1 pb-4" data-aos="fade-up">
                 @foreach($classDirs as $className => $photos)
                     <button type="button"
-                        class="album-tab-btn px-5 py-2 rounded-full font-bold text-sm transition shadow-sm border border-transparent 
+                        class="album-tab-btn snap-center whitespace-nowrap flex-shrink-0 px-5 py-2.5 rounded-full font-bold text-sm transition shadow-sm border border-transparent 
                                         {{ $loop->first ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200' }}"
                         data-target="album-tab-{{ Str::slug($className) }}"
                         onclick="showAlbumTab(this, 'album-tab-{{ Str::slug($className) }}')">
