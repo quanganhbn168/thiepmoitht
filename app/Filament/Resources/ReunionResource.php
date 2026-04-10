@@ -26,6 +26,8 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Actions;
 use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Str;
 
 // Table Components
 use Filament\Tables\Columns\TextColumn;
@@ -202,7 +204,7 @@ class ReunionResource extends Resource
                                             if (is_array($json)) {
                                                 $newState = [];
                                                 foreach ($json as $item) {
-                                                    $newState[(string) \Illuminate\Support\Str::uuid()] = [
+                                                    $newState[(string) Str::uuid()] = [
                                                         'time' => $item['time'] ?? '',
                                                         'title' => $item['title'] ?? '',
                                                         'description' => $item['description'] ?? '',
@@ -210,9 +212,9 @@ class ReunionResource extends Resource
                                                     ];
                                                 }
                                                 $set('content.timeline', $newState);
-                                                \Filament\Notifications\Notification::make()->success()->title('Nhập JSON thành công!')->send();
+                                                Notification::make()->success()->title('Nhập JSON thành công!')->send();
                                             } else {
-                                                \Filament\Notifications\Notification::make()->danger()->title('Lỗi định dạng JSON')->body('Hãy chắc chắn mã bạn dán là một mảng JSON hợp lệ!')->send();
+                                                Notification::make()->danger()->title('Lỗi định dạng JSON')->body('Hãy chắc chắn mã bạn dán là một mảng JSON hợp lệ!')->send();
                                             }
                                         }),
                                 ])->alignEnd(),
