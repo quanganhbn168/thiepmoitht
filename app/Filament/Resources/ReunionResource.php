@@ -275,6 +275,7 @@ class ReunionResource extends Resource
                 TextColumn::make('class_name')
                     ->label('Lớp / Link thiệp')
                     ->searchable(['class_name', 'slug'])
+                    ->placeholder('(Cả khóa/Trống)')
                     ->description(fn (Reunion $record): string => url('/' . $record->slug))
                     ->copyable()
                     ->copyableState(fn (Reunion $record): string => url('/' . $record->slug))
