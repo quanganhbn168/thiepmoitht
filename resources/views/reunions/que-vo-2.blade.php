@@ -1,11 +1,11 @@
 @extends('layouts.reunion')
 
-@section('title', 'Thư Mời Họp Lớp | THPT Quế Võ 2')
+@section('title', "Thư Mời Họp Lớp | {$schoolInfo['name']}")
 
 @section('meta')
     <meta name="description"
-        content="Thư mời họp lớp kỷ niệm {{ mb_strtolower($schoolInfo['anniversary']) }} ngày ra trường - {{ $schoolInfo['course'] }} - Trường THPT Quế Võ 2. {{ $eventInfo['time'] }} {{ $eventInfo['day'] }} {{ $eventInfo['date'] }}.">
-    <meta property="og:title" content="Thư Mời Họp Lớp - {{ $schoolInfo['anniversary'] }} Trở Về Khung Trời Kỷ Niệm">
+        content="Thư mời họp lớp kỷ niệm {{ mb_strtolower($schoolInfo['anniversary']) }} ngày ra trường - {{ $schoolInfo['course'] }} - {{ $schoolInfo['name'] }}. {{ $eventInfo['time'] }} {{ $eventInfo['day'] }} {{ $eventInfo['date'] }}.">
+    <meta property="og:title" content="Thư Mời Họp Lớp - {{ $schoolInfo['anniversary'] }} {{ $schoolInfo['slogan'] }}">
     <meta property="og:image" content="{{ $reunion->getCoverUrl() }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
