@@ -176,21 +176,21 @@ class ReunionResource extends Resource
 
                         Tab::make('Lịch trình (Timeline)')
                             ->schema([
-                                Forms\Components\Repeater::make('content.timeline')
+                                Repeater::make('content.timeline')
                                     ->label('Các hoạt động trong ngày')
                                     ->schema([
-                                        Forms\Components\TextInput::make('time')
+                                        TextInput::make('time')
                                             ->label('Thời gian')
                                             ->placeholder('VD: 7h00 - 8h00')
                                             ->required(),
-                                        Forms\Components\TextInput::make('title')
+                                        TextInput::make('title')
                                             ->label('Tiêu đề hoạt động')
                                             ->placeholder('VD: Đón tiếp đại biểu')
                                             ->required(),
-                                        Forms\Components\Textarea::make('description')
+                                        Textarea::make('description')
                                             ->label('Mô tả chi tiết')
                                             ->rows(2),
-                                        Forms\Components\Toggle::make('is_highlight')
+                                        Toggle::make('is_highlight')
                                             ->label('Tô đậm (Highlight)')
                                             ->default(false),
                                     ])
