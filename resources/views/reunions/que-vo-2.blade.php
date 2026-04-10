@@ -380,16 +380,6 @@
             </svg>
         </div>
 
-        <!-- Logo & School Name -->
-        <div class="absolute top-4 left-0 w-full flex justify-between items-start px-5 sm:px-8 z-20">
-            <img src="{{ $reunion->getSchoolPhotoUrl() }}" alt="Logo" class="h-12 sm:h-16 w-auto mix-blend-multiply">
-            <div class="text-right">
-                <span class="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Trường
-                    THPT</span>
-                <span class="text-sm sm:text-lg font-serif font-bold text-blue-900">{{ $schoolInfo['name'] }}</span>
-            </div>
-        </div>
-
         <!-- NỘI DUNG CHÍNH (Content) -->
         <div class="relative z-10 w-full max-w-xl mx-auto px-5 text-center flex flex-col items-center">
 
@@ -788,9 +778,9 @@
             <!-- Tabs Navigation -->
             <div class="flex flex-wrap items-center justify-center gap-2 mb-8" data-aos="fade-up">
                 @foreach($classDirs as $className => $photos)
-                    <button type="button" 
+                    <button type="button"
                         class="album-tab-btn px-5 py-2 rounded-full font-bold text-sm transition shadow-sm border border-transparent 
-                        {{ $loop->first ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200' }}" 
+                                        {{ $loop->first ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200' }}"
                         data-target="album-tab-{{ Str::slug($className) }}"
                         onclick="showAlbumTab(this, 'album-tab-{{ Str::slug($className) }}')">
                         {{ $className }}
@@ -802,7 +792,7 @@
             <!-- Tabs Content -->
             <div class="relative min-h-[300px]">
                 @foreach($classDirs as $className => $photos)
-                    <div id="album-tab-{{ Str::slug($className) }}" 
+                    <div id="album-tab-{{ Str::slug($className) }}"
                         class="album-tab-content {{ $loop->first ? 'block' : 'hidden' }} animate-fade-in">
                         <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
                             @foreach($photos as $index => $photo)
@@ -815,7 +805,8 @@
                                         loading="lazy">
                                     <div
                                         class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition duration-300 flex items-center justify-center">
-                                        <i class="fas fa-search-plus text-white text-lg opacity-0 group-hover:opacity-100 transition duration-300 scale-50 group-hover:scale-100"></i>
+                                        <i
+                                            class="fas fa-search-plus text-white text-lg opacity-0 group-hover:opacity-100 transition duration-300 scale-50 group-hover:scale-100"></i>
                                     </div>
                                 </a>
                             @endforeach
@@ -831,7 +822,7 @@
                         el.classList.add('hidden');
                         el.classList.remove('block');
                     });
-                    
+
                     // Reset all buttons
                     document.querySelectorAll('.album-tab-btn').forEach(el => {
                         el.classList.remove('bg-gradient-to-r', 'from-blue-600', 'to-blue-500', 'text-white', 'border-transparent');
