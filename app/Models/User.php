@@ -74,6 +74,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->email === self::SUPER_ADMIN_EMAIL || $this->hasRole('super_admin');
     }
 
+    public function isAdmin(): bool
+    {
+        return $this->isSuperAdmin() || $this->hasRole('admin');
+    }
+
     public function isCustomer(): bool
     {
         return $this->hasRole('customer');
