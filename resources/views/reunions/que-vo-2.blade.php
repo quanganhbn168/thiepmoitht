@@ -678,10 +678,10 @@
             </div>
 
             <!-- Tabs Navigation -->
-            <div class="flex overflow-x-auto snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] items-center sm:justify-center gap-3 mb-8 px-1 pb-4" data-aos="fade-up">
+            <div class="flex overflow-x-auto sm:flex-wrap snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] items-center sm:justify-center gap-3 mb-8 px-1 pb-4" data-aos="fade-up">
                 @foreach($classDirs as $className => $photos)
                     <button type="button"
-                        class="album-tab-btn snap-center whitespace-nowrap flex-shrink-0 px-5 py-2.5 rounded-full font-bold text-sm transition shadow-sm border border-transparent 
+                        class="album-tab-btn snap-center whitespace-nowrap sm:whitespace-normal flex-shrink-0 px-5 py-2.5 rounded-full font-bold text-sm transition shadow-sm border border-transparent 
                                         {{ $loop->first ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-gray-200' }}"
                         data-target="album-tab-{{ Str::slug($className) }}"
                         onclick="showAlbumTab(this, 'album-tab-{{ Str::slug($className) }}')">
