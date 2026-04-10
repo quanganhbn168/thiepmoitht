@@ -488,20 +488,34 @@
             </div>
 
             <div class="relative rounded-2xl overflow-hidden shadow-2xl group cursor-pointer" data-aos="zoom-in">
-                <a href="{{ $reunion->getMediaUrlFallback('video') ?: '/video/trailer-hop-lop.mp4' }}"
-                    class="glightbox-video">
-                    <img src="{{ $reunion->getVideoCoverUrl() }}" alt="Video trailer họp lớp"
-                        class="w-full aspect-video object-cover group-hover:scale-105 transition duration-700">
-                    <div
-                        class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition flex items-center justify-center">
-                        <div class="play-circle">
-                            <i class="fas fa-play text-blue-600 text-xl sm:text-2xl ml-1"></i>
+                @php
+                    $videoUrl = $reunion->getMediaUrlFallback('video');
+                @endphp
+
+                @if($videoUrl)
+                    <a href="{{ $videoUrl }}" class="glightbox-video block">
+                        <img src="{{ $reunion->getVideoCoverUrl() }}" alt="Video trailer họp lớp"
+                            class="w-full aspect-video object-cover group-hover:scale-105 transition duration-700">
+                        <div
+                            class="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition flex items-center justify-center">
+                            <div class="play-circle">
+                                <i class="fas fa-play text-blue-600 text-xl sm:text-2xl ml-1"></i>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6">
+                            <p class="font-accent text-lg sm:text-xl text-white">Xem lại kỷ niệm xưa...</p>
+                        </div>
+                    </a>
+                @else
+                    <div class="block overflow-hidden relative">
+                        <img src="{{ $reunion->getVideoCoverUrl() }}" alt="Kỷ niệm họp lớp"
+                            class="w-full aspect-video object-cover group-hover:scale-105 transition duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+                        <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 pointer-events-none">
+                            <p class="font-accent text-lg sm:text-xl text-white">Chút kỷ niệm lưu giữ...</p>
                         </div>
                     </div>
-                    <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6">
-                        <p class="font-accent text-lg sm:text-xl text-white">Xem lại kỷ niệm xưa...</p>
-                    </div>
-                </a>
+                @endif
             </div>
         </div>
     </section>
