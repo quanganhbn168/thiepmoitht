@@ -197,7 +197,7 @@ class ReunionResource extends Resource
                                                 ->required()
                                                 ->rows(10),
                                         ])
-                                        ->action(function (array $data, \Filament\Forms\Set $set, \Filament\Notifications\Notification $notification) {
+                                        ->action(function (array $data, \Filament\Forms\Set $set) {
                                             $json = json_decode($data['json_data'], true);
                                             if (is_array($json)) {
                                                 $newState = [];
@@ -210,9 +210,9 @@ class ReunionResource extends Resource
                                                     ];
                                                 }
                                                 $set('content.timeline', $newState);
-                                                $notification->success()->title('Nhập JSON thành công!')->send();
+                                                \Filament\Notifications\Notification::make()->success()->title('Nhập JSON thành công!')->send();
                                             } else {
-                                                $notification->danger()->title('Lỗi định dạng JSON')->body('Hãy chắc chắn mã bạn dán là một mảng JSON hợp lệ!')->send();
+                                                \Filament\Notifications\Notification::make()->danger()->title('Lỗi định dạng JSON')->body('Hãy chắc chắn mã bạn dán là một mảng JSON hợp lệ!')->send();
                                             }
                                         }),
                                 ])->alignEnd(),
