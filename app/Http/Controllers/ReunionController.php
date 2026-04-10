@@ -96,12 +96,15 @@ class ReunionController extends Controller
             sort($dirs, SORT_NATURAL | SORT_FLAG_CASE);
             foreach ($dirs as $dir) {
                 $className = basename($dir);
-                $photos = glob($dir . '/*.{jpg,jpeg,png,webp}', GLOB_BRACE);
+                $photos = glob($dir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE);
+                
                 if (!empty($photos)) {
                     sort($photos, SORT_NATURAL | SORT_FLAG_CASE);
                     $classDirs[$className] = array_map(function ($p) use ($folderName) {
                         return '/images/' . $folderName . '/' . basename(dirname($p)) . '/' . basename($p);
                     }, $photos);
+                } else {
+                    $classDirs[$className] = [];
                 }
             }
         }
