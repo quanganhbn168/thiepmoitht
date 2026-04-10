@@ -136,7 +136,7 @@ class ReunionController extends Controller
         /* ... existing variable definitions ... */
 
         $className = $reunion->class_name ?: '2003-2006';
-        $courseText = mb_stripos($className, 'niên khóa') !== false 
+        $courseText = preg_match('/niên khóa/ui', $className) 
             ? $className 
             : 'Niên khóa ' . $className;
 
