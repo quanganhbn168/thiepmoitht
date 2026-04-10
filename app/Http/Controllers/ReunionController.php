@@ -53,7 +53,7 @@ class ReunionController extends Controller
 
         $classDirs = [];
         for ($i = 1; $i <= 13; $i++) {
-            $classDirs['12A' . $i] = [];
+            $classDirs['A' . $i] = [];
         }
 
         return view('reunions.que-vo-1', compact('reunion', 'messages', 'classDirs'));
@@ -78,7 +78,7 @@ class ReunionController extends Controller
 
         $classDirs = [];
         for ($i = 1; $i <= 13; $i++) {
-            $classDirs['12A' . $i] = [];
+            $classDirs['A' . $i] = [];
         }
 
         return view('reunions.que-vo-1-teacher', compact('reunion', 'messages', 'classDirs'));
@@ -119,7 +119,7 @@ class ReunionController extends Controller
         
         // Auto create folder if missing
         if (!is_dir($basePath)) {
-            File::makeDirectory($basePath . '/12A1', 0755, true, true);
+            File::makeDirectory($basePath . '/A1', 0755, true, true);
         }
 
         $classDirs = $this->scanGalleryDir($basePath, $reunion->slug);
