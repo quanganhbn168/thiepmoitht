@@ -1435,6 +1435,349 @@
             padding: 30px 0;
         }
     }
+    /* ACTION - EDITORIAL SPLIT */
+.action-editorial-002 {
+    position: relative;
+    padding: 110px 0 118px;
+    color: #fff;
+    background:
+        radial-gradient(circle at 12% 10%, rgba(224, 42, 63, .28), transparent 30%),
+        radial-gradient(circle at 88% 8%, rgba(242, 207, 122, .18), transparent 28%),
+        linear-gradient(135deg, #031126 0%, #061b36 46%, #2a0710 100%);
+}
+
+.action-editorial-002:before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(90deg, rgba(242,207,122,.07) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(242,207,122,.05) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+}
+
+.action-editorial-bg {
+    position: absolute;
+    inset: 24px;
+    border: 1px solid rgba(242, 207, 122, .18);
+    border-radius: 42px;
+    pointer-events: none;
+}
+
+.action-editorial-wrap {
+    position: relative;
+    z-index: 2;
+    width: min(var(--container), calc(100% - 40px));
+    margin: 0 auto;
+}
+
+.action-editorial-head {
+    max-width: 760px;
+    margin: 0 auto 44px;
+    text-align: center;
+}
+
+.action-editorial-head span {
+    display: inline-flex;
+    margin-bottom: 12px;
+    padding: 8px 16px;
+    color: var(--gold-2);
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(242,207,122,.28);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.action-editorial-head h2 {
+    margin: 0;
+    color: #fff;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(36px, 5vw, 62px);
+    font-weight: 900;
+    line-height: 1.02;
+    letter-spacing: -.045em;
+}
+
+.action-editorial-head p {
+    max-width: 620px;
+    margin: 16px auto 0;
+    color: rgba(255,255,255,.68);
+    line-height: 1.75;
+}
+
+.action-editorial-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+.rsvp-panel-002,
+.map-panel-002,
+.contact-panel-002 {
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(242,207,122,.24);
+    box-shadow: 0 30px 80px rgba(0,0,0,.28);
+    backdrop-filter: blur(16px);
+}
+
+.rsvp-panel-002 {
+    min-height: 100%;
+    padding: clamp(30px, 4vw, 48px);
+    border-radius: 34px;
+}
+
+.rsvp-panel-002:before {
+    content: "";
+    position: absolute;
+    right: -130px;
+    top: -130px;
+    width: 330px;
+    height: 330px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(224,42,63,.36), transparent 68%);
+    pointer-events: none;
+}
+
+.rsvp-panel-002:after {
+    content: "";
+    position: absolute;
+    left: -120px;
+    bottom: -120px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(242,207,122,.22), transparent 66%);
+    pointer-events: none;
+}
+
+.panel-label-002 {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    color: var(--gold-2);
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(242,207,122,.25);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.rsvp-panel-002 h3,
+.map-panel-002 h3,
+.contact-panel-002 h3 {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 10px;
+    color: #fff;
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: clamp(30px, 3.5vw, 44px);
+    font-weight: 900;
+    line-height: 1.08;
+}
+
+.action-card-desc {
+    position: relative;
+    z-index: 1;
+    margin: 0 0 26px;
+    color: rgba(255,255,255,.68);
+    line-height: 1.75;
+}
+
+.form-grid-editorial-002 {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.form-grid-editorial-002 .full {
+    grid-column: 1 / -1;
+}
+
+.field-002 {
+    display: grid;
+    gap: 8px;
+}
+
+.field-002 label {
+    color: rgba(242,207,122,.9);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.field-002 input,
+.field-002 select,
+.field-002 textarea {
+    width: 100%;
+    min-height: 50px;
+    padding: 0 16px;
+    color: #fff;
+    background: rgba(3,17,38,.42);
+    border: 1px solid rgba(242,207,122,.24);
+    border-radius: 16px;
+    outline: none;
+    font: inherit;
+}
+
+.field-002 textarea {
+    min-height: 112px;
+    padding-top: 14px;
+    resize: vertical;
+}
+
+.field-002 input::placeholder,
+.field-002 textarea::placeholder {
+    color: rgba(255,255,255,.42);
+}
+
+.field-002 select {
+    color: rgba(255,255,255,.78);
+}
+
+.field-002 select option {
+    color: var(--ink);
+}
+
+.field-002 input:focus,
+.field-002 select:focus,
+.field-002 textarea:focus {
+    border-color: var(--gold-2);
+    box-shadow: 0 0 0 4px rgba(242,207,122,.12);
+}
+
+.action-side-002 {
+    display: grid;
+    grid-template-rows: 1.05fr .95fr;
+    gap: 24px;
+}
+
+.map-panel-002,
+.contact-panel-002 {
+    border-radius: 30px;
+    padding: 28px;
+}
+
+.map-panel-002 {
+    display: flex;
+    flex-direction: column;
+}
+
+.map-content-002 {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 18px;
+}
+
+.map-content-002 p {
+    margin: 0;
+    color: rgba(255,255,255,.68);
+    line-height: 1.65;
+}
+
+.map-box {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    min-height: 240px;
+    overflow: hidden;
+    border-radius: 22px;
+    border: 1px solid rgba(242,207,122,.26);
+    background: #e9e2d8;
+    box-shadow: 0 18px 44px rgba(0,0,0,.24);
+}
+
+.map-box iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.contact-list-editorial-002 {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 12px;
+}
+
+.contact-list-editorial-002 li {
+    display: grid;
+    gap: 5px;
+    padding: 15px 16px;
+    color: rgba(255,255,255,.62);
+    background: rgba(3,17,38,.34);
+    border: 1px solid rgba(242,207,122,.18);
+    border-radius: 18px;
+}
+
+.contact-list-editorial-002 span {
+    color: var(--gold-2);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.contact-list-editorial-002 strong {
+    color: #fff;
+    line-height: 1.45;
+}
+
+@media (max-width: 1040px) {
+    .action-editorial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .action-side-002 {
+        grid-template-rows: auto;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .action-editorial-002 {
+        padding: 82px 0 88px;
+    }
+
+    .action-editorial-bg {
+        inset: 12px;
+        border-radius: 28px;
+    }
+
+    .form-grid-editorial-002,
+    .action-side-002 {
+        grid-template-columns: 1fr;
+    }
+
+    .rsvp-panel-002,
+    .map-panel-002,
+    .contact-panel-002 {
+        padding: 24px;
+        border-radius: 24px;
+    }
+
+    .map-box {
+        min-height: 220px;
+    }
+}
 </style>
 @endpush
 
@@ -1823,60 +2166,141 @@
         </div>
     </section>
 
-    {{-- RSVP + MAP + CONTACT --}}
-    <section id="action" class="overflow-hidden relative">
-        <div class="action-grid">
-            <div id="rsvp" class="action-card">
+    {{-- RSVP + MAP + CONTACT - Template 002 Alt Layout --}}
+<section id="action" class="action-editorial-002 overflow-hidden relative">
+    <div class="action-editorial-bg"></div>
+
+    <div class="action-editorial-wrap">
+        <div class="action-editorial-head">
+            <span>Tham dự ngày hội ngộ</span>
+            <h2>Xác nhận & thông tin sự kiện</h2>
+            <p>Gửi xác nhận tham dự, lưu lại địa điểm và liên hệ ban tổ chức khi cần hỗ trợ.</p>
+        </div>
+
+        <div class="action-editorial-grid">
+            {{-- RSVP --}}
+            <div id="rsvp" class="rsvp-panel-002">
+                <div class="panel-label-002">
+                    <i class="fa fa-paper-plane"></i>
+                    RSVP
+                </div>
+
                 <h3>Xác nhận tham dự</h3>
-                <p class="action-card-desc">Gửi thông tin tham dự để ban tổ chức chuẩn bị chỗ ngồi, tiệc và liên hệ khi cần.</p>
-                <form action="{{ $rsvpUrl ?? route('reunion.rsvp.store', ['reunion' => $reunion->slug]) }}" method="POST" onsubmit="handleTemplate002Rsvp(event)">
+                <p class="action-card-desc">
+                    Gửi thông tin tham dự để ban tổ chức chuẩn bị chỗ ngồi, tiệc và liên hệ khi cần.
+                </p>
+
+                <form
+                    action="{{ $rsvpUrl ?? route('reunion.rsvp.store', ['reunion' => $reunion->slug]) }}"
+                    method="POST"
+                    onsubmit="handleTemplate002Rsvp(event)"
+                >
                     @csrf
-                    <div class="form-grid">
-                        <input name="name" type="text" placeholder="Họ và tên *" required>
-                        <select name="class" required>
-                            <option value="">Chọn lớp *</option>
-                            @forelse(($event->classes ?? []) as $class)
-                            <option value="{{ $class->name }}">{{ $class->name }}</option>
-                            @empty
-                            <option>12A</option><option>12B</option><option>12C</option><option>12D</option><option>12E</option>
-                            @endforelse
-                        </select>
-                        <input name="phone" type="tel" placeholder="Số điện thoại *" required>
-                        <input name="guest_count" type="number" min="1" placeholder="Số người tham dự">
-                        <textarea class="full" name="note" placeholder="Lời nhắn nếu có"></textarea>
-                        <button class="btn btn-primary full" type="submit"><i class="fa fa-paper-plane"></i> Gửi xác nhận</button>
+
+                    <div class="form-grid form-grid-editorial-002">
+                        <div class="field-002">
+                            <label>Họ và tên</label>
+                            <input name="name" type="text" placeholder="Nhập họ và tên *" required>
+                        </div>
+
+                        <div class="field-002">
+                            <label>Lớp</label>
+                            <select name="class" required>
+                                <option value="">Chọn lớp *</option>
+                                @forelse(($event->classes ?? []) as $class)
+                                    <option value="{{ $class->name }}">{{ $class->name }}</option>
+                                @empty
+                                    <option>12A</option>
+                                    <option>12B</option>
+                                    <option>12C</option>
+                                    <option>12D</option>
+                                    <option>12E</option>
+                                @endforelse
+                            </select>
+                        </div>
+
+                        <div class="field-002">
+                            <label>Số điện thoại</label>
+                            <input name="phone" type="tel" placeholder="Số điện thoại *" required>
+                        </div>
+
+                        <div class="field-002">
+                            <label>Số người tham dự</label>
+                            <input name="guest_count" type="number" min="1" placeholder="VD: 1">
+                        </div>
+
+                        <div class="field-002 full">
+                            <label>Lời nhắn</label>
+                            <textarea name="note" placeholder="Lời nhắn nếu có"></textarea>
+                        </div>
+
+                        <button class="btn btn-gold full" type="submit">
+                            <i class="fa fa-paper-plane"></i>
+                            Gửi xác nhận tham dự
+                        </button>
                     </div>
                 </form>
             </div>
 
-            <div id="event-map" class="action-card">
-                <h3>Địa điểm tổ chức</h3>
-                <p class="action-card-desc">Lưu lại địa chỉ và mở bản đồ trước khi di chuyển để tới điểm hẹn đúng giờ.</p>
-                <p><strong>{{ $event->school_name }}</strong><br>{{ $event->address }}</p>
-                <div class="map-box">
-                    {!! $event->map_embed ?? '<iframe loading="lazy" src="https://www.google.com/maps?q=Tr%C6%B0%E1%BB%9Dng%20THPT%20Qu%E1%BA%BF%20V%C3%B5%201&output=embed"></iframe>' !!}
+            {{-- SIDE INFO --}}
+            <div class="action-side-002">
+                <div id="event-map" class="map-panel-002">
+                    <div class="panel-label-002">
+                        <i class="fa fa-map-marker-alt"></i>
+                        Địa điểm
+                    </div>
+
+                    <div class="map-content-002">
+                        <h3>{{ $event->school_name }}</h3>
+                        <p>{{ $event->address }}</p>
+                    </div>
+
+                    <div class="map-box">
+                        {!! $event->map_embed ?? '<iframe loading="lazy" src="https://www.google.com/maps?q=Tr%C6%B0%E1%BB%9Dng%20THPT%20Qu%E1%BA%BF%20V%C3%B5%201&output=embed"></iframe>' !!}
+                    </div>
+                </div>
+
+                <div id="contact" class="contact-panel-002">
+                    <div class="panel-label-002">
+                        <i class="fa fa-phone"></i>
+                        Liên hệ
+                    </div>
+
+                    <h3>Ban tổ chức</h3>
+                    <p class="action-card-desc">
+                        Cần hỗ trợ về lịch trình, địa điểm hoặc thông tin lớp, anh chị có thể liên hệ trực tiếp.
+                    </p>
+
+                    <ul class="contact-list contact-list-editorial-002">
+                        @forelse(($event->contacts ?? []) as $contact)
+                            <li>
+                                <span>{{ $contact->role }}</span>
+                                <strong>{{ $contact->name }} - {{ $contact->phone }}</strong>
+                            </li>
+                        @empty
+                            <li>
+                                <span>Trưởng ban</span>
+                                <strong>Nguyễn Văn Hòa - 0986 123 456</strong>
+                            </li>
+                            <li>
+                                <span>Phó ban</span>
+                                <strong>Phạm Thị Lan - 0912 345 678</strong>
+                            </li>
+                            <li>
+                                <span>Thư ký</span>
+                                <strong>Trần Quang Minh - 0978 765 432</strong>
+                            </li>
+                        @endforelse
+                    </ul>
                 </div>
             </div>
-
-            <div id="contact" class="action-card">
-                <h3>Liên hệ ban tổ chức</h3>
-                <p class="action-card-desc">Cần hỗ trợ về lịch trình, địa điểm hoặc thông tin lớp, anh chị có thể liên hệ trực tiếp.</p>
-                <ul class="contact-list">
-                    @forelse(($event->contacts ?? []) as $contact)
-                    <li><span>{{ $contact->role }}</span><strong>{{ $contact->name }} - {{ $contact->phone }}</strong></li>
-                    @empty
-                    <li><span>Trưởng ban</span><strong>Nguyễn Văn Hòa - 0986 123 456</strong></li>
-                    <li><span>Phó ban</span><strong>Phạm Thị Lan - 0912 345 678</strong></li>
-                    <li><span>Thư ký</span><strong>Trần Quang Minh - 0978 765 432</strong></li>
-                    @endforelse
-                </ul>
-            </div>
         </div>
+    </div>
 
-        <div class="corner-flower corner-flower-bottom-right">
-            <img src="{{ asset('images/phuong-3.png') }}" alt="hoa-phuong-3">
-        </div>
-    </section>
+    <div class="corner-flower corner-flower-bottom-right">
+        <img src="{{ asset('images/phuong-3.png') }}" alt="hoa-phuong-3">
+    </div>
+</section>
 </main>
 
 <footer>
