@@ -1,0 +1,226 @@
+.reunion-site-header {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 100;
+    background: transparent;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    transition:
+        background .25s ease,
+        backdrop-filter .25s ease,
+        border-color .25s ease,
+        box-shadow .25s ease,
+        transform .25s ease;
+}
+
+.reunion-site-header.is-scrolled,
+.reunion-site-header.is-menu-open {
+    background: rgba(250, 243, 232, .88);
+    border-bottom-color: rgba(185, 136, 67, .18);
+    box-shadow: 0 10px 30px rgba(6, 36, 71, .08);
+    backdrop-filter: blur(16px);
+}
+
+.reunion-header-inner {
+    position: relative;
+    width: min(var(--container, 1180px), calc(100% - 40px));
+    height: 86px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.reunion-logo img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    transition: width .25s ease, height .25s ease, filter .25s ease;
+}
+
+.reunion-site-header.is-scrolled .reunion-logo img {
+    width: 58px;
+    height: 58px;
+}
+
+.reunion-menu ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.reunion-menu a {
+    position: relative;
+    color: var(--navy, #062447);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    transition: color .25s ease, text-shadow .25s ease, background .25s ease;
+}
+
+.reunion-site-header:not(.is-scrolled) .reunion-menu a {
+    color: var(--navy, #062447);
+    text-shadow: 0 1px 0 rgba(255,255,255,.45);
+}
+
+.reunion-menu a:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -9px;
+    width: 0;
+    height: 2px;
+    background: var(--gold, #b98843);
+    transition: width .2s ease;
+}
+
+.reunion-menu a:hover:after {
+    width: 100%;
+}
+
+.reunion-menu-toggle {
+    display: none;
+}
+
+@media (max-width: 1040px) {
+    .reunion-menu ul {
+        gap: 16px;
+    }
+
+    .reunion-menu a {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 760px) {
+    .reunion-site-header:not(.is-scrolled):not(.is-menu-open) {
+        background: transparent;
+        border-bottom-color: transparent;
+        box-shadow: none;
+    }
+
+    .reunion-site-header.is-scrolled,
+    .reunion-site-header.is-menu-open {
+        background: rgba(250, 243, 232, .94);
+    }
+
+    .reunion-header-inner {
+        width: min(var(--container, 1180px), calc(100% - 24px));
+        height: 72px;
+        gap: 12px;
+    }
+
+    .reunion-logo img {
+        width: 54px;
+        height: 54px;
+    }
+
+    .reunion-site-header.is-scrolled .reunion-logo img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .reunion-menu-toggle {
+        display: inline-flex;
+        width: 46px;
+        height: 46px;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 5px;
+        border: 1px solid rgba(6, 36, 71, .14);
+        border-radius: 999px;
+        color: var(--navy, #062447);
+        background: rgba(255,255,255,.72);
+        box-shadow: 0 10px 24px rgba(6, 36, 71, .1);
+        cursor: pointer;
+        transition: background .2s ease, transform .2s ease, box-shadow .2s ease;
+    }
+
+    .reunion-menu-toggle:hover {
+        transform: translateY(-1px);
+        background: rgba(255,255,255,.92);
+        box-shadow: 0 14px 28px rgba(6, 36, 71, .14);
+    }
+
+    .reunion-menu-toggle span {
+        width: 18px;
+        height: 2px;
+        border-radius: 999px;
+        background: currentColor;
+        transition: transform .2s ease, opacity .2s ease;
+    }
+
+    .reunion-site-header.is-menu-open .reunion-menu-toggle span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg);
+    }
+
+    .reunion-site-header.is-menu-open .reunion-menu-toggle span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .reunion-site-header.is-menu-open .reunion-menu-toggle span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg);
+    }
+
+    .reunion-menu {
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 0;
+        right: 0;
+        max-height: calc(100vh - 96px);
+        padding: 10px;
+        overflow-y: auto;
+        border: 1px solid rgba(185, 136, 67, .2);
+        border-radius: 20px;
+        background: rgba(250, 243, 232, .97);
+        box-shadow: 0 24px 60px rgba(6, 36, 71, .18);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-8px);
+        visibility: hidden;
+        transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+        backdrop-filter: blur(16px);
+    }
+
+    .reunion-site-header.is-menu-open .reunion-menu {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
+        visibility: visible;
+    }
+
+    .reunion-menu ul {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+    }
+
+    .reunion-menu a {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        border-radius: 14px;
+        padding: 0 14px;
+        color: var(--navy, #062447);
+        font-size: 13px;
+        text-shadow: none;
+    }
+
+    .reunion-menu a:after {
+        display: none;
+    }
+
+    .reunion-menu a:hover,
+    .reunion-menu a:focus {
+        background: rgba(185, 136, 67, .12);
+    }
+}

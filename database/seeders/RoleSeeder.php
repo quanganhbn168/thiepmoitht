@@ -22,11 +22,11 @@ class RoleSeeder extends Seeder
 
         // Create permissions
         $permissions = [
-            // Wedding permissions
-            'view weddings',
-            'create weddings',
-            'edit weddings',
-            'delete weddings',
+            // Reunion permissions
+            'view reunions',
+            'create reunions',
+            'edit reunions',
+            'delete reunions',
             
             // User permissions
             'view users',
@@ -64,7 +64,7 @@ class RoleSeeder extends Seeder
 
         // Assign permissions to admin
         $admin->givePermissionTo([
-            'view weddings', 'create weddings', 'edit weddings', 'delete weddings',
+            'view reunions', 'create reunions', 'edit reunions', 'delete reunions',
             'view users', 'create users', 'edit users', 'delete users',
             'view agents', 'create agents', 'edit agents', 'delete agents',
             'view templates', 'manage templates',
@@ -75,7 +75,7 @@ class RoleSeeder extends Seeder
 
         // Assign permissions to agent
         $agent->givePermissionTo([
-            'view weddings', 'create weddings', 'edit weddings',
+            'view reunions', 'create reunions', 'edit reunions',
             'view users', 'create users', 'edit users',  // Their customers
             'view rsvps', 'manage rsvps',
             'view wishes', 'manage wishes',
@@ -83,7 +83,7 @@ class RoleSeeder extends Seeder
 
         // Assign permissions to customer
         $customer->givePermissionTo([
-            'view weddings', 'create weddings', 'edit weddings',
+            'view reunions', 'create reunions', 'edit reunions',
             'view rsvps',
             'view wishes',
         ]);

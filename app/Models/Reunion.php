@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Enums\FallingEffect;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Reunion extends Model implements HasMedia
 {
@@ -27,6 +27,10 @@ class Reunion extends Model implements HasMedia
         'expires_at' => 'date',
     ];
 
+    // ==========================================
+    // STATUS HELPERS
+    // ==========================================
+
     public function isPro(): bool
     {
         return $this->tier === 'pro';
@@ -37,57 +41,129 @@ class Reunion extends Model implements HasMedia
         return $this->status === 'published';
     }
 
-    public function getMusicUrlAttribute(): ?string
+    // ==========================================
+    // MEDIA URL HELPERS
+    // ==========================================
+
+    public function getMediaUrlByCollection(string $collection, ?string $fallback = null, string $conversion = ''): ?string
     {
-        if (!$this->background_music) return null;
-        if (Str::startsWith($this->background_music, ['http', 'https'])) return $this->background_music;
-        return asset('storage/' . $this->background_music);
+        $url = $this->getFirstMediaUrl($collection, $conversion);
+
+        return $url ?: $fallback;
     }
 
-    // --- REUNION ASSETS HELPERS ---
-
-    public function getMediaUrlFallback(string $collection, string $conversion = ''): string
+    public function getLogoUrl(): string
     {
-        return $this->getFirstMediaUrl($collection, $conversion);
+        return $this->getMediaUrlByCollection(
+            'logo',
+            asset('images/default-logo.png')
+        );
+    }
+
+    public function getShareUrl(): string
+    {
+        return $this->getMediaUrlByCollection(
+            'share',
+            asset('images/default-cover.jpg')
+        );
     }
 
     public function getCoverUrl(): string
     {
-        $url = $this->getMediaUrlFallback('share');
-        return $url ?: asset('images/default-cover.jpg'); 
+        return $this->getMediaUrlByCollection(
+            'cover',
+            $this->getShareUrl()
+        );
     }
 
     public function getHeroUrl(): string
     {
-        $url = $this->getMediaUrlFallback('share');
-        return $url ?: asset('images/hop-lop-que-vo-2.png');
+        return $this->getMediaUrlByCollection(
+            'hero_background',
+            $this->getMediaUrlByCollection(
+                'hero',
+                $this->getShareUrl() ?: asset('images/hop-lop-que-vo-2.png')
+            )
+        );
+    }
+
+    public function getHeroPhoto1Url(): string
+    {
+        return $this->getMediaUrlByCollection(
+            'hero_photo_1',
+            $this->getHeroUrl()
+        );
+    }
+
+    public function getHeroPhoto2Url(): string
+    {
+        return $this->getMediaUrlByCollection(
+            'hero_photo_2',
+            $this->getCoverUrl()
+        );
+    }
+
+    public function getHeroPhoto3Url(): string
+    {
+        return $this->getMediaUrlByCollection(
+            'hero_photo_3',
+            $this->getHeroUrl()
+        );
     }
 
     public function getVideoCoverUrl(): string
     {
-        $url = $this->getMediaUrlFallback('video_cover');
-        return $url ?: asset('images/default-video-cover.jpg');
+        return $this->getMediaUrlByCollection(
+            'video_cover',
+            asset('images/default-video-cover.jpg')
+        );
+    }
+
+    public function getVideoUrl(): ?string
+    {
+        return $this->getMediaUrlByCollection('video');
     }
 
     public function getSchoolPhotoUrl(): string
     {
-        $url = $this->getMediaUrlFallback('school_photo');
-        return $url ?: 'https://ui-avatars.com/api/?name=School&background=random';
+        return $this->getMediaUrlByCollection(
+            'school_photo',
+            'https://ui-avatars.com/api/?name=School&background=random'
+        );
     }
 
     public function getClassPhotoUrl(): string
     {
-        $url = $this->getMediaUrlFallback('class_photo');
-        return $url ?: 'https://ui-avatars.com/api/?name=Class&background=random';
+        return $this->getMediaUrlByCollection(
+            'class_photo',
+            'https://ui-avatars.com/api/?name=Class&background=random'
+        );
     }
 
     public function getQrCodeUrl(): string
     {
-        $url = $this->getMediaUrlFallback('qr_code');
-        return $url ?: asset('images/qr-placeholder.png');
+        return $this->getMediaUrlByCollection(
+            'qr_code',
+            asset('images/qr-placeholder.png')
+        );
     }
 
-    // --- RELATIONS ---
+    public function getMusicUrlAttribute(): ?string
+    {
+        if (!$this->background_music) {
+            return null;
+        }
+
+        if (Str::startsWith($this->background_music, ['http://', 'https://'])) {
+            return $this->background_music;
+        }
+
+        return asset('storage/' . $this->background_music);
+    }
+
+    // ==========================================
+    // RELATIONSHIPS
+    // ==========================================
 
     public function template(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
@@ -111,74 +187,136 @@ class Reunion extends Model implements HasMedia
 
     public function approvedMessages(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(ReunionMessage::class)->where('is_approved', true);
+        return $this->hasMany(ReunionMessage::class)
+            ->where('is_approved', true);
     }
 
-    // --- SPATIE MEDIA LIBRARY ---
+    // ==========================================
+    // SPATIE MEDIA LIBRARY
+    // ==========================================
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('cover')->singleFile();
-        $this->addMediaCollection('hero')->singleFile();
-        $this->addMediaCollection('school_photo')->singleFile(); // Ảnh trường cũ
-        $this->addMediaCollection('class_photo')->singleFile();  // Ảnh tập thể lớp
-        $this->addMediaCollection('qr_code')->singleFile();      // QR Code quỹ hội
-        $this->addMediaCollection('gallery');
-        $this->addMediaCollection('video')->singleFile();        // Video trailer
+        $singleFileCollections = [
+            'logo',
+            'share',
+            'cover',
+            'hero',
+            'hero_background',
+            'hero_photo_1',
+            'hero_photo_2',
+            'hero_photo_3',
+            'video_cover',
+            'video',
+            'school_photo',
+            'class_photo',
+            'qr_code',
+        ];
+
+        foreach ($singleFileCollections as $collection) {
+            $this
+                ->addMediaCollection($collection)
+                ->useDisk('public')
+                ->singleFile();
+        }
+
+        $this
+            ->addMediaCollection('gallery')
+            ->useDisk('public');
     }
 
-    public function registerMediaConversions(\Spatie\MediaLibrary\MediaCollections\Models\Media $media = null): void
+    public function registerMediaConversions(Media $media = null): void
     {
-        $this->addMediaConversion('share')
+        $this
+            ->addMediaConversion('share')
             ->width(1200)
             ->height(630)
             ->sharpen(10)
-            ->performOnCollections('cover')
-            ->nonQueued();
+            ->performOnCollections('share', 'cover');
 
-        $this->addMediaConversion('optimized')
+        $this
+            ->addMediaConversion('optimized')
             ->width(1080)
             ->height(1920)
             ->sharpen(10)
-            ->performOnCollections('hero', 'school_photo', 'class_photo')
-            ->nonQueued();
-            
-        $this->addMediaConversion('thumb')
+            ->performOnCollections(
+                'hero',
+                'hero_background',
+                'hero_photo_1',
+                'hero_photo_2',
+                'hero_photo_3',
+                'video_cover',
+                'school_photo',
+                'class_photo'
+            );
+
+        $this
+            ->addMediaConversion('thumb')
             ->width(400)
             ->height(400)
             ->sharpen(10)
-            ->nonQueued();
+            ->performOnCollections(
+                'logo',
+                'share',
+                'cover',
+                'hero',
+                'hero_background',
+                'hero_photo_1',
+                'hero_photo_2',
+                'hero_photo_3',
+                'video_cover',
+                'school_photo',
+                'class_photo',
+                'qr_code',
+                'gallery'
+            );
     }
 
-    protected static function booted()
+    // ==========================================
+    // CONTENT HELPERS
+    // ==========================================
+
+    public function getContentValue(string $key, mixed $default = null): mixed
     {
-        static::creating(function ($reunion) {
+        return data_get($this->content, $key, $default);
+    }
+
+    // ==========================================
+    // MODEL EVENTS
+    // ==========================================
+
+    protected static function booted(): void
+    {
+        static::creating(function (Reunion $reunion): void {
             $reunion->status = $reunion->status ?? 'draft';
             $reunion->tier = $reunion->tier ?? 'standard';
             $reunion->falling_effect = $reunion->falling_effect ?? 'leaves';
         });
 
-        static::saving(function ($reunion) {
-            if (empty($reunion->slug)) {
-                $school = Str::slug($reunion->school_name ?? 'school');
-                $class = Str::slug($reunion->class_name ?? 'class');
-                $year = Str::slug($reunion->graduation_year ?? now()->year);
-                
-                $baseSlug = "$school-$class-$year";
-                $slug = $baseSlug;
-                $counter = 1;
-
-                while (static::where('slug', $slug)->where('id', '!=', $reunion->id)->exists()) {
-                    $slug = $baseSlug . '-' . $counter++;
-                }
-                
-                $reunion->slug = $slug;
+        static::saving(function (Reunion $reunion): void {
+            if (!empty($reunion->slug)) {
+                return;
             }
-        });
-    }
 
-    public function getContentValue($key, $default = null)
-    {
-        return $this->content[$key] ?? $default;
+            $school = Str::slug($reunion->school_name ?: 'school');
+            $class = Str::slug($reunion->class_name ?: 'class');
+            $year = Str::slug($reunion->graduation_year ?: now()->year);
+
+            $baseSlug = "{$school}-{$class}-{$year}";
+            $slug = $baseSlug;
+            $counter = 1;
+
+            while (
+                static::query()
+                    ->where('slug', $slug)
+                    ->where('id', '!=', $reunion->id)
+                    ->exists()
+            ) {
+                $slug = $baseSlug . '-' . $counter;
+                $counter++;
+            }
+
+            $reunion->slug = $slug;
+        });
     }
 }

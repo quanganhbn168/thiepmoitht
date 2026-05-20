@@ -76,12 +76,11 @@ class UserResource extends Resource
                             ->preload()
                             ->label('Quyền hạn (Shield)'),
                         TextInput::make('password')
-                            ->label('Mật khẩu')
-                            ->password()
-                            ->dehydrateStateUsing(fn($state) => Hash::make($state))
-                            ->dehydrated(fn($state) => filled($state))
-                            ->required(fn(string $context): bool => $context === 'create')
-                            ->maxLength(255),
+    ->label('Mật khẩu')
+    ->password()
+    ->dehydrated(fn($state) => filled($state))
+    ->required(fn(string $context): bool => $context === 'create')
+    ->maxLength(255),
                     ]),
             ]);
     }

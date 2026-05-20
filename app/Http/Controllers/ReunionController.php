@@ -2,36 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Reunion;
-use App\Models\ReunionRsvp;
 use App\Models\ReunionMessage;
-
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\File;
+use App\Models\ReunionRsvp;
+use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Str;
 
 class ReunionController extends Controller
 {
+    private const DEFAULT_TEMPLATE_VIEW = 'templates.standard';
+    private const QUE_VO_2_TEMPLATE_VIEW = 'templates.que-vo-2';
+
+    private const DEFAULT_HERO_IMAGE = 'images/hop-lop-que-vo-2.png';
+    private const DEFAULT_DEMO_SCHOOL = 'THPT Quế Võ 2';
+    private const DEFAULT_DEMO_CLASS = 'Niên Khóa 2003-2006';
+    private const DEFAULT_DEMO_YEAR = '2006';
+    private const DEFAULT_EVENT_DATETIME = '2026-05-17T07:00:00+07:00';
+
+    private function demoUserId(): ?int
+    {
+        return User::query()->value('id');
+    }
+
     private function getDemoReunion(): Reunion
     {
         return Reunion::firstOrCreate(
             ['slug' => 'hop-lop-nien-khoa-2003-2006-que-vo-2'],
             [
-                'school_name' => 'THPT Quế Võ 2',
-                'class_name' => 'Niên Khóa 2003-2006',
-                'graduation_year' => '2006',
+                'school_name' => self::DEFAULT_DEMO_SCHOOL,
+                'class_name' => self::DEFAULT_DEMO_CLASS,
+                'graduation_year' => self::DEFAULT_DEMO_YEAR,
                 'status' => 'published',
-                'user_id' => 1
+                'user_id' => $this->demoUserId(),
             ]
         );
     }
 
     public function show(Reunion $reunion, Request $request)
     {
-        // Forward dynamic slugs to our Que Vo 2 interface for now
-        // since it's the main template we are working with.
-        return $this->renderQueVo2($reunion);
+        $template = $reunion->template;
+
+        $viewPath = $template?->is_active && $template?->type === 'reunion'
+            ? $template->view_path
+            : self::DEFAULT_TEMPLATE_VIEW;
+
+        return $this->renderReunionTemplate($reunion, $viewPath);
     }
 
     public function showQueVoDemo()
@@ -43,20 +64,18 @@ class ReunionController extends Controller
                 'class_name' => 'Niên Khóa 1998-2001',
                 'graduation_year' => '2001',
                 'status' => 'published',
-                'user_id' => 1
+                'user_id' => $this->demoUserId(),
             ]
         );
-        $messages = ReunionMessage::where('reunion_id', $reunion->id)
-            ->where('is_approved', true)
-            ->orderBy('created_at', 'desc')
-            ->get();
+
+        $messages = $this->approvedMessages($reunion);
 
         $classDirs = [];
         for ($i = 1; $i <= 13; $i++) {
             $classDirs['A' . $i] = [];
         }
 
-        return view('reunions.que-vo-1', compact('reunion', 'messages', 'classDirs'));
+        return view('templates.que-vo-1', compact('reunion', 'messages', 'classDirs'));
     }
 
     public function showQueVoTeacherDemo()
@@ -68,146 +87,649 @@ class ReunionController extends Controller
                 'class_name' => 'Niên Khóa 1998-2001 (Dành cho Thầy cô)',
                 'graduation_year' => '2001',
                 'status' => 'published',
-                'user_id' => 1
+                'user_id' => $this->demoUserId(),
             ]
         );
-        $messages = ReunionMessage::where('reunion_id', $reunion->id)
-            ->where('is_approved', true)
-            ->orderBy('created_at', 'desc')
-            ->get();
+
+        $messages = $this->approvedMessages($reunion);
 
         $classDirs = [];
         for ($i = 1; $i <= 13; $i++) {
             $classDirs['A' . $i] = [];
         }
 
-        return view('reunions.que-vo-1-teacher', compact('reunion', 'messages', 'classDirs'));
+        return view('templates.que-vo-1-teacher', compact('reunion', 'messages', 'classDirs'));
     }
 
     public function showQueVo2Demo()
     {
-        $reunion = $this->getDemoReunion();
-        return $this->renderQueVo2($reunion);
+        return $this->renderReunionTemplate(
+            $this->getDemoReunion(),
+            self::QUE_VO_2_TEMPLATE_VIEW
+        );
     }
 
-    private function scanGalleryDir(string $basePath, string $folderName): array
+    private function renderReunionTemplate(Reunion $reunion, ?string $viewPath = null)
     {
-        $classDirs = [];
-        if (is_dir($basePath)) {
-            $dirs = array_filter(glob($basePath . '/*'), 'is_dir');
-            sort($dirs, SORT_NATURAL | SORT_FLAG_CASE);
-            foreach ($dirs as $dir) {
-                $className = basename($dir);
-                $photos = glob($dir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE);
+        $viewPath = $this->resolveTemplateView($viewPath);
 
-                if (!empty($photos)) {
-                    sort($photos, SORT_NATURAL | SORT_FLAG_CASE);
-                    $classDirs[$className] = array_map(function ($p) use ($folderName) {
-                        return '/images/' . $folderName . '/' . basename(dirname($p)) . '/' . basename($p);
-                    }, $photos);
-                } else {
-                    $classDirs[$className] = [];
-                }
-            }
+        $classDirs = $this->getClassGalleryDirs($reunion, $viewPath);
+        $content = $this->contentArray($reunion);
+
+        $schoolInfo = $this->buildSchoolInfo($reunion, $content);
+        $eventInfo = $this->buildEventInfo($reunion);
+        $openLetter = $this->getOpenLetter($reunion);
+        $greeting = data_get($content, 'invitation_greeting', 'Quý thầy cô & Các bạn');
+        $timeline = $this->getTimeline($content);
+        $organizers = $this->getOrganizers($content);
+        $messages = $this->approvedMessages($reunion);
+
+        $event = $this->buildTemplateEventData(
+            reunion: $reunion,
+            schoolInfo: $schoolInfo,
+            eventInfo: $eventInfo,
+            openLetter: $openLetter,
+            timeline: $timeline,
+            organizers: $organizers,
+            messages: $messages,
+            classDirs: $classDirs
+        );
+
+        $rsvpUrl = route('reunion.rsvp.store', ['reunion' => $reunion->slug]);
+
+        return view($viewPath, compact(
+            'event',
+            'rsvpUrl',
+            'reunion',
+
+            // Giữ lại để các template cũ vẫn dùng được.
+            'classDirs',
+            'organizers',
+            'eventInfo',
+            'schoolInfo',
+            'openLetter',
+            'greeting',
+            'timeline',
+            'messages'
+        ));
+    }
+
+    private function resolveTemplateView(?string $viewPath): string
+    {
+        return $viewPath && View::exists($viewPath)
+            ? $viewPath
+            : self::DEFAULT_TEMPLATE_VIEW;
+    }
+
+    private function contentArray(Reunion $reunion): array
+    {
+        return is_array($reunion->content) ? $reunion->content : [];
+    }
+
+    private function approvedMessages(Reunion $reunion)
+    {
+        return ReunionMessage::query()
+            ->where('reunion_id', $reunion->id)
+            ->where('is_approved', true)
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    private function getClassGalleryDirs(Reunion $reunion, string $viewPath): array
+    {
+        $configuredClassDirs = $this->getConfiguredClassGalleryDirs($reunion);
+
+        if (!empty($configuredClassDirs)) {
+            return $configuredClassDirs;
         }
-        return $classDirs;
-    }
 
-    private function renderQueVo2(Reunion $reunion)
-    {
         $basePath = public_path('images/' . $reunion->slug);
 
-        // Auto create folder if missing
-        if (!is_dir($basePath)) {
+        if ($viewPath === self::QUE_VO_2_TEMPLATE_VIEW && !is_dir($basePath)) {
             File::makeDirectory($basePath . '/A1', 0755, true, true);
         }
 
         $classDirs = $this->scanGalleryDir($basePath, $reunion->slug);
 
-        // Fallback thư mục tĩnh mẫu nếu rỗng
-        if (empty($classDirs)) {
+        if ($viewPath === self::QUE_VO_2_TEMPLATE_VIEW && empty($classDirs)) {
             $fallbackPath = public_path('images/que-vo-2');
             $classDirs = $this->scanGalleryDir($fallbackPath, 'que-vo-2');
         }
 
-        $organizers = $reunion->content['organizers'] ?? [
-            [
-                'role' => 'T/M Ban liên lạc – Trưởng Ban tổ chức',
-                'name' => 'Ban Tổ Chức',
-                'phone' => ''
-            ]
-        ];
+        return $classDirs;
+    }
 
-        /* ... existing variable definitions ... */
+    private function getConfiguredClassGalleryDirs(Reunion $reunion): array
+    {
+        $albums = data_get($this->contentArray($reunion), 'class_albums', []);
 
-        $className = $reunion->class_name ?: '2003-2006';
+        if (!is_iterable($albums)) {
+            return [];
+        }
+
+        $classDirs = [];
+
+        foreach ($albums as $album) {
+            if (!is_array($album)) {
+                continue;
+            }
+
+            $className = trim((string) ($album['name'] ?? ''));
+
+            if ($className === '') {
+                continue;
+            }
+
+            $photos = [];
+            $coverImage = $this->publicDiskUrl($album['cover_image'] ?? null);
+
+            if ($coverImage) {
+                $photos[] = $coverImage;
+            }
+
+            foreach ($this->normalizeUploadPaths($album['photos'] ?? []) as $path) {
+                $url = $this->publicDiskUrl($path);
+
+                if ($url) {
+                    $photos[] = $url;
+                }
+            }
+
+            $classDirs[$className] = array_values(array_unique($photos));
+        }
+
+        return $classDirs;
+    }
+
+    private function normalizeUploadPaths(mixed $value): array
+    {
+        if (is_string($value)) {
+            return [$value];
+        }
+
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $paths = [];
+
+        foreach ($value as $item) {
+            $paths = array_merge($paths, $this->normalizeUploadPaths($item));
+        }
+
+        return $paths;
+    }
+
+    private function publicDiskUrl(mixed $path): ?string
+    {
+        $paths = $this->normalizeUploadPaths($path);
+        $path = trim((string) ($paths[0] ?? ''));
+
+        if ($path === '') {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', $path);
+
+        if (Str::startsWith($path, ['http://', 'https://', '/'])) {
+            return $path;
+        }
+
+        return Storage::disk('public')->url($path);
+    }
+
+    private function scanGalleryDir(string $basePath, string $folderName): array
+    {
+        if (!is_dir($basePath)) {
+            return [];
+        }
+
+        $classDirs = [];
+        $dirs = array_filter(glob($basePath . '/*'), 'is_dir');
+
+        sort($dirs, SORT_NATURAL | SORT_FLAG_CASE);
+
+        foreach ($dirs as $dir) {
+            $className = basename($dir);
+            $photos = glob($dir . '/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', GLOB_BRACE) ?: [];
+
+            if (!empty($photos)) {
+                sort($photos, SORT_NATURAL | SORT_FLAG_CASE);
+
+                $classDirs[$className] = array_map(function ($path) use ($folderName) {
+                    return '/images/' . $folderName . '/' . basename(dirname($path)) . '/' . basename($path);
+                }, $photos);
+            } else {
+                $classDirs[$className] = [];
+            }
+        }
+
+        return $classDirs;
+    }
+
+    private function buildSchoolInfo(Reunion $reunion, array $content): array
+    {
+        $className = trim((string) ($reunion->class_name ?: self::DEFAULT_DEMO_CLASS));
+
         $courseText = preg_match('/niên khóa/ui', $className)
             ? $className
             : 'Niên khóa ' . $className;
 
-        $schoolInfo = [
-            'name' => $reunion->school_name ?: 'Trường THPT Quế Võ 2',
+        return [
+            'name' => $reunion->school_name ?: self::DEFAULT_DEMO_SCHOOL,
             'course' => $courseText,
-            'years' => $reunion->graduation_year ? (str_contains($reunion->graduation_year, '-') ? $reunion->graduation_year : ((int) $reunion->graduation_year - 3) . ' - ' . $reunion->graduation_year) : '2003 - 2006',
-            'anniversary' => $reunion->content['schoolInfo']['anniversary'] ?? '20 Năm',
-            'slogan' => $reunion->content['schoolInfo']['slogan'] ?? 'Trở Về Thanh Xuân',
+            'years' => $this->formatGraduationYears($reunion->graduation_year),
+            'anniversary' => data_get($content, 'schoolInfo.anniversary', '20 Năm'),
+            'slogan' => data_get($content, 'schoolInfo.slogan', 'Trở Về Thanh Xuân'),
         ];
+    }
 
-        Carbon::setLocale('vi');
-        // Ưu tiên event_time (chứa cả giờ chính xác), dự phòng event_date cũ
-        $eventDate = $reunion->event_time ?? $reunion->event_date;
+    private function formatGraduationYears(?string $graduationYear): string
+    {
+        $graduationYear = trim((string) $graduationYear);
 
-        // Xử lý thông minh: Nếu Admin dán nguyên cục <iframe> của Google Maps, tự động bóc tách lấy mỗi cái <src> url để khỏi bị lỗi 404
-        $mapIframe = $reunion->map_iframe;
-        if ($mapIframe && preg_match('/src="([^"]+)"/', $mapIframe, $matches)) {
-            $mapIframe = $matches[1];
+        if ($graduationYear === '') {
+            return '2003 - 2006';
         }
 
-        $eventInfo = [
+        if (str_contains($graduationYear, '-')) {
+            return preg_replace('/\s*-\s*/', ' - ', $graduationYear);
+        }
+
+        if (preg_match('/^\d{4}$/', $graduationYear)) {
+            $endYear = (int) $graduationYear;
+            return ($endYear - 3) . ' - ' . $endYear;
+        }
+
+        return $graduationYear;
+    }
+
+    private function buildEventInfo(Reunion $reunion): array
+    {
+        Carbon::setLocale('vi');
+
+        $eventDate = $reunion->event_time ?? $reunion->event_date;
+        $mapEmbedUrl = $this->extractMapEmbedUrl($reunion->map_iframe);
+
+        $locationName = $reunion->venue_name ?: self::DEFAULT_DEMO_SCHOOL;
+        $locationAddress = $reunion->venue_address ?: 'Phố Mới, Quế Võ, Bắc Ninh';
+
+        return [
             'time' => $eventDate ? $eventDate->format('H\hi') : '07h00',
             'time_short' => $eventDate ? $eventDate->format('H\h') : '07h',
             'day' => $eventDate ? ucfirst($eventDate->isoFormat('dddd')) : 'Chủ nhật',
             'date' => $eventDate ? $eventDate->format('d/m/Y') : '17/05/2026',
             'date_formatted' => $eventDate ? $eventDate->format('d . m . Y') : '17 . 05 . 2026',
             'date_full_tail' => $eventDate ? $eventDate->format('d \t\h\á\n\g m \n\ă\m Y') : '17 tháng 05 năm 2026',
-            'location_name' => $reunion->venue_name ?? 'Trường THPT Quế Võ 2',
-            'location_address' => $reunion->venue_address ?? 'Phố Mới, Quế Võ, Bắc Ninh',
-            'datetime_iso' => $eventDate ? $eventDate->format('Y-m-d\TH:i:sP') : '2026-05-17T07:00:00+07:00',
-            'map_query' => urlencode($reunion->venue_address ?? 'Truong+THPT+Que+Vo+2+Bac+Ninh'),
-            'map_iframe' => $mapIframe ?: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3726.5!2d106.1614!3d21.1234!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjHCsDA3JzI0LjQiTiAxMDbCsDA5JzQxLjAiRQ!5e0!3m2!1svi!2s!4v1234567890'
+            'location_name' => $locationName,
+            'location_address' => $locationAddress,
+            'datetime_iso' => $eventDate ? $eventDate->format('Y-m-d\TH:i:sP') : self::DEFAULT_EVENT_DATETIME,
+            'map_query' => urlencode($locationAddress),
+            'map_url' => $reunion->map_url ?: 'https://maps.google.com/?q=' . urlencode($locationAddress),
+            'map_iframe' => $mapEmbedUrl,
         ];
+    }
 
-        $openLetter = $reunion->getContentValue('open_letter', '<p><strong>Trân trọng kính mời:</strong> Ban Giám hiệu các thời kỳ, quý thầy cô giáo cùng toàn thể các bạn cựu học sinh niên khóa 2003-2006.</p><p>Thời gian trôi qua thật nhanh... mới ngày nào chúng ta còn là những cô cậu học trò hồn nhiên dưới mái trường THPT Quế Võ Số 2 thân yêu, vậy mà đã tròn 20 năm kể từ ngày chia tay.</p><p>Hai mươi năm – mỗi người một hành trình, một ngả rẽ riêng. Nhưng chắc chắn rằng, trong sâu thẳm trái tim mỗi người vẫn luôn lưu giữ vẹn nguyên những ký ức của một thời áo trắng.</p><p>✨ Nhân dịp kỷ niệm <strong>20 năm ngày ra trường</strong>, Ban liên lạc trân trọng kính mời Ban Giám hiệu, quý thầy cô giáo cùng toàn thể các bạn khóa 2003–2006 trở về tham dự buổi hội ngộ đầy ý nghĩa.</p><p>💛 Đây là dịp để chúng ta cùng gặp lại nhau, ôn lại những kỷ niệm đẹp và bày tỏ lòng tri ân sâu sắc tới Ban Giám hiệu cùng quý thầy cô.</p><p>💐 Rất mong sự hiện diện của quý thầy cô và toàn thể các bạn để buổi hội ngộ thêm trọn vẹn, ấm áp và đáng nhớ.</p><p><strong>Hẹn gặp lại – Thanh xuân của chúng ta!</strong></p>');
-        $greeting = $reunion->getContentValue('invitation_greeting', 'Quý thầy cô & Các bạn');
+    private function extractMapEmbedUrl(?string $mapIframe): string
+    {
+        $defaultMapUrl = 'https://www.google.com/maps?q=Tr%C6%B0%E1%BB%9Dng%20THPT%20Qu%E1%BA%BF%20V%C3%B5%202&output=embed';
 
-        $timeline = $reunion->content['timeline'] ?? [
-            ['time' => '7h00-8h00', 'title' => 'Đón tiếp thầy cô và các bạn', 'description' => 'Giao lưu, nhận áo đồng phục và chụp ảnh lưu niệm tại backdrop.', 'is_highlight' => false],
-            ['time' => '8h00-8h30', 'title' => 'Văn nghệ chào mừng', 'description' => 'Các tiết mục văn nghệ đặc sắc do cựu học sinh biểu diễn.', 'is_highlight' => false],
-            ['time' => '8h30-8h45', 'title' => 'Phát biểu khai mạc', 'description' => 'Tuyên bố lý do, giới thiệu đại biểu và khai mạc chương trình.', 'is_highlight' => true],
-            ['time' => '8h45-9h00', 'title' => 'Phát biểu của Thầy Hiệu trưởng cũ', 'description' => 'Lắng nghe những chia sẻ đầy kỷ niệm từ Thầy hiệu trưởng nhiệm kỳ 2003-2006.', 'is_highlight' => false],
-            ['time' => '9h00-9h15', 'title' => 'Phát biểu của Thầy Hiệu trưởng đương nhiệm', 'description' => 'Thầy hiệu trưởng hiện tại phát biểu về sự phát triển của nhà trường.', 'is_highlight' => false],
-            ['time' => '9h15-9h30', 'title' => 'Phát biểu của Học sinh', 'description' => 'Đại diện cựu học sinh gửi lời tri ân sâu sắc tới mái trường và thầy cô.', 'is_highlight' => false],
-            ['time' => '9h30-10h00', 'title' => 'Tặng quà tri ân Thầy cô giáo', 'description' => 'Gửi tặng những món quà ý nghĩa đến các thầy cô nguyên là giáo viên giảng dạy khóa 2003-2006.', 'is_highlight' => true],
-            ['time' => '10h00-10h15', 'title' => 'Tặng quà Nhà trường', 'description' => 'Tập thể cựu học sinh dâng tặng hoa và kỷ vật cho trường THPT Quế Võ 2.', 'is_highlight' => false],
-            ['time' => '10h15-10h30', 'title' => 'Chúc mừng BGH', 'description' => 'Tập thể Ban tổ chức lên tặng hoa và chúc sức khỏe Ban Giám Hiệu.', 'is_highlight' => false],
-            ['time' => '10h30-10h45', 'title' => 'Trao bằng vinh danh BTC', 'description' => 'Vinh danh cảm ơn các cá nhân Tập thể BTC đã tích cực kết nối và xây dựng chương trình.', 'is_highlight' => false],
-            ['time' => '11h00-11h30', 'title' => 'Chụp ảnh dạo quanh trường xưa', 'description' => 'Di chuyển quanh sân trường, các góc lớp để cùng nhau lưu lại bức ảnh Thanh Xuân.', 'is_highlight' => true],
+        if (!$mapIframe) {
+            return $defaultMapUrl;
+        }
+
+        if (preg_match('/src=["\']([^"\']+)["\']/', $mapIframe, $matches)) {
+            return $matches[1];
+        }
+
+        return $mapIframe;
+    }
+
+    private function makeMapEmbed(?string $mapUrl): string
+    {
+        if (!$mapUrl) {
+            $mapUrl = 'https://www.google.com/maps?q=Tr%C6%B0%E1%BB%9Dng%20THPT%20Qu%E1%BA%BF%20V%C3%B5%202&output=embed';
+        }
+
+        if (str_contains($mapUrl, '<iframe')) {
+            return $mapUrl;
+        }
+
+        return '<iframe loading="lazy" src="' . e($mapUrl) . '" width="100%" height="300" style="border:0;" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>';
+    }
+
+    private function getOpenLetter(Reunion $reunion): string
+    {
+        return $reunion->getContentValue(
+            'open_letter',
+            '<p><strong>Trân trọng kính mời:</strong> Ban Giám hiệu các thời kỳ, quý thầy cô giáo cùng toàn thể các bạn cựu học sinh niên khóa 2003-2006.</p>
+            <p>Thời gian trôi qua thật nhanh... mới ngày nào chúng ta còn là những cô cậu học trò hồn nhiên dưới mái trường THPT Quế Võ Số 2 thân yêu, vậy mà đã tròn 20 năm kể từ ngày chia tay.</p>
+            <p>Hai mươi năm – mỗi người một hành trình, một ngả rẽ riêng. Nhưng chắc chắn rằng, trong sâu thẳm trái tim mỗi người vẫn luôn lưu giữ vẹn nguyên những ký ức của một thời áo trắng.</p>
+            <p>✨ Nhân dịp kỷ niệm <strong>20 năm ngày ra trường</strong>, Ban liên lạc trân trọng kính mời Ban Giám hiệu cùng toàn thể các bạn khóa 2003–2006 trở về tham dự buổi hội ngộ đầy ý nghĩa.</p>
+            <p>💛 Đây là dịp để chúng ta cùng gặp lại nhau, ôn lại những kỷ niệm đẹp và bày tỏ lòng tri ân sâu sắc tới quý thầy cô.</p>
+            <p>💐 Rất mong sự hiện diện của quý thầy cô và toàn thể các bạn để buổi hội ngộ thêm trọn vẹn, ấm áp và đáng nhớ.</p>
+            <p><strong>Hẹn gặp lại – Thanh xuân của chúng ta!</strong></p>'
+        );
+    }
+
+    private function getTimeline(array $content): array
+    {
+        $timeline = data_get($content, 'timeline');
+
+        if (is_array($timeline) && !empty($timeline)) {
+            return array_values($timeline);
+        }
+
+        return [
+            [
+                'time' => '7h00 - 8h00',
+                'title' => 'Đón tiếp thầy cô và các bạn',
+                'description' => 'Giao lưu, nhận áo đồng phục và chụp ảnh lưu niệm tại backdrop.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '8h00 - 8h30',
+                'title' => 'Văn nghệ chào mừng',
+                'description' => 'Các tiết mục văn nghệ đặc sắc do cựu học sinh biểu diễn.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '8h30 - 8h45',
+                'title' => 'Phát biểu khai mạc',
+                'description' => 'Tuyên bố lý do, giới thiệu đại biểu và khai mạc chương trình.',
+                'is_highlight' => true,
+            ],
+            [
+                'time' => '8h45 - 9h00',
+                'title' => 'Phát biểu của Thầy Hiệu trưởng cũ',
+                'description' => 'Lắng nghe những chia sẻ đầy kỷ niệm từ Thầy hiệu trưởng nhiệm kỳ 2003-2006.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '9h00 - 9h15',
+                'title' => 'Phát biểu của Thầy Hiệu trưởng đương nhiệm',
+                'description' => 'Thầy hiệu trưởng hiện tại phát biểu về sự phát triển của nhà trường.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '9h15 - 9h30',
+                'title' => 'Phát biểu của Học sinh',
+                'description' => 'Đại diện cựu học sinh gửi lời tri ân sâu sắc tới mái trường và thầy cô.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '9h30 - 10h00',
+                'title' => 'Tặng quà tri ân Thầy cô giáo',
+                'description' => 'Gửi tặng những món quà ý nghĩa đến các thầy cô nguyên là giáo viên giảng dạy khóa 2003-2006.',
+                'is_highlight' => true,
+            ],
+            [
+                'time' => '10h00 - 10h15',
+                'title' => 'Tặng quà Nhà trường',
+                'description' => 'Tập thể cựu học sinh dâng tặng hoa và kỷ vật cho trường THPT Quế Võ 2.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '10h15 - 10h30',
+                'title' => 'Chúc mừng BGH',
+                'description' => 'Tập thể Ban tổ chức lên tặng hoa và chúc sức khỏe Ban Giám Hiệu.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '10h30 - 10h45',
+                'title' => 'Trao bằng vinh danh BTC',
+                'description' => 'Vinh danh cảm ơn các cá nhân Tập thể BTC đã tích cực kết nối và xây dựng chương trình.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '11h00 - 11h30',
+                'title' => 'Chụp ảnh dạo quanh trường xưa',
+                'description' => 'Di chuyển quanh sân trường, các góc lớp để cùng nhau lưu lại bức ảnh Thanh Xuân.',
+                'is_highlight' => true,
+            ],
         ];
+    }
 
-        $messages = ReunionMessage::where('reunion_id', $reunion->id)
-            ->where('is_approved', true)
-            ->orderBy('created_at', 'desc')
-            ->get();
+    private function getOrganizers(array $content): array
+    {
+        $organizers = data_get($content, 'organizers');
 
-        return view('reunions.que-vo-2', compact('classDirs', 'organizers', 'eventInfo', 'schoolInfo', 'openLetter', 'greeting', 'timeline', 'messages', 'reunion'));
+        if (is_array($organizers) && !empty($organizers)) {
+            return array_values($organizers);
+        }
+
+        return [
+            [
+                'role' => 'T/M Ban liên lạc – Trưởng Ban tổ chức',
+                'name' => 'Ban Tổ Chức',
+                'phone' => '',
+            ],
+        ];
+    }
+
+    private function buildTemplateEventData(
+        Reunion $reunion,
+        array $schoolInfo,
+        array $eventInfo,
+        string $openLetter,
+        array $timeline,
+        array $organizers,
+        $messages,
+        array $classDirs
+    ): object {
+        $logoUrl = $reunion->getLogoUrl();
+        $shareUrl = $reunion->getShareUrl();
+        $coverUrl = $reunion->getCoverUrl();
+        $heroUrl = $reunion->getHeroUrl();
+
+        $heroPhoto1Url = $reunion->getHeroPhoto1Url();
+        $heroPhoto2Url = $reunion->getHeroPhoto2Url();
+        $heroPhoto3Url = $reunion->getHeroPhoto3Url();
+
+        $videoCoverUrl = $reunion->getVideoCoverUrl();
+        $videoUrl = $reunion->getVideoUrl();
+
+        $templateMedia = $this->mapTemplateMedia($reunion);
+
+        $eventName = $schoolInfo['name'] ?? 'Trường THPT';
+        $eventCourse = $schoolInfo['course'] ?? 'Niên khóa';
+        $eventAnniversary = $schoolInfo['anniversary'] ?? 'Ngày hội ngộ';
+        $eventSlogan = $schoolInfo['slogan'] ?? 'Trở về thanh xuân';
+
+        $eventDateLabel = trim(
+            ($eventInfo['time_short'] ?? '') . ' ' .
+            ($eventInfo['day'] ?? '') . ', ' .
+            ($eventInfo['date'] ?? '')
+        );
+
+        $eventAddress = trim(
+            ($eventInfo['location_name'] ?? '') . ' - ' .
+            ($eventInfo['location_address'] ?? ''),
+            ' -'
+        );
+
+        $openLetterText = $this->htmlToPlainText($openLetter);
+
+        return (object) [
+            'title' => 'Thư Mời Họp Lớp | ' . $eventName,
+            'slug' => $reunion->slug,
+
+            // Có cả 2 tên để không vỡ Blade cũ.
+            'course_name' => $eventCourse,
+            'cource_name' => $eventCourse,
+
+            'school_name' => $eventName,
+
+            // Media dùng chung.
+            'logo' => $logoUrl,
+            'share_image' => $shareUrl,
+            'cover' => $coverUrl,
+            'video_cover' => $videoCoverUrl,
+            'video_url' => $videoUrl,
+
+            // Media hero.
+            'hero_image' => $heroUrl,
+            'background' => $heroUrl,
+            'hero_photo_1' => $heroPhoto1Url,
+            'hero_photo_2' => $heroPhoto2Url,
+            'hero_photo_3' => $heroPhoto3Url,
+
+            // Toàn bộ media động theo template.media_schema.
+            // Blade có thể gọi: $event->media['hero_photo_1'] ?? null
+            'media' => $templateMedia,
+
+            'slogan' => $this->makeHeroSlogan($eventSlogan),
+            'description' => '<p>' . e($eventAnniversary) . ' ngày ra trường - ' . e($eventSlogan) . '</p>',
+            'time' => $eventDateLabel,
+            'address' => $eventAddress,
+
+            'thungo' => $openLetterText,
+            'programs' => $this->mapTimelineForTemplate($timeline),
+            'classes' => $this->mapClassesForTemplate($classDirs, $heroUrl),
+            'guestbooks' => $this->mapMessagesForTemplate($messages),
+            'contacts' => $this->mapOrganizersForTemplate($organizers),
+
+            'map_embed' => $this->makeMapEmbed($eventInfo['map_iframe'] ?? null),
+            'countdown_time' => $eventInfo['datetime_iso'] ?? self::DEFAULT_EVENT_DATETIME,
+            'time_countdown' => $eventInfo['datetime_iso'] ?? self::DEFAULT_EVENT_DATETIME,
+        ];
+    }
+
+    private function mapTemplateMedia(Reunion $reunion): array
+    {
+        $schema = $reunion->template?->media_schema;
+
+        if (!is_array($schema)) {
+            return [];
+        }
+
+        $media = [];
+
+        foreach (($schema['groups'] ?? []) as $group) {
+            foreach (($group['fields'] ?? []) as $field) {
+                $key = $field['key'] ?? null;
+                $collection = $field['collection'] ?? $key;
+
+                if (!$key || !$collection) {
+                    continue;
+                }
+
+                $media[$key] = $reunion->getMediaUrlByCollection($collection);
+            }
+        }
+
+        return $media;
+    }
+
+    private function htmlToPlainText(?string $html): string
+    {
+        $html = (string) $html;
+
+        $text = str_replace(
+            ['</p>', '<br>', '<br/>', '<br />'],
+            "\n",
+            $html
+        );
+
+        $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return trim(preg_replace("/\n{3,}/", "\n\n", $text));
+    }
+
+    private function mapTimelineForTemplate(array $timeline)
+    {
+        return collect($timeline)
+            ->map(fn ($item) => (object) [
+                'time' => $item['time'] ?? '',
+                'title' => $item['title'] ?? '',
+                'description' => $item['description'] ?? '',
+                'is_highlight' => (bool) ($item['is_highlight'] ?? false),
+            ])
+            ->values();
+    }
+
+    private function mapClassesForTemplate(array $classDirs, string $fallbackImage)
+    {
+        return collect($classDirs)
+            ->map(function ($photos, $className) use ($fallbackImage) {
+                $photos = is_array($photos)
+                    ? array_values(array_filter($photos))
+                    : [];
+
+                $firstPhoto = !empty($photos)
+                    ? $photos[0]
+                    : $fallbackImage;
+
+                return (object) [
+                    'name' => $className,
+                    'thumbnail' => $firstPhoto,
+                    'url' => !empty($photos) ? $photos[0] : '#',
+                    'photos' => $photos,
+                    'photo_count' => count($photos),
+                ];
+            })
+            ->values();
+    }
+
+    private function mapMessagesForTemplate($messages)
+    {
+        return collect($messages)
+            ->map(fn ($message) => (object) [
+                'name' => $message->name ?? '',
+                'class_name' => '',
+                'content' => $message->content ?? '',
+            ])
+            ->values();
+    }
+
+    private function mapOrganizersForTemplate(array $organizers)
+    {
+        return collect($organizers)
+            ->map(fn ($item) => (object) [
+                'role' => $item['role'] ?? 'Ban tổ chức',
+                'name' => $item['name'] ?? 'Ban Tổ Chức',
+                'phone' => $item['phone'] ?? '',
+            ])
+            ->values();
+    }
+
+    private function makeHeroSlogan(?string $slogan): string
+    {
+        $slogan = trim($slogan ?: 'Trở Về Thanh Xuân');
+
+        $words = preg_split('/\s+/u', $slogan);
+
+        if (count($words) <= 2) {
+            return '<span class="pretitle">' . e($slogan) . '</span>';
+        }
+
+        $lineOne = implode(' ', array_slice($words, 0, 2));
+        $lineTwo = implode(' ', array_slice($words, 2));
+
+        return '<span class="pretitle">' . e($lineOne) . '</span><h3>' . e($lineTwo) . '</h3>';
     }
 
     public function storeRsvpDemo(Request $request)
     {
-        $key = 'rsvp:' . $request->ip();
+        return $this->storeRsvpForReunion($request, $this->getDemoReunion());
+    }
+
+    public function storeRsvp(Request $request, Reunion $reunion)
+    {
+        return $this->storeRsvpForReunion($request, $reunion);
+    }
+
+    private function storeRsvpForReunion(Request $request, Reunion $reunion)
+    {
+        $key = 'rsvp:' . $reunion->id . ':' . $request->ip();
+
         if (RateLimiter::tooManyAttempts($key, 10)) {
-            return response()->json(['message' => 'Bạn đã gửi quá nhiều lần. Vui lòng thử lại sau.'], 429);
+            return response()->json([
+                'message' => 'Bạn đã gửi quá nhiều lần. Vui lòng thử lại sau.',
+            ], 429);
         }
+
         RateLimiter::hit($key, 3600);
 
         $validated = $request->validate([
@@ -218,20 +740,22 @@ class ReunionController extends Controller
             'note' => 'nullable|string|max:500',
         ]);
 
-        $reunion = $this->getDemoReunion();
+        $noteLines = [];
 
-        $note = $validated['note'] ?? '';
         if (!empty($validated['class'])) {
-            $classNote = 'Lớp: ' . $validated['class'];
-            $note = $note ? $classNote . "\n" . $note : $classNote;
+            $noteLines[] = 'Lớp: ' . $validated['class'];
+        }
+
+        if (!empty($validated['note'])) {
+            $noteLines[] = $validated['note'];
         }
 
         ReunionRsvp::create([
             'reunion_id' => $reunion->id,
             'name' => $validated['name'],
-            'phone' => $validated['phone'],
+            'phone' => $validated['phone'] ?? null,
             'guest_count' => $validated['guest_count'] ?? 1,
-            'note' => $note,
+            'note' => implode(PHP_EOL, $noteLines),
             'status' => 'attending',
         ]);
 
@@ -240,10 +764,24 @@ class ReunionController extends Controller
 
     public function storeMessageDemo(Request $request)
     {
-        $key = 'message:' . $request->ip();
+        return $this->storeMessageForReunion($request, $this->getDemoReunion());
+    }
+
+    public function storeMessage(Request $request, Reunion $reunion)
+    {
+        return $this->storeMessageForReunion($request, $reunion);
+    }
+
+    private function storeMessageForReunion(Request $request, Reunion $reunion)
+    {
+        $key = 'message:' . $reunion->id . ':' . $request->ip();
+
         if (RateLimiter::tooManyAttempts($key, 5)) {
-            return response()->json(['message' => 'Bạn đã gửi quá nhiều lần. Vui lòng thử lại sau.'], 429);
+            return response()->json([
+                'message' => 'Bạn đã gửi quá nhiều lần. Vui lòng thử lại sau.',
+            ], 429);
         }
+
         RateLimiter::hit($key, 3600);
 
         $validated = $request->validate([
@@ -251,13 +789,11 @@ class ReunionController extends Controller
             'content' => 'required|string|max:1000',
         ]);
 
-        $reunion = $this->getDemoReunion();
-
         ReunionMessage::create([
             'reunion_id' => $reunion->id,
             'name' => $validated['name'],
             'content' => $validated['content'],
-            'is_approved' => true,
+            'is_approved' => (bool) $reunion->is_auto_approve_messages,
         ]);
 
         return response()->json(['success' => true]);

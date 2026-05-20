@@ -1,4 +1,10 @@
-@props(['classDirs' => []])
+@props(['classDirs' => [], 'reunion' => null])
+
+@php
+    $submitUrl = $reunion
+        ? route('reunion.rsvp.store', ['reunion' => $reunion->slug])
+        : route('reunion.demo.rsvp');
+@endphp
 
 <!-- RSVP - XÁC NHẬN THAM DỰ -->
 <section id="rsvp" class="py-16 sm:py-24 bg-white relative px-5 overflow-hidden">
@@ -155,7 +161,7 @@
 
         const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        fetch("{{ route('reunion.demo.rsvp') }}", {
+        fetch(@js($submitUrl), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

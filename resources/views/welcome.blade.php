@@ -140,7 +140,6 @@
             <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
                 <a href="#features" class="hover:text-rose-700 transition">Tính năng</a>
                 <a href="#demo" class="hover:text-rose-700 transition">Xem Demo</a>
-                <a href="#pricing" class="hover:text-rose-700 transition">Bảng giá</a>
                 <a href="#contact" class="hover:text-rose-700 transition">Liên hệ</a>
                 @auth
                     <a href="{{ url('/dashboard') }}" class="text-rose-700 font-semibold">Tài khoản</a>
@@ -491,83 +490,6 @@
             
             <div class="text-center mt-10">
                 <p class="font-accent text-lg text-gray-400">Ảnh sẽ được cập nhật từ BTC các lớp 🌸</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-24 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl"></div>
-        
-        <div class="max-w-6xl mx-auto px-6 relative z-10">
-            <div class="text-center mb-16">
-                <span class="text-amber-400 font-semibold uppercase tracking-widest text-sm" data-aos="fade-up">Bảng giá</span>
-                <h2 class="text-3xl md:text-4xl font-serif font-bold mt-4" data-aos="fade-up" data-aos-delay="100">
-                    Gói Dịch Vụ <span class="text-amber-400">Thiệp Mời Họp Lớp</span>
-                </h2>
-                <p class="text-gray-400 mt-4 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="150">
-                    THT Media thiết kế và cài đặt hoàn chỉnh từ A-Z. BTC chỉ cần cung cấp thông tin!
-                </p>
-            </div>
-            
-            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                <!-- Standard Package -->
-                <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-8 card-hover" data-aos="fade-up">
-                    <div class="text-center mb-8">
-                        <div class="w-16 h-16 rounded-2xl bg-slate-700 flex items-center justify-center text-white text-3xl mx-auto mb-4">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">TIÊU CHUẨN</h3>
-                        <div class="text-4xl font-bold text-white mb-1">1.500.000đ</div>
-                        <div class="text-gray-400 text-sm">VNĐ / trọn gói</div>
-                    </div>
-                    <ul class="space-y-3 mb-8 text-gray-300 text-sm">
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>Thiệp mời online chuẩn responsive</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>Timeline chương trình chi tiết</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>RSVP xác nhận tham dự</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>QR Code quỹ hội</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>Google Maps địa điểm</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>5 ảnh kỷ niệm</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>Nhạc nền</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-green-400 mt-1"></i><span>Lưu trữ 6 tháng</span></li>
-                        <li class="flex items-start gap-2 text-gray-500"><i class="fas fa-times mt-1"></i><span class="line-through">Sổ lưu bút online</span></li>
-                        <li class="flex items-start gap-2 text-gray-500"><i class="fas fa-times mt-1"></i><span class="line-through">Hiệu ứng đặc biệt</span></li>
-                    </ul>
-                    <a href="#contact" class="block w-full py-3 text-center rounded-full border border-white/30 font-bold hover:bg-white/10 transition text-sm">Liên hệ đăng ký</a>
-                </div>
-                
-                <!-- Premium Package -->
-                <div class="bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-2 border-rose-400 rounded-3xl p-8 relative card-hover md:scale-105" data-aos="fade-up" data-aos-delay="100">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full gradient-rose text-white text-xs font-bold animate-pulse-glow">
-                        ⭐ Được chọn nhiều nhất
-                    </div>
-                    <div class="text-center mb-8">
-                        <div class="w-16 h-16 rounded-2xl gradient-rose flex items-center justify-center text-white text-3xl mx-auto mb-4">
-                            <i class="fas fa-crown"></i>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2">PREMIUM</h3>
-                        <div class="text-4xl font-bold text-rose-400 mb-1">2.500.000đ</div>
-                        <div class="text-gray-400 text-sm">VNĐ / trọn gói</div>
-                    </div>
-                    <ul class="space-y-3 mb-8 text-gray-300 text-sm">
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Tất cả tính năng Tiêu Chuẩn</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Thiết kế Premium riêng</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Ảnh không giới hạn</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Video trailer kỷ niệm</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Sổ lưu bút online</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Hiệu ứng lá rơi / hoa rơi</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Màn mở thiệp 3D</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span><strong>Lưu trữ vĩnh viễn</strong></span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span>Tùy chỉnh font, màu sắc</span></li>
-                        <li class="flex items-start gap-2"><i class="fas fa-check text-rose-400 mt-1"></i><span>Hỗ trợ ưu tiên 1-1</span></li>
-                    </ul>
-                    <a href="#contact" class="block w-full py-3 text-center rounded-full gradient-rose text-white font-bold hover:opacity-90 transition text-sm animate-pulse-glow">Đăng ký ngay</a>
-                </div>
-            </div>
-            
-            <div class="text-center mt-12 text-gray-400 text-sm">
-                <p>💡 Tất cả các gói đều được THT Media thiết kế hoàn chỉnh từ A-Z. BTC chỉ cần gửi ảnh và thông tin!</p>
             </div>
         </div>
     </section>

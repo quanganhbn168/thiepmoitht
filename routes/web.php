@@ -26,6 +26,8 @@ Route::get('/hop-lop-que-vo-1-teacher', [ReunionController::class, 'showQueVoTea
 Route::get('/hop-lop-que-vo-2', [ReunionController::class, 'showQueVo2Demo'])->name('reunion.demo.que-vo-2');
 Route::post('/demo-hop-lop-rsvp', [ReunionController::class, 'storeRsvpDemo'])->name('reunion.demo.rsvp');
 Route::post('/demo-hop-lop-message', [ReunionController::class, 'storeMessageDemo'])->name('reunion.demo.message');
+Route::post('/{reunion:slug}/rsvp', [ReunionController::class, 'storeRsvp'])->name('reunion.rsvp.store');
+Route::post('/{reunion:slug}/message', [ReunionController::class, 'storeMessage'])->name('reunion.message.store');
 
 // Fallback: /{slug} can be reunion
 Route::get('/{slug}', [\App\Http\Controllers\HomeController::class, 'resolveSlug'])

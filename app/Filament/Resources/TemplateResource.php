@@ -4,12 +4,20 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TemplateResource\Pages;
 use App\Models\Template;
+use App\Support\TemplateViewRegistry;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Artisan;
+use Filament\Forms\Components\Actions;
+use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 
 class TemplateResource extends Resource
 {
@@ -37,51 +45,247 @@ class TemplateResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return \Filament\Facades\Filament::getCurrentPanel()->getId() === 'admin';
+        return Filament::getCurrentPanel()->getId() === 'admin';
     }
 
     public static function canAccess(): bool
     {
-        return \Filament\Facades\Filament::getCurrentPanel()->getId() === 'admin' 
+        return Filament::getCurrentPanel()->getId() === 'admin'
             && (auth()->user()->isSuperAdmin() || auth()->user()->isAdmin());
     }
 
-    // Query filter removed to allow showing all template types
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('type', 'reunion');
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
+                Forms\Components\Tabs::make('Template Tabs')
+                    ->tabs([
+                        Forms\Components\Tabs\Tab::make('Thông tin mẫu')
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Tên mẫu')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->columnSpanFull(),
+
+                                Forms\Components\TextInput::make('view_path')
+                                    ->label('Đường dẫn file Blade')
+                                    ->required()
+                                    ->datalist(fn (): array => TemplateViewRegistry::paths('reunion'))
+                                    ->maxLength(255)
+                                    ->placeholder('templates.que-vo-2')
+                                    ->rule(function () {
+                                        return function (string $attribute, $value, \Closure $fail): void {
+                                            $value = (string) $value;
+
+                                            if (! TemplateViewRegistry::exists($value)) {
+                                                $fail('Không tìm thấy file Blade tương ứng trong resources/views.');
+                                            }
+                                        };
+                                    })
+                                    ->helperText('VD: resources/views/templates/que-vo-2.blade.php => templates.que-vo-2')
+                                    ->columnSpanFull(),
+
+                                Forms\Components\Hidden::make('type')
+                                    ->default('reunion'),
+
+                                Forms\Components\Hidden::make('required_tier')
+                                    ->default('standard'),
+
+                                Forms\Components\FileUpload::make('thumbnail_url')
+                                    ->label('Ảnh đại diện mẫu')
+                                    ->image()
+                                    ->disk('public')
+                                    ->directory('templates')
+                                    ->visibility('public')
+                                    ->imageEditor()
+                                    ->maxSize(10240)
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->columnSpanFull(),
+
+                                Forms\Components\Toggle::make('is_active')
+                                    ->label('Kích hoạt')
+                                    ->default(true)
+                                    ->required(),
+                            ])
+                            ->columns(2),
+
+                        Forms\Components\Tabs\Tab::make('Cấu hình Media')
+    ->schema([
+        Forms\Components\Placeholder::make('media_schema_note')
+            ->label('')
+            ->content('Khai báo các ảnh/video mà template này cần. Có thể chỉnh bằng UI bên dưới hoặc bấm nút dán JSON nhanh.'),
+
+        Actions::make([
+            FormAction::make('paste_media_schema_json')
+                ->label('Dán JSON nhanh')
+                ->icon('heroicon-o-code-bracket-square')
+                ->color('info')
+                ->modalHeading('Dán Media Schema JSON')
+                ->modalWidth('5xl')
+                ->form([
+                    Forms\Components\Textarea::make('media_schema_json')
+                        ->label('Media Schema JSON')
+                        ->rows(24)
+                        ->required()
+                        ->default(function (Get $get): string {
+                            $schema = $get('media_schema');
+
+                            if (! is_array($schema) || empty($schema)) {
+                                $schema = TemplateResource::defaultReunionMediaSchema();
+                            }
+
+                            return json_encode(
+                                $schema,
+                                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+                            );
+                        })
+                        ->helperText('Dán JSON hợp lệ có cấu trúc {"groups": [...]} rồi bấm Lưu.'),
+                ])
+                ->action(function (array $data, Set $set): void {
+                    $json = $data['media_schema_json'] ?? '';
+
+                    $schema = json_decode($json, true);
+
+                    if (json_last_error() !== JSON_ERROR_NONE || ! is_array($schema)) {
+                        Notification::make()
+                            ->title('JSON không hợp lệ')
+                            ->body(json_last_error_msg())
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    if (! isset($schema['groups']) || ! is_array($schema['groups'])) {
+                        Notification::make()
+                            ->title('Thiếu key groups')
+                            ->body('Media schema cần có cấu trúc: {"groups": [...]}')
+                            ->danger()
+                            ->send();
+
+                        return;
+                    }
+
+                    $set('media_schema', $schema);
+
+                    Notification::make()
+                        ->title('Đã nạp JSON vào form')
+                        ->body('Anh nhớ bấm Lưu template để ghi vào database.')
+                        ->success()
+                        ->send();
+                }),
+
+            FormAction::make('load_default_media_schema')
+                ->label('Nạp mẫu mặc định')
+                ->icon('heroicon-o-photo')
+                ->color('warning')
+                ->requiresConfirmation()
+                ->modalHeading('Nạp cấu hình media mặc định?')
+                ->modalDescription('Hành động này sẽ thay thế cấu hình hiện tại trong form bằng preset: logo, share, hero background, 3 ảnh hero, video cover và video.')
+                ->action(function (Set $set): void {
+                    $set('media_schema', TemplateResource::defaultReunionMediaSchema());
+
+                    Notification::make()
+                        ->title('Đã nạp preset media')
+                        ->body('Anh nhớ bấm Lưu template để ghi vào database.')
+                        ->success()
+                        ->send();
+                }),
+        ])
+            ->alignStart()
+            ->columnSpanFull(),
+
+        Forms\Components\Repeater::make('media_schema.groups')
+            ->label('Nhóm media')
+            ->addActionLabel('Thêm nhóm media')
+            ->collapsible()
+            ->cloneable()
+            ->reorderable()
+            ->default(TemplateResource::defaultReunionMediaSchema()['groups'])
+            ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên mẫu')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('view_path')
-                    ->label('Đường dẫn file (View Path)')
+                    ->label('Tên nhóm')
+                    ->placeholder('VD: Khu vực Hero, Ảnh nhận diện, Video')
                     ->required()
                     ->maxLength(255)
-                    ->helperText('Ví dụ: templates.modern_01'),
-                Forms\Components\Select::make('type')
-                    ->label('Loại')
-                    ->options([
-                        'wedding' => 'Wedding',
+                    ->columnSpanFull(),
+
+                Forms\Components\Repeater::make('fields')
+                    ->label('Danh sách ảnh/video')
+                    ->addActionLabel('Thêm ảnh/video')
+                    ->collapsible()
+                    ->cloneable()
+                    ->reorderable()
+                    ->schema([
+                        Forms\Components\TextInput::make('key')
+                            ->label('Key')
+                            ->placeholder('VD: hero_photo_1')
+                            ->required()
+                            ->maxLength(100)
+                            ->helperText('Key nội bộ, nên viết không dấu, không khoảng trắng.'),
+
+                        Forms\Components\TextInput::make('label')
+                            ->label('Tên hiển thị')
+                            ->placeholder('VD: Ảnh Hero 1')
+                            ->required()
+                            ->maxLength(255),
+
+                        Forms\Components\Select::make('type')
+                            ->label('Loại file')
+                            ->options([
+                                'image' => 'Ảnh',
+                                'video' => 'Video',
+                            ])
+                            ->default('image')
+                            ->required()
+                            ->live(),
+
+                        Forms\Components\TextInput::make('collection')
+                            ->label('Media collection')
+                            ->placeholder('VD: hero_photo_1')
+                            ->required()
+                            ->maxLength(100)
+                            ->helperText('Nên đặt giống Key để dễ mapping với Blade/controller.'),
+
+                        Forms\Components\TextInput::make('max_size')
+                            ->label('Dung lượng tối đa KB')
+                            ->numeric()
+                            ->default(fn (Get $get) => $get('type') === 'video' ? 102400 : 10240)
+                            ->helperText('Ảnh: 10240 KB. Video: 102400 KB.'),
+
+                        Forms\Components\Toggle::make('single')
+                            ->label('Chỉ cho 1 file')
+                            ->default(true),
                     ])
-                    ->default('wedding')
-                    ->required(),
-                Forms\Components\Select::make('required_tier')
-                    ->label('Gói yêu cầu')
-                    ->options(\App\Enums\WeddingTier::optionsWithPrice())
-                    ->default('basic')
-                    ->required()
-                    ->helperText('Khách hàng phải mua gói này hoặc cao hơn để sử dụng mẫu'),
-                Forms\Components\FileUpload::make('thumbnail_url')
-                    ->label('Ảnh đại diện')
-                    ->image()
-                    ->disk('public')
-                    ->directory('templates'),
-                Forms\Components\Toggle::make('is_active')
-                    ->label('Kích hoạt')
-                    ->required(),
+                    ->columns(2)
+                    ->columnSpanFull(),
+            ])
+            ->columnSpanFull(),
+    ])
+    ->columns(1),
+
+                        Forms\Components\Tabs\Tab::make('JSON nâng cao')
+                            ->schema([
+                                Forms\Components\Placeholder::make('json_note')
+                                    ->label('')
+                                    ->content('Tab này chỉ để kiểm tra nhanh cấu trúc media_schema. Bình thường anh cấu hình bằng tab “Cấu hình Media” là đủ.'),
+
+                                Forms\Components\KeyValue::make('metadata')
+                                    ->label('Metadata mở rộng')
+                                    ->keyLabel('Key')
+                                    ->valueLabel('Value')
+                                    ->addActionLabel('Thêm metadata')
+                                    ->columnSpanFull(),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -93,46 +297,62 @@ class TemplateResource extends Resource
                     ->label('Ảnh')
                     ->defaultImageUrl('https://placehold.co/100x100?text=No+Image')
                     ->circular(),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Tên giao diện')
                     ->searchable()
                     ->weight('bold')
                     ->description(fn (Template $record) => $record->view_path),
-                Tables\Columns\TextColumn::make('type')
-                    ->label('Phân loại')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'wedding' => 'success',
-                        'business' => 'info',
-                        default => 'gray',
-                    }),
-                Tables\Columns\TextColumn::make('tier')
-                    ->label('Gói')
-                    ->badge()
-                    ->color(fn (?string $state): string => match ($state) {
-                        \App\Enums\WeddingTier::PRO->value => 'warning',
-                        default => 'gray', // Standard
+
+                Tables\Columns\TextColumn::make('media_schema')
+                    ->label('Media')
+                    ->formatStateUsing(function ($state): string {
+                        $groups = is_array($state) ? ($state['groups'] ?? []) : [];
+                        $fieldCount = collect($groups)->sum(fn ($group) => count($group['fields'] ?? []));
+
+                        return $fieldCount > 0
+                            ? $fieldCount . ' media field'
+                            : 'Chưa cấu hình';
                     })
-                    ->formatStateUsing(fn (?string $state): string => \App\Enums\WeddingTier::tryFrom($state)?->label() ?? strtoupper($state)),
+                    ->badge()
+                    ->color(function ($state): string {
+                        $groups = is_array($state) ? ($state['groups'] ?? []) : [];
+                        $fieldCount = collect($groups)->sum(fn ($group) => count($group['fields'] ?? []));
+
+                        return $fieldCount > 0 ? 'success' : 'gray';
+                    }),
+
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label('Bật/Tắt'),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('type')
-                    ->options([
-                        'wedding' => 'Wedding',
-                        'business' => 'Business',
-                    ]),
-                Tables\Filters\SelectFilter::make('tier')
-                    ->label('Gói dịch vụ')
-                    ->options(\App\Enums\WeddingTier::options()),
+                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+
+                Tables\Actions\Action::make('preset_reunion_hero')
+                    ->label('Preset Media')
+                    ->icon('heroicon-o-photo')
+                    ->color('warning')
+                    ->requiresConfirmation()
+                    ->modalHeading('Gán preset media cho mẫu họp lớp?')
+                    ->modalDescription('Hành động này sẽ ghi đè cấu hình media_schema hiện tại bằng preset gồm logo, share, hero 3 ảnh, video cover và video.')
+                    ->action(function (Template $record): void {
+                        $record->update([
+                            'media_schema' => self::defaultReunionMediaSchema(),
+                        ]);
+
+                        Notification::make()
+                            ->title('Đã gán preset media cho template')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -143,8 +363,9 @@ class TemplateResource extends Resource
                 Tables\Actions\Action::make('sync')
                     ->label('🔄 Sync Templates')
                     ->action(function () {
-                        \Artisan::call('templates:sync');
-                        \Filament\Notifications\Notification::make()
+                        Artisan::call('templates:sync');
+
+                        Notification::make()
                             ->title('Templates synced!')
                             ->success()
                             ->send();
@@ -155,6 +376,93 @@ class TemplateResource extends Resource
                     ->color('success'),
             ]);
     }
+
+    public static function defaultReunionMediaSchema(): array
+{
+    return [
+        'groups' => [
+            [
+                'name' => 'Ảnh nhận diện',
+                'fields' => [
+                    [
+                        'key' => 'logo',
+                        'label' => 'Logo',
+                        'type' => 'image',
+                        'collection' => 'logo',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                    [
+                        'key' => 'share',
+                        'label' => 'Ảnh chia sẻ Facebook/Zalo',
+                        'type' => 'image',
+                        'collection' => 'share',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Khu vực Hero',
+                'fields' => [
+                    [
+                        'key' => 'hero_background',
+                        'label' => 'Ảnh nền Hero',
+                        'type' => 'image',
+                        'collection' => 'hero_background',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                    [
+                        'key' => 'hero_photo_1',
+                        'label' => 'Ảnh Hero 1',
+                        'type' => 'image',
+                        'collection' => 'hero_photo_1',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                    [
+                        'key' => 'hero_photo_2',
+                        'label' => 'Ảnh Hero 2',
+                        'type' => 'image',
+                        'collection' => 'hero_photo_2',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                    [
+                        'key' => 'hero_photo_3',
+                        'label' => 'Ảnh Hero 3',
+                        'type' => 'image',
+                        'collection' => 'hero_photo_3',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'Video',
+                'fields' => [
+                    [
+                        'key' => 'video_cover',
+                        'label' => 'Ảnh bìa Video',
+                        'type' => 'image',
+                        'collection' => 'video_cover',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                    [
+                        'key' => 'video',
+                        'label' => 'Video Trailer MP4',
+                        'type' => 'video',
+                        'collection' => 'video',
+                        'max_size' => 102400,
+                        'single' => true,
+                    ],
+                ],
+            ],
+        ],
+    ];
+}
 
     public static function getRelations(): array
     {
