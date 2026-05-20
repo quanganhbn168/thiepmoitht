@@ -10,10 +10,31 @@ class EditReunion extends EditRecord
 {
     protected static string $resource = ReunionResource::class;
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        return $this->normalizeClassAlbums($data);
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return $this->normalizeClassAlbums($data);
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             Actions\DeleteAction::make(),
         ];
+    }
+
+    private function normalizeClassAlbums(array $data): array
+    {
+        if (isset($data['content']['class_albums'])) {
+            $data['content']['class_albums'] = ReunionResource::normalizeClassAlbumsForStorage(
+                $data['content']['class_albums']
+            );
+        }
+
+        return $data;
     }
 }

@@ -238,6 +238,8 @@ class ReunionController extends Controller
             $classDirs[$className] = array_values(array_unique($photos));
         }
 
+        uksort($classDirs, fn (string $first, string $second): int => strnatcasecmp($first, $second));
+
         return $classDirs;
     }
 
