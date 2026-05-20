@@ -3,8 +3,8 @@
 @extends('layouts.reunion')
 
 @section('title', $event->title)
-@section('meta_title', $event->title)
-@section('meta_description', trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string) ($event->description ?? '')), ENT_QUOTES | ENT_HTML5, 'UTF-8'))))
+@section('meta_title', $event->meta_title)
+@section('meta_description', $event->meta_description)
 @section('share_image', $event->share_image)
 @section('canonical_url', url('/' . $event->slug))
 

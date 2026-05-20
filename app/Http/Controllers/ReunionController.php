@@ -551,9 +551,16 @@ class ReunionController extends Controller
         );
 
         $openLetterText = $this->htmlToPlainText($openLetter);
+        $content = $this->contentArray($reunion);
+        $defaultTitle = 'Thư Mời Họp Lớp | ' . $eventName;
+        $defaultMetaDescription = $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo);
+        $metaTitle = $this->cleanMetaText(data_get($content, 'seo.title')) ?: $defaultTitle;
+        $metaDescription = $this->cleanMetaText(data_get($content, 'seo.description')) ?: $defaultMetaDescription;
 
         return (object) [
-            'title' => 'Thư Mời Họp Lớp | ' . $eventName,
+            'title' => $metaTitle,
+            'meta_title' => $metaTitle,
+            'meta_description' => $metaDescription,
             'slug' => $reunion->slug,
 
             // Có cả 2 tên để không vỡ Blade cũ.
@@ -595,6 +602,33 @@ class ReunionController extends Controller
             'countdown_time' => $eventInfo['datetime_iso'] ?? self::DEFAULT_EVENT_DATETIME,
             'time_countdown' => $eventInfo['datetime_iso'] ?? self::DEFAULT_EVENT_DATETIME,
         ];
+    }
+
+    private function makeDefaultMetaDescription(string $eventName, string $eventCourse, string $eventAnniversary, array $eventInfo): string
+    {
+        $eventDate = trim(
+            ($eventInfo['time'] ?? '') . ' ' .
+            ($eventInfo['day'] ?? '') . ' ' .
+            ($eventInfo['date'] ?? '')
+        );
+
+        return trim(
+            'Thư mời họp lớp ' . $eventCourse . ' - ' . $eventName . '. ' .
+            $eventAnniversary . ' ngày ra trường. ' .
+            $eventDate . '.',
+            " .\t\n\r\0\x0B"
+        ) . '.';
+    }
+
+    private function cleanMetaText(mixed $value): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '') {
+            return '';
+        }
+
+        return trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
     }
 
     private function mapTemplateMedia(Reunion $reunion): array

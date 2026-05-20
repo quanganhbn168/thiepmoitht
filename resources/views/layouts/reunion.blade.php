@@ -2,11 +2,13 @@
 <html lang="vi" class="scroll-smooth">
 <head>
     @php
-        $defaultTitle = data_get($event ?? null, 'title', 'Thư Mời Họp Lớp');
+        $defaultTitle = data_get($event ?? null, 'meta_title')
+            ?: data_get($event ?? null, 'title', 'Thư Mời Họp Lớp');
         $pageTitle = trim($__env->yieldContent('title', $defaultTitle));
         $metaTitle = trim($__env->yieldContent('meta_title', $pageTitle));
 
-        $defaultDescription = data_get($event ?? null, 'description', '');
+        $defaultDescription = data_get($event ?? null, 'meta_description')
+            ?: data_get($event ?? null, 'description', '');
         $defaultDescription = trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string) $defaultDescription), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
 
         if ($defaultDescription === '' && isset($schoolInfo)) {

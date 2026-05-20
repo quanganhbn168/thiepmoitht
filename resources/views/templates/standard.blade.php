@@ -2,10 +2,10 @@
 {{-- Template Type: reunion --}}
 @extends('layouts.reunion')
 
-@section('title', 'Thư Mời Họp Lớp | ' . $schoolInfo['name'])
-@section('meta_title', 'Thư Mời Họp Lớp - ' . $schoolInfo['name'])
-@section('meta_description', 'Thư mời họp lớp ' . $schoolInfo['course'] . ' - ' . $schoolInfo['name'] . '. ' . $eventInfo['time'] . ' ' . $eventInfo['day'] . ' ' . $eventInfo['date'] . '.')
-@section('share_image', $reunion->getShareUrl())
+@section('title', $event->title)
+@section('meta_title', $event->meta_title)
+@section('meta_description', $event->meta_description)
+@section('share_image', $event->share_image)
 @section('canonical_url', url('/' . $reunion->slug))
 
 @push('styles')

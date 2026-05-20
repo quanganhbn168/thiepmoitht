@@ -173,7 +173,7 @@ class TemplateResource extends Resource
                         return;
                     }
 
-                    $set('media_schema', $schema);
+                    $set('media_schema', TemplateResource::sanitizeMediaSchema($schema));
 
                     Notification::make()
                         ->title('Đã nạp JSON vào form')
@@ -188,7 +188,7 @@ class TemplateResource extends Resource
                 ->color('warning')
                 ->requiresConfirmation()
                 ->modalHeading('Nạp cấu hình media mặc định?')
-                ->modalDescription('Hành động này sẽ thay thế cấu hình hiện tại trong form bằng preset: logo, share, hero background, 3 ảnh hero, video cover và video.')
+                ->modalDescription('Hành động này sẽ thay thế cấu hình hiện tại trong form bằng preset: logo, hero background, 3 ảnh hero, video cover và video.')
                 ->action(function (Set $set): void {
                     $set('media_schema', TemplateResource::defaultReunionMediaSchema());
 
@@ -342,7 +342,7 @@ class TemplateResource extends Resource
                     ->color('warning')
                     ->requiresConfirmation()
                     ->modalHeading('Gán preset media cho mẫu họp lớp?')
-                    ->modalDescription('Hành động này sẽ ghi đè cấu hình media_schema hiện tại bằng preset gồm logo, share, hero 3 ảnh, video cover và video.')
+                    ->modalDescription('Hành động này sẽ ghi đè cấu hình media_schema hiện tại bằng preset gồm logo, hero 3 ảnh, video cover và video.')
                     ->action(function (Template $record): void {
                         $record->update([
                             'media_schema' => self::defaultReunionMediaSchema(),
@@ -389,14 +389,6 @@ class TemplateResource extends Resource
                         'label' => 'Logo',
                         'type' => 'image',
                         'collection' => 'logo',
-                        'max_size' => 10240,
-                        'single' => true,
-                    ],
-                    [
-                        'key' => 'share',
-                        'label' => 'Ảnh chia sẻ Facebook/Zalo',
-                        'type' => 'image',
-                        'collection' => 'share',
                         'max_size' => 10240,
                         'single' => true,
                     ],
@@ -463,6 +455,31 @@ class TemplateResource extends Resource
         ],
     ];
 }
+
+    public static function sanitizeMediaSchema(mixed $schema): array
+    {
+        if (!is_array($schema)) {
+            return [];
+        }
+
+        $groups = collect($schema['groups'] ?? [])
+            ->filter(fn ($group): bool => is_array($group))
+            ->map(function (array $group): array {
+                $group['fields'] = collect($group['fields'] ?? [])
+                    ->filter(fn ($field): bool => is_array($field))
+                    ->reject(fn (array $field): bool => ($field['collection'] ?? $field['key'] ?? null) === 'share')
+                    ->values()
+                    ->all();
+
+                return $group;
+            })
+            ->values()
+            ->all();
+
+        $schema['groups'] = $groups;
+
+        return $schema;
+    }
 
     public static function getRelations(): array
     {

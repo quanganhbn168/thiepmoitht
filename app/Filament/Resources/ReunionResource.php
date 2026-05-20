@@ -369,10 +369,6 @@ class ReunionResource extends Resource
                                     ->label('Hiển thị Loading')
                                     ->default(false),
 
-                                Toggle::make('can_share')
-                                    ->label('Cho phép chia sẻ')
-                                    ->default(true),
-
                                 Toggle::make('is_auto_approve_messages')
                                     ->label('Duyệt lời chúc tự động')
                                     ->default(false),
@@ -544,6 +540,50 @@ class ReunionResource extends Resource
                                     ->maxSize(20480)
                                     ->columnSpanFull(),
                             ]),
+
+                        Tab::make('SEO & Chia sẻ')
+                            ->schema([
+                                Placeholder::make('seo_share_note')
+                                    ->label('')
+                                    ->content(new HtmlString(
+                                        '<div style="padding: 12px; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+                                            <strong>SEO & chia sẻ:</strong><br>
+                                            Nội dung ở đây dùng cho title, mô tả và ảnh preview khi gửi link qua Zalo/Facebook.
+                                        </div>'
+                                    ))
+                                    ->columnSpanFull(),
+
+                                Toggle::make('can_share')
+                                    ->label('Cho phép chia sẻ')
+                                    ->default(true),
+
+                                TextInput::make('content.seo.title')
+                                    ->label('Tiêu đề SEO / Share')
+                                    ->placeholder('VD: Thư Mời Họp Lớp | Trường THPT Quế Võ 1')
+                                    ->maxLength(160)
+                                    ->helperText('Nếu bỏ trống, hệ thống tự lấy theo tên trường.'),
+
+                                Textarea::make('content.seo.description')
+                                    ->label('Mô tả SEO / Share')
+                                    ->placeholder('VD: Trân trọng kính mời thầy cô và các bạn về dự buổi họp lớp...')
+                                    ->rows(4)
+                                    ->maxLength(300)
+                                    ->helperText('Nên viết 120-180 ký tự để hiển thị đẹp khi chia sẻ.')
+                                    ->columnSpanFull(),
+
+                                SpatieMediaLibraryFileUpload::make('media_share')
+                                    ->collection('share')
+                                    ->disk('public')
+                                    ->label('Ảnh share Facebook/Zalo')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->maxFiles(1)
+                                    ->maxSize(10240)
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->helperText('Nên dùng ảnh tỷ lệ 1200x630 để preview đẹp khi gửi link.')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -589,6 +629,10 @@ class ReunionResource extends Resource
             $fieldComponents = [];
 
             foreach ($fields as $field) {
+                if (($field['collection'] ?? $field['key'] ?? null) === 'share') {
+                    continue;
+                }
+
                 $fieldComponent = self::makeMediaUploadField($field);
 
                 if ($fieldComponent) {
