@@ -3,16 +3,10 @@
 @extends('layouts.reunion')
 
 @section('title', 'Thư Mời Họp Lớp | ' . $schoolInfo['name'])
-
-@section('meta')
-    <meta name="description" content="Thư mời họp lớp {{ $schoolInfo['course'] }} - {{ $schoolInfo['name'] }}. {{ $eventInfo['time'] }} {{ $eventInfo['day'] }} {{ $eventInfo['date'] }}.">
-    <meta property="og:title" content="Thư Mời Họp Lớp - {{ $schoolInfo['name'] }}">
-    <meta property="og:description" content="{{ $schoolInfo['anniversary'] }} ngày ra trường - {{ $schoolInfo['course'] }}">
-    <meta property="og:image" content="{{ $reunion->getCoverUrl() }}">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url('/' . $reunion->slug) }}">
-    <meta property="og:locale" content="vi_VN">
-@endsection
+@section('meta_title', 'Thư Mời Họp Lớp - ' . $schoolInfo['name'])
+@section('meta_description', 'Thư mời họp lớp ' . $schoolInfo['course'] . ' - ' . $schoolInfo['name'] . '. ' . $eventInfo['time'] . ' ' . $eventInfo['day'] . ' ' . $eventInfo['date'] . '.')
+@section('share_image', $reunion->getShareUrl())
+@section('canonical_url', url('/' . $reunion->slug))
 
 @push('styles')
     <style>
