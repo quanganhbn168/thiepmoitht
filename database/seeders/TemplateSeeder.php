@@ -52,7 +52,7 @@ class TemplateSeeder extends Seeder
             [
                 'name' => 'Họp lớp Quế Võ 1 - Thầy cô',
                 'view_path' => 'templates.que-vo-1-teacher',
-                'type' => 'reunion',
+                'type' => 'reunion_teacher',
                 'required_tier' => 'standard',
                 'is_active' => true,
             ],
@@ -70,9 +70,16 @@ class TemplateSeeder extends Seeder
                 'required_tier' => 'standard',
                 'is_active' => true,
             ],
+            [
+                'name' => 'Thiệp thầy cô 001',
+                'view_path' => 'templates.templates_001_teacher',
+                'type' => 'reunion_teacher',
+                'required_tier' => 'standard',
+                'is_active' => true,
+            ],
         ];
 
-        \App\Models\Template::where('type', '!=', 'reunion')->delete();
+        \App\Models\Template::whereNotIn('type', ['reunion', 'reunion_teacher'])->delete();
 
         foreach ($templates as $template) {
             \App\Models\Template::updateOrCreate(

@@ -1,5 +1,5 @@
 {{-- Template Name: Họp lớp Quế Võ 1 - Thầy cô --}}
-{{-- Template Type: reunion --}}
+{{-- Template Type: reunion_teacher --}}
 @extends('layouts.reunion')
 
 @section('title', 'Thư Kính Mời Quý Thầy Cô - 25 Năm Trở Về Khung Trời Kỷ Niệm')

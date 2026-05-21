@@ -1814,7 +1814,6 @@
         <div class="hero-inner">
             <div class="hero-section_right">
                 <div class="hero-badge-002">
-                    <i class="fa fa-star"></i>
                     Ngày trở về đáng nhớ
                 </div>
 

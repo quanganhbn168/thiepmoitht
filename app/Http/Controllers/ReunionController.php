@@ -6,6 +6,7 @@ use App\Models\Reunion;
 use App\Models\ReunionMessage;
 use App\Models\ReunionRsvp;
 use App\Models\User;
+use App\Models\Template;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -46,13 +47,14 @@ class ReunionController extends Controller
 
     public function show(Reunion $reunion, Request $request)
     {
-        $template = $reunion->template;
+        return $this->renderReunionTemplate($reunion, $this->resolveReunionViewPath($reunion));
+    }
 
-        $viewPath = $template?->is_active && $template?->type === 'reunion'
-            ? $template->view_path
-            : self::DEFAULT_TEMPLATE_VIEW;
+    public function showTeacherInvitation(Reunion $reunion, Request $request)
+    {
+        abort_unless($this->hasTeacherInvitation($reunion), 404);
 
-        return $this->renderReunionTemplate($reunion, $viewPath);
+        return $this->renderReunionTemplate($reunion, $this->resolveTeacherInvitationViewPath($reunion), 'teacher');
     }
 
     public function showQueVoDemo()
@@ -109,7 +111,7 @@ class ReunionController extends Controller
         );
     }
 
-    private function renderReunionTemplate(Reunion $reunion, ?string $viewPath = null)
+    private function renderReunionTemplate(Reunion $reunion, ?string $viewPath = null, string $audience = 'default')
     {
         $viewPath = $this->resolveTemplateView($viewPath);
 
@@ -118,8 +120,8 @@ class ReunionController extends Controller
 
         $schoolInfo = $this->buildSchoolInfo($reunion, $content);
         $eventInfo = $this->buildEventInfo($reunion);
-        $openLetter = $this->getOpenLetter($reunion);
-        $greeting = data_get($content, 'invitation_greeting', 'Quý thầy cô & Các bạn');
+        $openLetter = $this->getOpenLetter($reunion, $content, $audience, $schoolInfo);
+        $greeting = $this->getInvitationGreeting($content, $audience);
         $timeline = $this->getTimeline($content);
         $organizers = $this->getOrganizers($content);
         $messages = $this->approvedMessages($reunion);
@@ -132,7 +134,9 @@ class ReunionController extends Controller
             timeline: $timeline,
             organizers: $organizers,
             messages: $messages,
-            classDirs: $classDirs
+            classDirs: $classDirs,
+            greeting: $greeting,
+            audience: $audience
         );
 
         $rsvpUrl = route('reunion.rsvp.store', ['reunion' => $reunion->slug]);
@@ -154,6 +158,34 @@ class ReunionController extends Controller
         ));
     }
 
+    private function resolveReunionViewPath(Reunion $reunion): string
+    {
+        $template = $reunion->template;
+
+        return $template?->is_active && $template?->type === 'reunion'
+            ? $template->view_path
+            : self::DEFAULT_TEMPLATE_VIEW;
+    }
+
+    private function resolveTeacherInvitationViewPath(Reunion $reunion): string
+    {
+        $templateId = (int) data_get($this->contentArray($reunion), 'teacher_invitation.template_id');
+
+        if ($templateId > 0) {
+            $template = Template::query()
+                ->whereKey($templateId)
+                ->where('type', 'reunion_teacher')
+                ->where('is_active', true)
+                ->first();
+
+            if ($template?->view_path) {
+                return $template->view_path;
+            }
+        }
+
+        return $this->resolveReunionViewPath($reunion);
+    }
+
     private function resolveTemplateView(?string $viewPath): string
     {
         return $viewPath && View::exists($viewPath)
@@ -164,6 +196,11 @@ class ReunionController extends Controller
     private function contentArray(Reunion $reunion): array
     {
         return is_array($reunion->content) ? $reunion->content : [];
+    }
+
+    private function hasTeacherInvitation(Reunion $reunion): bool
+    {
+        return (bool) data_get($this->contentArray($reunion), 'teacher_invitation.enabled', false);
     }
 
     private function approvedMessages(Reunion $reunion)
@@ -400,18 +437,52 @@ class ReunionController extends Controller
         return '<iframe loading="lazy" src="' . e($mapUrl) . '" width="100%" height="300" style="border:0;" allowfullscreen="" referrerpolicy="no-referrer-when-downgrade"></iframe>';
     }
 
-    private function getOpenLetter(Reunion $reunion): string
+    private function getInvitationGreeting(array $content, string $audience = 'default'): string
     {
-        return $reunion->getContentValue(
-            'open_letter',
-            '<p><strong>Trân trọng kính mời:</strong> Ban Giám hiệu các thời kỳ, quý thầy cô giáo cùng toàn thể các bạn cựu học sinh niên khóa 2003-2006.</p>
+        if ($audience === 'teacher') {
+            $greeting = trim((string) data_get($content, 'teacher_invitation.greeting'));
+
+            return $greeting !== '' ? $greeting : 'Kính gửi Quý thầy cô giáo';
+        }
+
+        $greeting = trim((string) data_get($content, 'invitation_greeting'));
+
+        return $greeting !== '' ? $greeting : 'Quý thầy cô & Các bạn';
+    }
+
+    private function getOpenLetter(Reunion $reunion, array $content, string $audience = 'default', array $schoolInfo = []): string
+    {
+        if ($audience === 'teacher') {
+            $openLetter = trim((string) data_get($content, 'teacher_invitation.open_letter'));
+
+            return $openLetter !== ''
+                ? $openLetter
+                : $this->defaultTeacherOpenLetter($schoolInfo);
+        }
+
+        $openLetter = trim((string) data_get($content, 'open_letter'));
+
+        return $openLetter !== ''
+            ? $openLetter
+            : '<p><strong>Trân trọng kính mời:</strong> Ban Giám hiệu các thời kỳ, quý thầy cô giáo cùng toàn thể các bạn cựu học sinh niên khóa 2003-2006.</p>
             <p>Thời gian trôi qua thật nhanh... mới ngày nào chúng ta còn là những cô cậu học trò hồn nhiên dưới mái trường THPT Quế Võ Số 2 thân yêu, vậy mà đã tròn 20 năm kể từ ngày chia tay.</p>
             <p>Hai mươi năm – mỗi người một hành trình, một ngả rẽ riêng. Nhưng chắc chắn rằng, trong sâu thẳm trái tim mỗi người vẫn luôn lưu giữ vẹn nguyên những ký ức của một thời áo trắng.</p>
             <p>✨ Nhân dịp kỷ niệm <strong>20 năm ngày ra trường</strong>, Ban liên lạc trân trọng kính mời Ban Giám hiệu cùng toàn thể các bạn khóa 2003–2006 trở về tham dự buổi hội ngộ đầy ý nghĩa.</p>
             <p>💛 Đây là dịp để chúng ta cùng gặp lại nhau, ôn lại những kỷ niệm đẹp và bày tỏ lòng tri ân sâu sắc tới quý thầy cô.</p>
             <p>💐 Rất mong sự hiện diện của quý thầy cô và toàn thể các bạn để buổi hội ngộ thêm trọn vẹn, ấm áp và đáng nhớ.</p>
-            <p><strong>Hẹn gặp lại – Thanh xuân của chúng ta!</strong></p>'
-        );
+            <p><strong>Hẹn gặp lại – Thanh xuân của chúng ta!</strong></p>';
+    }
+
+    private function defaultTeacherOpenLetter(array $schoolInfo): string
+    {
+        $schoolName = $schoolInfo['name'] ?? 'mái trường xưa';
+        $course = $schoolInfo['course'] ?? 'niên khóa';
+        $anniversary = $schoolInfo['anniversary'] ?? 'ngày hội ngộ';
+
+        return '<p><strong>Trân trọng kính mời:</strong> Quý thầy cô giáo đã từng giảng dạy, dìu dắt tập thể ' . e($course) . ' - ' . e($schoolName) . '.</p>'
+            . '<p>Nhân dịp ' . e($anniversary) . ' ngày ra trường, tập thể cựu học sinh kính mong được đón quý thầy cô về tham dự buổi hội ngộ, cùng ôn lại những kỷ niệm đẹp dưới mái trường xưa.</p>'
+            . '<p>Sự hiện diện của quý thầy cô là niềm vinh dự và là món quà ý nghĩa nhất đối với tập thể chúng em.</p>'
+            . '<p><strong>Ban liên lạc trân trọng kính mời.</strong></p>';
     }
 
     private function getTimeline(array $content): array
@@ -517,8 +588,11 @@ class ReunionController extends Controller
         array $timeline,
         array $organizers,
         $messages,
-        array $classDirs
+        array $classDirs,
+        string $greeting = 'Quý thầy cô & Các bạn',
+        string $audience = 'default'
     ): object {
+        $isTeacherInvitation = $audience === 'teacher';
         $logoUrl = $reunion->getLogoUrl();
         $shareUrl = $reunion->getShareUrl();
         $coverUrl = $reunion->getCoverUrl();
@@ -552,22 +626,46 @@ class ReunionController extends Controller
 
         $openLetterText = $this->htmlToPlainText($openLetter);
         $content = $this->contentArray($reunion);
-        $defaultTitle = 'Thư Mời Họp Lớp | ' . $eventName;
-        $defaultMetaDescription = $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo);
-        $metaTitle = $this->cleanMetaText(data_get($content, 'seo.title')) ?: $defaultTitle;
-        $metaDescription = $this->cleanMetaText(data_get($content, 'seo.description')) ?: $defaultMetaDescription;
+        $eventSlug = $isTeacherInvitation ? $reunion->slug . '/thay-co' : $reunion->slug;
+        $eventUrl = url('/' . $eventSlug);
+        $teacherInvitationUrl = $this->hasTeacherInvitation($reunion)
+            ? url('/' . $reunion->slug . '/thay-co')
+            : null;
+
+        $defaultTitle = $isTeacherInvitation
+            ? 'Thư Mời Thầy Cô | ' . $eventName
+            : 'Thư Mời Họp Lớp | ' . $eventName;
+
+        $defaultMetaDescription = $isTeacherInvitation
+            ? $this->makeDefaultTeacherMetaDescription($eventName, $eventCourse, $eventInfo)
+            : $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo);
+
+        $metaTitlePath = $isTeacherInvitation ? 'teacher_invitation.seo.title' : 'seo.title';
+        $metaDescriptionPath = $isTeacherInvitation ? 'teacher_invitation.seo.description' : 'seo.description';
+        $metaTitle = $this->cleanMetaText(data_get($content, $metaTitlePath)) ?: $defaultTitle;
+        $metaDescription = $this->cleanMetaText(data_get($content, $metaDescriptionPath)) ?: $defaultMetaDescription;
+        $description = $isTeacherInvitation
+            ? '<p>Trân trọng kính mời quý thầy cô tham dự ngày hội ngộ - ' . e($eventSlogan) . '</p>'
+            : '<p>' . e($eventAnniversary) . ' ngày ra trường - ' . e($eventSlogan) . '</p>';
 
         return (object) [
             'title' => $metaTitle,
             'meta_title' => $metaTitle,
             'meta_description' => $metaDescription,
-            'slug' => $reunion->slug,
+            'slug' => $eventSlug,
+            'url' => $eventUrl,
+            'canonical_url' => $eventUrl,
+            'main_url' => url('/' . $reunion->slug),
+            'teacher_url' => $teacherInvitationUrl,
+            'audience' => $audience,
+            'is_teacher_invitation' => $isTeacherInvitation,
 
             // Có cả 2 tên để không vỡ Blade cũ.
             'course_name' => $eventCourse,
             'cource_name' => $eventCourse,
 
             'school_name' => $eventName,
+            'greeting' => $greeting,
 
             // Media dùng chung.
             'logo' => $logoUrl,
@@ -588,7 +686,7 @@ class ReunionController extends Controller
             'media' => $templateMedia,
 
             'slogan' => $this->makeHeroSlogan($eventSlogan),
-            'description' => '<p>' . e($eventAnniversary) . ' ngày ra trường - ' . e($eventSlogan) . '</p>',
+            'description' => $description,
             'time' => $eventDateLabel,
             'address' => $eventAddress,
 
@@ -615,6 +713,21 @@ class ReunionController extends Controller
         return trim(
             'Thư mời họp lớp ' . $eventCourse . ' - ' . $eventName . '. ' .
             $eventAnniversary . ' ngày ra trường. ' .
+            $eventDate . '.',
+            " .\t\n\r\0\x0B"
+        ) . '.';
+    }
+
+    private function makeDefaultTeacherMetaDescription(string $eventName, string $eventCourse, array $eventInfo): string
+    {
+        $eventDate = trim(
+            ($eventInfo['time'] ?? '') . ' ' .
+            ($eventInfo['day'] ?? '') . ' ' .
+            ($eventInfo['date'] ?? '')
+        );
+
+        return trim(
+            'Trân trọng kính mời quý thầy cô tham dự buổi hội ngộ ' . $eventCourse . ' - ' . $eventName . '. ' .
             $eventDate . '.',
             " .\t\n\r\0\x0B"
         ) . '.';

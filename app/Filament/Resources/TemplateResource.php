@@ -23,6 +23,10 @@ class TemplateResource extends Resource
 {
     protected static ?string $model = Template::class;
 
+    public const TYPE_REUNION = 'reunion';
+
+    public const TYPE_REUNION_TEACHER = 'reunion_teacher';
+
     public static function getNavigationIcon(): ?string
     {
         return 'heroicon-o-rectangle-stack';
@@ -57,7 +61,15 @@ class TemplateResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('type', 'reunion');
+            ->whereIn('type', array_keys(self::templateTypeOptions()));
+    }
+
+    public static function templateTypeOptions(): array
+    {
+        return [
+            self::TYPE_REUNION => 'Thiệp họp lớp',
+            self::TYPE_REUNION_TEACHER => 'Thiệp thầy cô',
+        ];
     }
 
     public static function form(Form $form): Form
@@ -74,10 +86,18 @@ class TemplateResource extends Resource
                                     ->maxLength(255)
                                     ->columnSpanFull(),
 
+                                Forms\Components\Select::make('type')
+                                    ->label('Loại template')
+                                    ->options(self::templateTypeOptions())
+                                    ->default(self::TYPE_REUNION)
+                                    ->required()
+                                    ->live()
+                                    ->helperText('Chọn “Thiệp thầy cô” cho các mẫu chỉ dùng ở link /thay-co.'),
+
                                 Forms\Components\TextInput::make('view_path')
                                     ->label('Đường dẫn file Blade')
                                     ->required()
-                                    ->datalist(fn (): array => TemplateViewRegistry::paths('reunion'))
+                                    ->datalist(fn (Get $get): array => TemplateViewRegistry::paths($get('type') ?: self::TYPE_REUNION))
                                     ->maxLength(255)
                                     ->placeholder('templates.que-vo-2')
                                     ->rule(function () {
@@ -91,9 +111,6 @@ class TemplateResource extends Resource
                                     })
                                     ->helperText('VD: resources/views/templates/que-vo-2.blade.php => templates.que-vo-2')
                                     ->columnSpanFull(),
-
-                                Forms\Components\Hidden::make('type')
-                                    ->default('reunion'),
 
                                 Forms\Components\Hidden::make('required_tier')
                                     ->default('standard'),
@@ -304,6 +321,12 @@ class TemplateResource extends Resource
                     ->weight('bold')
                     ->description(fn (Template $record) => $record->view_path),
 
+                Tables\Columns\TextColumn::make('type')
+                    ->label('Loại')
+                    ->formatStateUsing(fn (?string $state): string => self::templateTypeOptions()[$state] ?? (string) $state)
+                    ->badge()
+                    ->color(fn (?string $state): string => $state === self::TYPE_REUNION_TEACHER ? 'warning' : 'info'),
+
                 Tables\Columns\TextColumn::make('media_schema')
                     ->label('Media')
                     ->formatStateUsing(function ($state): string {
@@ -331,7 +354,9 @@ class TemplateResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('Loại template')
+                    ->options(self::templateTypeOptions()),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

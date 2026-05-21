@@ -138,11 +138,11 @@ class ReunionResource extends Resource
                                 Select::make('template_id')
                                     ->label('Mẫu giao diện')
                                     ->relationship('template', 'name', fn ($query) => $query
-                                        ->where('type', 'reunion')
+                                        ->where('type', TemplateResource::TYPE_REUNION)
                                         ->where('is_active', true)
                                         ->orderBy('name'))
                                     ->default(fn () => Template::query()
-                                        ->where('type', 'reunion')
+                                        ->where('type', TemplateResource::TYPE_REUNION)
                                         ->where('view_path', self::DEFAULT_TEMPLATE_VIEW)
                                         ->value('id'))
                                     ->searchable()
@@ -185,6 +185,88 @@ class ReunionResource extends Resource
                                         'undo',
                                     ])
                                     ->default('<p><strong>Trân trọng kính mời:</strong> Ban Giám hiệu các thời kỳ, quý thầy cô giáo cùng toàn thể các bạn cựu học sinh niên khóa 2003-2006.</p><p>Thời gian trôi qua thật nhanh... mới ngày nào chúng ta còn là những cô cậu học trò hồn nhiên dưới mái trường THPT Quế Võ Số 2 thân yêu, vậy mà đã tròn 20 năm kể từ ngày chia tay.</p><p>Hai mươi năm – mỗi người một hành trình, một ngả rẽ riêng. Nhưng chắc chắn rằng, trong sâu thẳm trái tim mỗi người vẫn luôn lưu giữ vẹn nguyên những ký ức của một thời áo trắng.</p><p>✨ Nhân dịp kỷ niệm <strong>20 năm ngày ra trường</strong>, Ban liên lạc trân trọng kính mời Ban Giám hiệu, quý thầy cô giáo cùng toàn thể các bạn khóa 2003–2006 trở về tham dự buổi hội ngộ đầy ý nghĩa.</p><p>💛 Đây là dịp để chúng ta cùng gặp lại nhau, ôn lại những kỷ niệm đẹp và bày tỏ lòng tri ân sâu sắc tới Ban Giám hiệu cùng quý thầy cô.</p><p>💐 Rất mong sự hiện diện của quý thầy cô và toàn thể các bạn để buổi hội ngộ thêm trọn vẹn, ấm áp và đáng nhớ.</p><p><strong>Hẹn gặp lại – Thanh xuân của chúng ta!</strong></p>')
+                                    ->columnSpanFull(),
+
+                                Fieldset::make('Thiệp thầy cô giáo riêng')
+                                    ->schema([
+                                        Toggle::make('content.teacher_invitation.enabled')
+                                            ->label('Thiệp thầy cô giáo riêng')
+                                            ->helperText('Bật để có thêm link riêng /thay-co, vẫn dùng chung thời gian, địa điểm, media và lịch trình của thiệp này.')
+                                            ->live()
+                                            ->default(false)
+                                            ->columnSpanFull(),
+
+                                        Select::make('content.teacher_invitation.template_id')
+                                            ->label('Mẫu giao diện cho thầy cô')
+                                            ->options(fn (): array => Template::query()
+                                                ->where('type', TemplateResource::TYPE_REUNION_TEACHER)
+                                                ->where('is_active', true)
+                                                ->orderBy('name')
+                                                ->pluck('name', 'id')
+                                                ->all())
+                                            ->searchable()
+                                            ->preload()
+                                            ->required(fn (Get $get): bool => (bool) $get('content.teacher_invitation.enabled'))
+                                            ->helperText('Template này chỉ dùng cho link thầy cô, dữ liệu sự kiện vẫn lấy từ thiệp họp lớp hiện tại.')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.teacher_invitation.enabled'))
+                                            ->columnSpanFull(),
+
+                                        Placeholder::make('teacher_invitation_url')
+                                            ->label('Link thiệp thầy cô')
+                                            ->content(function (?Reunion $record): HtmlString {
+                                                if (!$record?->slug) {
+                                                    return new HtmlString('<span style="color: #64748b;">Lưu thiệp trước để lấy link thầy cô.</span>');
+                                                }
+
+                                                $url = url('/' . $record->slug . '/thay-co');
+
+                                                return new HtmlString(
+                                                    '<a href="' . e($url) . '" target="_blank" style="color: #2563eb; font-weight: 600;">' . e($url) . '</a>'
+                                                );
+                                            })
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.teacher_invitation.enabled'))
+                                            ->columnSpanFull(),
+
+                                        TextInput::make('content.teacher_invitation.greeting')
+                                            ->label('Lời xưng hô riêng')
+                                            ->placeholder('VD: Kính gửi Quý thầy cô giáo')
+                                            ->default('Kính gửi Quý thầy cô giáo')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.teacher_invitation.enabled'))
+                                            ->columnSpanFull(),
+
+                                        RichEditor::make('content.teacher_invitation.open_letter')
+                                            ->label('Thư ngỏ riêng cho thầy cô')
+                                            ->toolbarButtons([
+                                                'bold',
+                                                'italic',
+                                                'underline',
+                                                'strike',
+                                                'h2',
+                                                'h3',
+                                                'bulletList',
+                                                'orderedList',
+                                                'link',
+                                                'redo',
+                                                'undo',
+                                            ])
+                                            ->default('<p><strong>Trân trọng kính mời:</strong> Quý thầy cô giáo đã từng giảng dạy, dìu dắt tập thể chúng em.</p><p>Nhân dịp ngày hội ngộ, tập thể cựu học sinh kính mong được đón quý thầy cô về tham dự, cùng ôn lại những kỷ niệm đẹp dưới mái trường xưa.</p><p>Sự hiện diện của quý thầy cô là niềm vinh dự và là món quà ý nghĩa nhất đối với tập thể chúng em.</p><p><strong>Ban liên lạc trân trọng kính mời.</strong></p>')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.teacher_invitation.enabled'))
+                                            ->columnSpanFull(),
+
+                                        TextInput::make('content.teacher_invitation.seo.title')
+                                            ->label('Tiêu đề SEO / Share riêng')
+                                            ->placeholder('VD: Thư Mời Thầy Cô | Trường THPT Quế Võ 1')
+                                            ->maxLength(160)
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.teacher_invitation.enabled')),
+
+                                        Textarea::make('content.teacher_invitation.seo.description')
+                                            ->label('Mô tả SEO / Share riêng')
+                                            ->placeholder('VD: Trân trọng kính mời quý thầy cô về tham dự buổi hội ngộ...')
+                                            ->rows(3)
+                                            ->maxLength(300)
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.teacher_invitation.enabled')),
+                                    ])
+                                    ->columns(2)
                                     ->columnSpanFull(),
 
                                 Repeater::make('content.organizers')
@@ -810,6 +892,13 @@ class ReunionResource extends Resource
                     ->label('Xem Thiệp')
                     ->icon('heroicon-o-eye')
                     ->url(fn (Reunion $record): string => url('/' . $record->slug))
+                    ->openUrlInNewTab(),
+
+                Action::make('view_teacher_invitation')
+                    ->label('Xem Thiệp Thầy Cô')
+                    ->icon('heroicon-o-academic-cap')
+                    ->visible(fn (Reunion $record): bool => (bool) data_get($record->content, 'teacher_invitation.enabled', false))
+                    ->url(fn (Reunion $record): string => url('/' . $record->slug . '/thay-co'))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

@@ -7,6 +7,11 @@ use Illuminate\Support\Str;
 
 class TemplateViewRegistry
 {
+    private const SUPPORTED_TYPES = [
+        'reunion',
+        'reunion_teacher',
+    ];
+
     private const DIRECTORIES = [
         'templates',
     ];
@@ -26,7 +31,7 @@ class TemplateViewRegistry
                 $templates[$viewPath] = [
                     'name' => $metadata['name'],
                     'view_path' => $viewPath,
-                    'type' => 'reunion',
+                    'type' => $metadata['type'],
                     'required_tier' => 'standard',
                     'is_active' => true,
                 ];
@@ -84,13 +89,15 @@ class TemplateViewRegistry
     private static function extractMetadata(string $filePath, string $viewPath): ?array
     {
         $content = File::get($filePath);
+        $type = self::extractTemplateType($content);
 
-        if (! self::isReunionTemplate($content)) {
+        if (! $type) {
             return null;
         }
 
         return [
             'name' => self::extractTemplateName($content, $viewPath),
+            'type' => $type,
         ];
     }
 
@@ -107,12 +114,18 @@ class TemplateViewRegistry
             ->toString();
     }
 
-    private static function isReunionTemplate(string $content): bool
+    private static function extractTemplateType(string $content): ?string
     {
         if (preg_match('/{{--\s*(?:Template\s*)?Type:\s*([a-z_ -]+)\s*--}}/i', $content, $matches)) {
-            return strtolower(trim($matches[1])) === 'reunion';
+            $type = str_replace([' ', '-'], '_', strtolower(trim($matches[1])));
+
+            return in_array($type, self::SUPPORTED_TYPES, true) ? $type : null;
         }
 
-        return Str::contains($content, ["extends('layouts.reunion')", 'extends("layouts.reunion")']);
+        if (Str::contains($content, ["extends('layouts.reunion')", 'extends("layouts.reunion")'])) {
+            return 'reunion';
+        }
+
+        return null;
     }
 }
