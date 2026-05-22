@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Resources\ReunionRsvpResource;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -30,9 +29,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->homeUrl(fn (): string => auth()->user()?->isCustomer()
-                ? ReunionRsvpResource::getUrl()
-                : Dashboard::getUrl())
+            ->homeUrl(fn (): string => Dashboard::getUrl())
             ->favicon(asset('images/favicon.png'))
             ->colors([
                 'primary' => Color::Amber,
