@@ -1431,7 +1431,7 @@
                     <p class="course-name">{{ $event->course_name }} - {{ $event->school_name }}</p>
 
                     <div class="event-description">
-                        <p>Ban liên lạc trân trọng kính mời quý thầy cô về tham dự ngày hội ngộ, cùng gặp lại học trò cũ và ôn lại những kỷ niệm dưới mái trường thân thương.</p>
+                        <p>Ban liên lạc trân trọng kính mời Quý thầy cô về tham dự ngày hội ngộ, cùng gặp lại học trò cũ và ôn lại những kỷ niệm dưới mái trường thân thương.</p>
                     </div>
 
                     <div id="event-date-time" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl my-6">
