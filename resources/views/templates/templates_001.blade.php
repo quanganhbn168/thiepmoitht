@@ -1271,7 +1271,6 @@
                 <li><a href="#open-letter">Thư ngỏ</a></li>
                 <li><a href="#timeline">Chương trình</a></li>
                 <li><a href="#slide-class">Các lớp</a></li>
-                <li><a href="#soluubut">Sổ lưu bút</a></li>
                 <li><a href="#action">Xác nhận tham dự</a></li>
                 <li><a href="#contact">Liên hệ</a></li>
             </ul>
@@ -1505,113 +1504,6 @@
         <img src="{{ asset('images/phuong-2.png') }}" alt="hoa-phuong-2">
     </div>
     
-</section>
-
-    {{-- SỔ LƯU BÚT --}}
-<section id="soluubut" x-data="{ guestbookOpen: false }">
-    <div class="guestbook-wrap">
-        <div class="guestbook-head">
-            <div>
-                <h2 class="section-title">Sổ lưu bút</h2>
-                <p class="section-subtitle">Những dòng nhắn gửi trước ngày trở về, để câu chuyện thanh xuân được nối tiếp bằng chính giọng nói của bạn bè.</p>
-            </div>
-
-            <button class="btn btn-outline" type="button" @click="guestbookOpen = true">
-                <i class="fa fa-pen-nib"></i>
-                Viết lưu bút
-            </button>
-        </div>
-
-        <div class="guestbook-grid">
-            @forelse(($event->guestbooks ?? []) as $note)
-                <article class="guest-card">
-                    <div class="quote">“</div>
-                    <p>{{ $note->content }}</p>
-                    <strong>
-                        — {{ $note->name }}{{ !empty($note->class_name) ? ' - '.$note->class_name : '' }}
-                    </strong>
-                </article>
-            @empty
-                <article class="guest-card">
-                    <div class="quote">“</div>
-                    <p>Thật háo hức được gặp lại các bạn, mong ngày hội ngộ sẽ thật nhiều kỷ niệm đẹp!</p>
-                    <strong>— Nguyễn Văn Nam - 12A</strong>
-                </article>
-
-                <article class="guest-card">
-                    <div class="quote">“</div>
-                    <p>30 năm rồi mới có dịp quay lại mái trường xưa, cảm xúc thật khó tả.</p>
-                    <strong>— Phạm Thị Hương - 12B</strong>
-                </article>
-
-                <article class="guest-card">
-                    <div class="quote">“</div>
-                    <p>Hẹn gặp tất cả anh chị em khóa 88 trong ngày trở về đầy ý nghĩa này.</p>
-                    <strong>— Trần Quang Minh - 12C</strong>
-                </article>
-            @endforelse
-        </div>
-    </div>
-
-    {{-- Modal viết lưu bút --}}
-    <div
-        x-cloak
-        x-show="guestbookOpen"
-        x-transition.opacity
-        class="guestbook-modal"
-        @keydown.escape.window="guestbookOpen = false"
-    >
-        <div class="guestbook-modal-backdrop" @click="guestbookOpen = false"></div>
-
-        <div
-            class="guestbook-modal-card"
-            x-show="guestbookOpen"
-            x-transition.scale.origin.center
-            @click.stop
-        >
-            <button
-                type="button"
-                class="guestbook-modal-close"
-                @click="guestbookOpen = false"
-                aria-label="Đóng"
-            >
-                ×
-            </button>
-
-            <h3>Viết lưu bút</h3>
-            <p class="guestbook-modal-desc">
-                Gửi một lời nhắn yêu thương trước ngày trở về.
-            </p>
-
-            <form
-                action="{{ route('reunion.message.store', ['reunion' => $reunion->slug]) }}"
-                method="POST"
-                onsubmit="handleTemplate001Guestbook(event)"
-            >
-                @csrf
-
-                <div class="guestbook-form">
-                    <input
-                        name="name"
-                        type="text"
-                        placeholder="Họ và tên *"
-                        required
-                    >
-
-                    <textarea
-                        name="content"
-                        placeholder="Lời nhắn của bạn *"
-                        required
-                    ></textarea>
-
-                    <button class="btn btn-primary full" type="submit">
-                        <i class="fa fa-paper-plane"></i>
-                        Gửi lưu bút
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
 </section>
 
     {{-- RSVP + MAP + CONTACT --}}
