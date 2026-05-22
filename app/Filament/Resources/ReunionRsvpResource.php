@@ -8,7 +8,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Facades\Filament;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -26,15 +25,29 @@ class ReunionRsvpResource extends Resource
 
     protected static ?string $navigationGroup = 'Quản lý Thiệp';
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Khách xác nhận';
+    protected static ?string $navigationLabel = 'Xác nhận lời mời';
     protected static ?string $modelLabel = 'Khách xác nhận';
     protected static ?string $pluralModelLabel = 'Danh sách Khách xác nhận';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        return $user?->isSuperAdmin() || $user?->can('view_any_reunion::rsvp') || false;
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        return $user?->isSuperAdmin() || $user?->can('view_any_reunion::rsvp') || false;
+    }
 
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        if (!auth()->user()->hasRole('super_admin')) {
+        if (! auth()->user()?->isSuperAdmin()) {
             $query->whereHas('reunion', function (Builder $q) {
                 $q->where('user_id', auth()->id());
             });
@@ -49,7 +62,7 @@ class ReunionRsvpResource extends Resource
             ->schema([
                 Select::make('reunion_id')
                     ->relationship('reunion', 'slug', function (Builder $query) {
-                        if (!auth()->user()->hasRole('super_admin')) {
+                        if (! auth()->user()?->isSuperAdmin()) {
                             return $query->where('user_id', auth()->id());
                         }
                         return $query;

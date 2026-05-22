@@ -17,6 +17,8 @@ class User extends Authenticatable implements FilamentUser
 
     // Role constants
     const ROLE_SUPER_ADMIN = 'super_admin';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_AGENT = 'agent';
     const ROLE_CUSTOMER = 'customer';
     
     // Super admin email (hidden everywhere)

@@ -2,96 +2,81 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleSeeder extends Seeder
 {
+    private const RESOURCE_ACTIONS = [
+        'view_any',
+        'view',
+        'create',
+        'update',
+        'delete',
+        'delete_any',
+        'force_delete',
+        'force_delete_any',
+        'restore',
+        'restore_any',
+        'replicate',
+        'reorder',
+    ];
+
     public function run(): void
     {
-        // Reset cached roles and permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Create roles
-        $superAdmin = Role::create(['name' => User::ROLE_SUPER_ADMIN]);
-        $admin = Role::create(['name' => User::ROLE_ADMIN]);
-        $agent = Role::create(['name' => User::ROLE_AGENT]);
-        $customer = Role::create(['name' => User::ROLE_CUSTOMER]);
+        $superAdmin = Role::findOrCreate(User::ROLE_SUPER_ADMIN);
+        $admin = Role::findOrCreate(User::ROLE_ADMIN);
+        $agent = Role::findOrCreate(User::ROLE_AGENT);
+        $customer = Role::findOrCreate(User::ROLE_CUSTOMER);
 
-        // Create permissions
-        $permissions = [
-            // Reunion permissions
-            'view reunions',
-            'create reunions',
-            'edit reunions',
-            'delete reunions',
-            
-            // User permissions
-            'view users',
-            'create users',
-            'edit users',
-            'delete users',
-            
-            // Agent permissions
-            'view agents',
-            'create agents',
-            'edit agents',
-            'delete agents',
-            
-            // Template permissions
-            'view templates',
-            'manage templates',
-            
-            // RSVP/Wishes permissions
-            'view rsvps',
-            'manage rsvps',
-            'view wishes',
-            'manage wishes',
-            
-            // Service permissions
-            'view services',
-            'manage services',
-        ];
+        $reunionPermissions = $this->resourcePermissions('reunion');
+        $messagePermissions = $this->resourcePermissions('reunion::message');
+        $rsvpPermissions = $this->resourcePermissions('reunion::rsvp');
 
-        foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
-        }
+        collect()
+            ->merge($reunionPermissions)
+            ->merge($messagePermissions)
+            ->merge($rsvpPermissions)
+            ->unique()
+            ->each(fn (string $permission): Permission => Permission::findOrCreate($permission));
 
-        // Assign all permissions to super_admin
-        $superAdmin->givePermissionTo(Permission::all());
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Assign permissions to admin
-        $admin->givePermissionTo([
-            'view reunions', 'create reunions', 'edit reunions', 'delete reunions',
-            'view users', 'create users', 'edit users', 'delete users',
-            'view agents', 'create agents', 'edit agents', 'delete agents',
-            'view templates', 'manage templates',
-            'view rsvps', 'manage rsvps',
-            'view wishes', 'manage wishes',
-            'view services', 'manage services',
+        $customer->syncPermissions([
+            ...$messagePermissions,
+            ...$rsvpPermissions,
         ]);
 
-        // Assign permissions to agent
-        $agent->givePermissionTo([
-            'view reunions', 'create reunions', 'edit reunions',
-            'view users', 'create users', 'edit users',  // Their customers
-            'view rsvps', 'manage rsvps',
-            'view wishes', 'manage wishes',
+        $agent->syncPermissions([
+            ...$reunionPermissions,
+            ...$messagePermissions,
+            ...$rsvpPermissions,
         ]);
 
-        // Assign permissions to customer
-        $customer->givePermissionTo([
-            'view reunions', 'create reunions', 'edit reunions',
-            'view rsvps',
-            'view wishes',
-        ]);
+        $admin->syncPermissions(Permission::all());
+        $superAdmin->syncPermissions(Permission::all());
 
-        // Assign super_admin role to the god user
-        $godUser = User::where('email', User::SUPER_ADMIN_EMAIL)->first();
-        if ($godUser) {
-            $godUser->assignRole(User::ROLE_SUPER_ADMIN);
-        }
+        User::where('email', User::SUPER_ADMIN_EMAIL)->first()?->assignRole(User::ROLE_SUPER_ADMIN);
+
+        User::query()
+            ->where('email', '!=', User::SUPER_ADMIN_EMAIL)
+            ->where('role', User::ROLE_CUSTOMER)
+            ->get()
+            ->each(fn (User $user) => $user->syncRoles([User::ROLE_CUSTOMER]));
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+    }
+
+    private function resourcePermissions(string $resource): array
+    {
+        return array_map(
+            fn (string $action): string => "{$action}_{$resource}",
+            self::RESOURCE_ACTIONS,
+        );
     }
 }

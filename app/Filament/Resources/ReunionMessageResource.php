@@ -8,7 +8,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Facades\Filament;
 
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -32,11 +31,25 @@ class ReunionMessageResource extends Resource
     protected static ?string $modelLabel = 'Lời chúc';
     protected static ?string $pluralModelLabel = 'Sổ lưu bút';
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = auth()->user();
+
+        return $user?->isSuperAdmin() || $user?->can('view_any_reunion::message') || false;
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        return $user?->isSuperAdmin() || $user?->can('view_any_reunion::message') || false;
+    }
+
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
-        if (!auth()->user()->hasRole('super_admin')) {
+        if (! auth()->user()?->isSuperAdmin()) {
             $query->whereHas('reunion', function (Builder $q) {
                 $q->where('user_id', auth()->id());
             });
@@ -51,7 +64,7 @@ class ReunionMessageResource extends Resource
             ->schema([
                 Select::make('reunion_id')
                     ->relationship('reunion', 'slug', function (Builder $query) {
-                        if (!auth()->user()->hasRole('super_admin')) {
+                        if (! auth()->user()?->isSuperAdmin()) {
                             return $query->where('user_id', auth()->id());
                         }
                         return $query;

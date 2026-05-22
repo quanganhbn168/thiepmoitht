@@ -49,13 +49,14 @@ class TemplateResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Filament::getCurrentPanel()->getId() === 'admin';
+        return Filament::getCurrentPanel()->getId() === 'admin'
+            && (auth()->user()?->isSuperAdmin() || auth()->user()?->isAdmin());
     }
 
     public static function canAccess(): bool
     {
         return Filament::getCurrentPanel()->getId() === 'admin'
-            && (auth()->user()->isSuperAdmin() || auth()->user()->isAdmin());
+            && (auth()->user()?->isSuperAdmin() || auth()->user()?->isAdmin());
     }
 
     public static function getEloquentQuery(): Builder
