@@ -1565,7 +1565,94 @@
         <img src="{{ asset('images/pen.png') }}" alt="Hoa bằng lăng">
     </div>
 </section>
+{{-- CÁC LỚP --}}
+<section id="slide-class" class="relative overflow-hidden">
+    <div class="slide-class-inner">
+        <div class="class-heading">
+            <span>Album kỷ niệm</span>
+            <h2 class="section-title">Các lớp</h2>
+            <p>Cùng nhìn lại những gương mặt thân quen của một thời áo trắng.</p>
+        </div>
 
+        <div class="class-swiper-wrap">
+            <div class="swiper class-swiper">
+                <div class="swiper-wrapper">
+                    @forelse(($event->classes ?? []) as $class)
+                        @php
+                            $classPhotos = collect($class->photos ?? [])->filter()->values();
+                            $firstClassPhoto = $classPhotos->first();
+                            $classGalleryId = 'class-gallery-' . \Illuminate\Support\Str::slug($class->name);
+                        @endphp
+                        <div class="swiper-slide">
+                            <article class="class-card class-card-slider">
+                                <a href="{{ $firstClassPhoto ?: '#' }}"
+    class="class-card-image {{ $firstClassPhoto ? 'js-class-gallery' : '' }}"
+    @if($firstClassPhoto)
+        data-gallery="{{ $classGalleryId }}"
+        data-title="{{ $class->name }} - Ảnh 1"
+    @endif>
+    <img src="{{ $class->thumbnail }}" alt="{{ $class->name }}">
+</a>
+
+                                @foreach($classPhotos->slice(1)->values() as $photoIndex => $photo)
+    <a href="{{ $photo }}"
+        class="js-class-gallery"
+        data-gallery="{{ $classGalleryId }}"
+        data-title="{{ $class->name }} - Ảnh {{ $photoIndex + 2 }}"
+        style="display: none;"></a>
+@endforeach
+
+                                <div class="class-card-body">
+                                    <h4>{{ $class->name }}</h4>
+                                    @if($firstClassPhoto)
+                                        <button type="button" data-class-gallery-trigger>Xem ảnh lớp →</button>
+                                    @else
+                                        <span>Đang cập nhật ảnh</span>
+                                    @endif
+                                </div>
+                            </article>
+                        </div>
+                    @empty
+                        @foreach(['12A','12B','12C','12D','12E','12G','12H'] as $className)
+                            <div class="swiper-slide">
+                                <article class="class-card class-card-slider">
+                                    <a href="#" class="class-card-image">
+                                        <img src="{{ asset('images/demo/class-card.jpg') }}" alt="Lớp {{ $className }}">
+                                    </a>
+
+                                    <div class="class-card-body">
+                                        <h4>{{ $className }}</h4>
+                                        <a href="#">Xem ảnh lớp →</a>
+                                    </div>
+                                </article>
+                            </div>
+                        @endforeach
+                    @endforelse
+                </div>
+
+                <div class="class-swiper-controls">
+                    <button class="class-swiper-prev" type="button" aria-label="Lớp trước">
+                        <i class="fa fa-chevron-left"></i>
+                    </button>
+
+                    <div class="class-swiper-pagination"></div>
+
+                    <button class="class-swiper-next" type="button" aria-label="Lớp tiếp theo">
+                        <i class="fa fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="corner-flower corner-flower-top-left">
+        <img src="{{ asset('images/phuong-1.png') }}" alt="hoa-phuong-1">
+    </div>
+    <div class="corner-flower corner-flower-bottom-right">
+        <img src="{{ asset('images/phuong-2.png') }}" alt="hoa-phuong-2">
+    </div>
+    
+</section>
     {{-- RSVP + MAP + CONTACT --}}
     <section id="action" class="overflow-hidden relative">
         <div class="action-grid">
