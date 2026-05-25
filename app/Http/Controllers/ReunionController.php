@@ -619,7 +619,6 @@ class ReunionController extends Controller
         );
 
         $eventAddress = trim(
-            ($eventInfo['location_name'] ?? '') . ' - ' .
             ($eventInfo['location_address'] ?? ''),
             ' -'
         );
