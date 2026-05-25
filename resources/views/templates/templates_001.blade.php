@@ -1535,7 +1535,7 @@
             <div id="event-map" class="action-card">
                 <h3>Địa điểm tổ chức</h3>
                 <p class="action-card-desc">Lưu lại địa chỉ và mở bản đồ trước khi di chuyển để tới điểm hẹn đúng giờ.</p>
-                <p><strong>{{ $event->school_name }}</strong><br>{{ $event->address }}</p>
+                <p><strong>{{ $event->school_name }}</strong></p>
                 <div class="map-box">
                     {!! $event->map_embed ?? '<iframe loading="lazy" src="https://www.google.com/maps?q=Tr%C6%B0%E1%BB%9Dng%20THPT%20Qu%E1%BA%BF%20V%C3%B5%201&output=embed"></iframe>' !!}
                 </div>
