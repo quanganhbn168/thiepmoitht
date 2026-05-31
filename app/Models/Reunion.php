@@ -203,6 +203,7 @@ class Reunion extends Model implements HasMedia
             'cover',
             'hero',
             'hero_background',
+            'hero_image_01',
             'hero_photo_1',
             'hero_photo_2',
             'hero_photo_3',
@@ -242,6 +243,7 @@ class Reunion extends Model implements HasMedia
             ->performOnCollections(
                 'hero',
                 'hero_background',
+                'hero_image_01',
                 'hero_photo_1',
                 'hero_photo_2',
                 'hero_photo_3',
@@ -261,6 +263,7 @@ class Reunion extends Model implements HasMedia
                 'cover',
                 'hero',
                 'hero_background',
+                'hero_image_01',
                 'hero_photo_1',
                 'hero_photo_2',
                 'hero_photo_3',

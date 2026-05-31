@@ -419,122 +419,39 @@
         gap: 12px;
     }
 
-    .hero-video-card-003 {
-        position: absolute;
-        right: 34px;
-        bottom: 76px;
-        z-index: 4;
-        width: min(320px, calc(100% - 68px));
-        display: grid;
-        grid-template-columns: 92px 1fr;
-        gap: 12px;
-        align-items: center;
-        padding: 10px;
-        color: #fff;
-        background: rgba(24, 33, 38, .86);
-        border: 1px solid rgba(255, 255, 255, .18);
-        border-radius: var(--radius);
-        box-shadow: 0 18px 42px rgba(24, 33, 38, .28);
-        backdrop-filter: blur(10px);
-    }
-
-    .hero-video-card-003 img {
-        width: 92px;
-        height: 68px;
-        object-fit: cover;
-        border-radius: 6px;
-    }
-
-    .hero-video-card-003 span {
-        display: block;
-        color: rgba(255,255,255,.66);
-        font-size: 12px;
-        font-weight: 800;
-    }
-
-    .hero-video-card-003 strong {
-        display: block;
-        margin-top: 4px;
-        color: #fff;
-        line-height: 1.35;
-    }
-
-    .hero-video-card-003 i {
-        margin-left: 8px;
-        color: var(--gold);
-    }
-
     .hero-visual-003 {
         position: relative;
         min-width: 0;
-        padding: 16px;
+        display: grid;
+        gap: 12px;
+        min-height: 260px;
+        padding: 18px;
         background: rgba(255, 255, 255, .58);
         border: 1px solid rgba(49, 88, 75, .18);
         border-radius: var(--radius);
         box-shadow: var(--shadow);
     }
 
-    .hero-board-003 {
-        display: grid;
-        grid-template-columns: 1.1fr .9fr;
-        gap: 12px;
-        min-height: 580px;
-    }
-
-    .hero-photo-003 {
+    .hero-image-01-003 {
         position: relative;
+        min-height: clamp(260px, 34vw, 430px);
+        margin: 0;
         overflow: hidden;
-        border-radius: var(--radius);
         background: #d6d0c6;
+        border-radius: var(--radius);
+        box-shadow: 0 18px 40px rgba(24, 33, 38, .12);
     }
 
-    .hero-photo-003 img {
+    .hero-image-01-003 img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        filter: saturate(1.03) contrast(1.02);
-    }
-
-    .hero-photo-main-003 {
-        min-height: 580px;
-    }
-
-    .hero-photo-side-003 {
-        display: grid;
-        grid-template-rows: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .hero-caption-003 {
-        position: absolute;
-        left: 14px;
-        right: 14px;
-        bottom: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 12px 14px;
-        color: #fff;
-        background: rgba(31, 60, 53, .86);
-        border-radius: var(--radius);
-        backdrop-filter: blur(10px);
-    }
-
-    .hero-caption-003 span {
-        font-weight: 800;
-        line-height: 1.35;
-    }
-
-    .hero-caption-003 i {
-        color: var(--gold);
+        filter: saturate(1.04) contrast(1.02);
     }
 
     .count-down {
-        position: absolute;
-        left: 34px;
-        right: 34px;
-        bottom: -34px;
+        position: relative;
+        width: 100%;
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 10px;
@@ -1282,40 +1199,6 @@
             grid-template-columns: 1fr;
         }
 
-        .hero-board-003 {
-            min-height: auto;
-            grid-template-columns: 1fr;
-        }
-
-        .hero-photo-main-003 {
-            min-height: 420px;
-        }
-
-        .hero-photo-side-003 {
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto;
-        }
-
-        .hero-photo-side-003 .hero-photo-003 {
-            min-height: 190px;
-        }
-
-        .count-down {
-            position: relative;
-            left: auto;
-            right: auto;
-            bottom: auto;
-            margin-top: 12px;
-        }
-
-        .hero-video-card-003 {
-            position: relative;
-            right: auto;
-            bottom: auto;
-            width: 100%;
-            margin-top: 12px;
-        }
-
         .program-list li {
             grid-template-columns: 1fr;
         }
@@ -1340,14 +1223,6 @@
         #slogan h3,
         #slogan strong {
             font-size: clamp(48px, 16vw, 72px);
-        }
-
-        .hero-photo-main-003 {
-            min-height: 330px;
-        }
-
-        .hero-photo-side-003 {
-            grid-template-columns: 1fr;
         }
 
         .count-down {
@@ -1383,11 +1258,8 @@
 @section('content')
 @php
     $heroImage = $event->hero_image ?? $event->background ?? asset('images/anh-bia.jpg');
-    $heroPhotoOne = $event->hero_photo_1 ?? $heroImage;
-    $heroPhotoTwo = $event->hero_photo_2 ?? asset('images/20-nam-tro-ve-thanh-xuan.png');
-    $heroPhotoThree = $event->hero_photo_3 ?? asset('images/save-the-date.png');
+    $heroImage01 = data_get($event->media ?? [], 'hero_image_01') ?: $heroImage;
     $videoUrl = $event->video_url ?? null;
-    $videoCover = !empty($event->video_cover) ? $event->video_cover : $heroPhotoThree;
     $albumPhotos = collect($event->album_photos ?? [])->filter(fn ($photo) => !empty($photo->url))->take(100);
     $hasMasonryPhotos = $albumPhotos->isNotEmpty();
     $useMasonryAlbum = (bool) ($event->album_masonry_enabled ?? true);
@@ -1480,34 +1352,9 @@
                 </div>
 
                 <div class="hero-visual-003">
-                    <div class="hero-board-003">
-                        <figure class="hero-photo-003 hero-photo-main-003">
-                            <img src="{{ $heroImage }}" alt="{{ $event->title }}">
-                            <figcaption class="hero-caption-003">
-                                <span>{{ $event->course_name }}</span>
-                                <i class="fa fa-camera-retro"></i>
-                            </figcaption>
-                        </figure>
-
-                        <div class="hero-photo-side-003">
-                            <figure class="hero-photo-003">
-                                <img src="{{ $heroPhotoOne }}" alt="Ảnh kỷ niệm {{ $event->title }}">
-                            </figure>
-                            <figure class="hero-photo-003">
-                                <img src="{{ $heroPhotoTwo }}" alt="Kỷ niệm ngày trở về">
-                            </figure>
-                        </div>
-                    </div>
-
-                    @if($videoUrl)
-                        <a class="hero-video-card-003 glightbox-video" href="{{ $videoUrl }}">
-                            <img src="{{ $videoCover }}" alt="Video kỷ niệm {{ $event->title }}">
-                            <span>
-                                Video kỷ niệm
-                                <strong>Xem khoảnh khắc ngày trở về <i class="fa fa-circle-play"></i></strong>
-                            </span>
-                        </a>
-                    @endif
+                    <figure class="hero-image-01-003">
+                        <img src="{{ $heroImage01 }}" alt="Ảnh kỷ niệm {{ $event->title }}">
+                    </figure>
 
                     <div class="count-down">
                         <p><span id="day">00</span><span>Ngày</span></p>

@@ -432,6 +432,14 @@ class TemplateResource extends Resource
                         'single' => true,
                     ],
                     [
+                        'key' => 'hero_image_01',
+                        'label' => 'Ảnh Hero đơn',
+                        'type' => 'image',
+                        'collection' => 'hero_image_01',
+                        'max_size' => 10240,
+                        'single' => true,
+                    ],
+                    [
                         'key' => 'hero_photo_1',
                         'label' => 'Ảnh Hero 1',
                         'type' => 'image',
