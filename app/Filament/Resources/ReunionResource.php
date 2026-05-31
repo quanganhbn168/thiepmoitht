@@ -474,6 +474,12 @@ class ReunionResource extends Resource
                                     ))
                                     ->columnSpanFull(),
 
+                                Toggle::make('content.album_masonry_enabled')
+                                    ->label('Hiển thị album dạng Masonry')
+                                    ->helperText('Dùng cho trường hợp ảnh không chia theo lớp. Template hỗ trợ sẽ mặc định mở bố cục masonry, tối đa 100 ảnh.')
+                                    ->default(true)
+                                    ->columnSpanFull(),
+
                                 Actions::make([
                                     FormAction::make('importClassAlbumZip')
                                         ->label('Import ZIP album')
@@ -590,7 +596,7 @@ class ReunionResource extends Resource
                                             ->multiple()
                                             ->appendFiles()
                                             ->reorderable()
-                                            ->maxFiles(50)
+                                            ->maxFiles(100)
                                             ->image()
                                             ->imagePreviewHeight('140')
                                             ->panelLayout('grid')
@@ -600,7 +606,7 @@ class ReunionResource extends Resource
                                                 'image/webp',
                                             ])
                                             ->maxSize(10240)
-                                            ->helperText('Tối đa 50 ảnh cho mỗi lớp.')
+                                            ->helperText('Tối đa 100 ảnh cho mỗi album.')
                                             ->columnSpanFull(),
                                     ])
                                     ->columns(2)

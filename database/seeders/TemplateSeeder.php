@@ -71,6 +71,20 @@ class TemplateSeeder extends Seeder
                 'is_active' => true,
             ],
             [
+                'name' => 'Họp lớp 002',
+                'view_path' => 'templates.templates_002',
+                'type' => 'reunion',
+                'required_tier' => 'standard',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Họp lớp 003',
+                'view_path' => 'templates.templates_003',
+                'type' => 'reunion',
+                'required_tier' => 'standard',
+                'is_active' => true,
+            ],
+            [
                 'name' => 'Thiệp thầy cô 001',
                 'view_path' => 'templates.templates_001_teacher',
                 'type' => 'reunion_teacher',

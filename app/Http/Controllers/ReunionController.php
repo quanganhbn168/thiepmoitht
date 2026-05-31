@@ -692,6 +692,8 @@ class ReunionController extends Controller
             'thungo' => $openLetterText,
             'programs' => $this->mapTimelineForTemplate($timeline),
             'classes' => $this->mapClassesForTemplate($classDirs, $heroUrl),
+            'album_photos' => $this->mapAlbumPhotosForTemplate($reunion, $classDirs),
+            'album_masonry_enabled' => (bool) data_get($content, 'album_masonry_enabled', true),
             'guestbooks' => $this->mapMessagesForTemplate($messages),
             'contacts' => $this->mapOrganizersForTemplate($organizers),
 
@@ -818,6 +820,54 @@ class ReunionController extends Controller
                 ];
             })
             ->values();
+    }
+
+    private function mapAlbumPhotosForTemplate(Reunion $reunion, array $classDirs)
+    {
+        $photos = collect();
+
+        foreach ($reunion->getMedia('gallery') as $index => $media) {
+            if (!Str::startsWith((string) $media->mime_type, 'image/')) {
+                continue;
+            }
+
+            $url = $media->getUrl();
+
+            if (!$url) {
+                continue;
+            }
+
+            $photos->push((object) [
+                'url' => $url,
+                'thumb' => $url,
+                'title' => $media->name ?: 'Ảnh kỷ niệm ' . ($index + 1),
+                'source' => 'gallery',
+            ]);
+        }
+
+        foreach ($classDirs as $className => $classPhotos) {
+            foreach ((array) $classPhotos as $index => $photo) {
+                $photo = trim((string) $photo);
+
+                if ($photo === '') {
+                    continue;
+                }
+
+                $photos->push((object) [
+                    'url' => $photo,
+                    'thumb' => $photo,
+                    'title' => trim((string) $className) !== ''
+                        ? $className . ' - Ảnh ' . ($index + 1)
+                        : 'Ảnh kỷ niệm ' . ($index + 1),
+                    'source' => 'class_album',
+                ]);
+            }
+        }
+
+        return $photos
+            ->unique('url')
+            ->values()
+            ->take(100);
     }
 
     private function mapMessagesForTemplate($messages)
