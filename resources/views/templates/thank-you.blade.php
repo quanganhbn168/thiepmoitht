@@ -107,8 +107,7 @@
                             </div>
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-[0.18em] text-stone-500">Địa điểm</p>
-                                <p class="mt-1 font-semibold">{{ $eventInfo['location_name'] ?? $event->school_name }}</p>
-                                <p class="mt-1 text-sm leading-6 text-stone-600">{{ $event->address ?? ($eventInfo['location_address'] ?? '') }}</p>
+                                <p class="mt-1 text-sm font-semibold text-stone-600">{{ $event->address ?? ($eventInfo['location_address'] ?? '') }}</p>
                             </div>
                         </div>
                     </div>
