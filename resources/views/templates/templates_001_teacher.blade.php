@@ -1408,7 +1408,7 @@
 
         <nav id="menu" class="reunion-menu" data-reunion-menu aria-label="Menu chính">
             <ul>
-                <li><a href="#open-letter">Thư ngỏ</a></li>
+                <li><a href="#open-letter">{{ $event->open_letter_nav_label ?? 'Thư ngỏ' }}</a></li>
                 <li><a href="#timeline">Chương trình</a></li>
                 <li><a href="#action">Xác nhận tham dự</a></li>
                 <li><a href="#contact">Liên hệ</a></li>
@@ -1486,7 +1486,7 @@
 
     <div class="intro-program-grid open-letter-grid">
         <article id="open-letter">
-            <h3>Thư ngỏ</h3>
+            <h3>{{ $event->open_letter_title ?? 'Thư ngỏ' }}</h3>
             @if(!empty($event->greeting))
         <div class="event-greeting">
             <strong>{{ $event->greeting }}</strong>

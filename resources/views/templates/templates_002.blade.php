@@ -1797,7 +1797,7 @@
 
         <nav id="menu" class="reunion-menu" data-reunion-menu aria-label="Menu chính">
             <ul>
-                <li><a href="#open-letter">Thư ngỏ</a></li>
+                <li><a href="#open-letter">{{ $event->open_letter_nav_label ?? 'Thư ngỏ' }}</a></li>
                 <li><a href="#timeline">Chương trình</a></li>
                 <li><a href="#slide-class">Các lớp</a></li>
                 <li><a href="#soluubut">Sổ lưu bút</a></li>
@@ -1902,9 +1902,9 @@
 
         <div class="open-letter-shell-002">
             <article id="open-letter">
-                <h3>Thư ngỏ</h3>
+                <h3>{{ $event->open_letter_title ?? 'Thư ngỏ' }}</h3>
                 <div class="event-thu-ngo">{!! nl2br(e($event->thungo)) !!}</div>
-                <div class="letter-sign-002">Ban tổ chức trân trọng kính mời</div>
+                <div class="letter-sign-002">{{ $event->open_letter_sign ?? 'Ban tổ chức trân trọng kính mời' }}</div>
             </article>
         </div>
 

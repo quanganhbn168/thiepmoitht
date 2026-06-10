@@ -269,6 +269,141 @@ class ReunionResource extends Resource
                                     ->columns(2)
                                     ->columnSpanFull(),
 
+                                Fieldset::make('Thư cảm ơn')
+                                    ->schema([
+                                        Toggle::make('content.thank_you_letter.enabled')
+                                            ->label('Bật thư cảm ơn')
+                                            ->helperText('Bật để có thêm link riêng /thu-cam-on, dùng chung thời gian, địa điểm, media và lịch trình của thiệp này.')
+                                            ->live()
+                                            ->afterStateUpdated(function (Set $set, Get $get, bool $state): void {
+                                                if (!$state) {
+                                                    return;
+                                                }
+
+                                                if (blank($get('content.thank_you_letter.greeting'))) {
+                                                    $set('content.thank_you_letter.greeting', 'Kính gửi Quý mạnh thường quân');
+                                                }
+
+                                                if (blank($get('content.thank_you_letter.open_letter'))) {
+                                                    $set('content.thank_you_letter.open_letter', '<p>Ban tổ chức chương trình hội ngộ xin được gửi lời cảm ơn chân thành tới Quý mạnh thường quân đã quan tâm, đồng hành và sẻ chia cùng tập thể cựu học sinh.</p><p>Sự ủng hộ quý báu của Quý vị không chỉ góp thêm nguồn lực để chương trình được chuẩn bị chu đáo, mà còn lan tỏa tinh thần gắn kết, nghĩa tình và trách nhiệm với mái trường xưa.</p><p>Nhờ những tấm lòng ấy, ngày trở về của thầy cô và các thế hệ học trò có thêm nhiều khoảnh khắc ấm áp, trọn vẹn và đáng nhớ.</p><p>Ban tổ chức trân trọng ghi nhận sự đồng hành của Quý vị, kính chúc Quý vị cùng gia đình luôn mạnh khỏe, bình an, hạnh phúc và thành công.</p><p><strong>Xin trân trọng cảm ơn.</strong></p>');
+                                                }
+
+                                                if (blank($get('content.thank_you_letter.seo.title'))) {
+                                                    $set('content.thank_you_letter.seo.title', 'Thư Cảm Ơn | Chương trình hội ngộ');
+                                                }
+
+                                                if (blank($get('content.thank_you_letter.seo.description'))) {
+                                                    $set('content.thank_you_letter.seo.description', 'Ban tổ chức trân trọng cảm ơn Quý mạnh thường quân đã đồng hành, ủng hộ và sẻ chia cùng chương trình hội ngộ.');
+                                                }
+
+                                                if (blank($get('content.thank_you_letter.recipients'))) {
+                                                    $set('content.thank_you_letter.recipients', [
+                                                        [
+                                                            'name' => '',
+                                                            'role' => 'Mạnh thường quân',
+                                                            'note' => 'Đã đồng hành, ủng hộ và sẻ chia cùng chương trình.',
+                                                            'code' => '',
+                                                        ],
+                                                    ]);
+                                                }
+                                            })
+                                            ->default(false)
+                                            ->columnSpanFull(),
+
+                                        Placeholder::make('thank_you_letter_url')
+                                            ->label('Link thư cảm ơn')
+                                            ->content(function (?Reunion $record): HtmlString {
+                                                if (!$record?->slug) {
+                                                    return new HtmlString('<span style="color: #64748b;">Lưu thiệp trước để lấy link thư cảm ơn.</span>');
+                                                }
+
+                                                $url = url('/' . $record->slug . '/thu-cam-on');
+
+                                                return new HtmlString(
+                                                    '<a href="' . e($url) . '" target="_blank" style="color: #2563eb; font-weight: 600;">' . e($url) . '</a>'
+                                                );
+                                            })
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_letter.enabled'))
+                                            ->columnSpanFull(),
+
+                                        TextInput::make('content.thank_you_letter.greeting')
+                                            ->label('Lời xưng hô')
+                                            ->placeholder('VD: Kính gửi Quý mạnh thường quân')
+                                            ->default('Kính gửi Quý mạnh thường quân')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_letter.enabled'))
+                                            ->columnSpanFull(),
+
+                                        RichEditor::make('content.thank_you_letter.open_letter')
+                                            ->label('Nội dung thư cảm ơn')
+                                            ->toolbarButtons([
+                                                'bold',
+                                                'italic',
+                                                'underline',
+                                                'strike',
+                                                'h2',
+                                                'h3',
+                                                'bulletList',
+                                                'orderedList',
+                                                'link',
+                                                'redo',
+                                                'undo',
+                                            ])
+                                            ->default('<p>Ban tổ chức xin gửi lời cảm ơn chân thành tới Quý mạnh thường quân đã đồng hành, ủng hộ và sẻ chia cùng chương trình hội ngộ.</p><p>Sự đóng góp quý báu của Quý vị là nguồn động viên lớn, giúp chương trình được chuẩn bị chu đáo, ấm áp và ý nghĩa hơn.</p><p>Ban tổ chức trân trọng ghi nhận tấm lòng của Quý vị và kính chúc Quý vị cùng gia đình luôn mạnh khỏe, bình an, hạnh phúc và thành công.</p><p><strong>Xin trân trọng cảm ơn.</strong></p>')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_letter.enabled'))
+                                            ->columnSpanFull(),
+
+                                        TextInput::make('content.thank_you_letter.seo.title')
+                                            ->label('Tiêu đề SEO / Share riêng')
+                                            ->placeholder('VD: Thư Cảm Ơn | Trường THPT Quế Võ 1')
+                                            ->maxLength(160)
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_letter.enabled')),
+
+                                        Textarea::make('content.thank_you_letter.seo.description')
+                                            ->label('Mô tả SEO / Share riêng')
+                                            ->placeholder('VD: Ban tổ chức trân trọng cảm ơn Quý mạnh thường quân đã đồng hành...')
+                                            ->rows(3)
+                                            ->maxLength(300)
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_letter.enabled')),
+
+                                        Repeater::make('content.thank_you_letter.recipients')
+                                            ->label('Danh sách người/đơn vị nhận thư cảm ơn')
+                                            ->helperText('Mỗi dòng có một mã link riêng. VD mã “nguyen-van-a” sẽ mở ở /thu-cam-on/nguyen-van-a.')
+                                            ->schema([
+                                                TextInput::make('name')
+                                                    ->label('Tên người/đơn vị')
+                                                    ->placeholder('VD: Anh Nguyễn Văn A')
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state): void {
+                                                        if (blank($get('code')) && filled($state)) {
+                                                            $set('code', Str::slug($state));
+                                                        }
+                                                    })
+                                                    ->required(),
+
+                                                TextInput::make('role')
+                                                    ->label('Vai trò/ghi chú ngắn')
+                                                    ->placeholder('VD: Mạnh thường quân, Nhà tài trợ...'),
+
+                                                TextInput::make('code')
+                                                    ->label('Mã link')
+                                                    ->helperText('Không dấu, không khoảng trắng. VD: nguyen-van-a')
+                                                    ->required(),
+
+                                                Textarea::make('note')
+                                                    ->label('Lời ghi nhận riêng')
+                                                    ->placeholder('VD: Đã đồng hành, ủng hộ và sẻ chia cùng chương trình.')
+                                                    ->rows(2)
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(3)
+                                            ->defaultItems(1)
+                                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Người nhận thư')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_letter.enabled'))
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->columns(2)
+                                    ->columnSpanFull(),
+
                                 Repeater::make('content.organizers')
                                     ->label('Thông tin Ban Tổ Chức / Đầu mối liên hệ')
                                     ->schema([
@@ -905,6 +1040,16 @@ class ReunionResource extends Resource
                     ->icon('heroicon-o-academic-cap')
                     ->visible(fn (Reunion $record): bool => (bool) data_get($record->content, 'teacher_invitation.enabled', false))
                     ->url(fn (Reunion $record): string => url('/' . $record->slug . '/thay-co'))
+                    ->openUrlInNewTab(),
+
+                Action::make('view_thank_you_letter')
+                    ->label('Xem Thư Cảm Ơn')
+                    ->icon('heroicon-o-heart')
+                    ->visible(fn (Reunion $record): bool => (bool) (
+                        data_get($record->content, 'thank_you_letter.enabled', false)
+                        ?: data_get($record->content, 'benefactor_thank_you.enabled', false)
+                    ))
+                    ->url(fn (Reunion $record): string => url('/' . $record->slug . '/thu-cam-on'))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

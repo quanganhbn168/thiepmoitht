@@ -57,6 +57,15 @@ class ReunionController extends Controller
         return $this->renderReunionTemplate($reunion, $this->resolveTeacherInvitationViewPath($reunion), 'teacher');
     }
 
+    public function showThankYouLetter(Reunion $reunion, Request $request, ?string $recipient = null)
+    {
+        abort_unless($this->hasThankYouLetter($reunion), 404);
+
+        return $this->renderReunionTemplate($reunion, 'templates.thank-you', 'thank_you', [
+            'thank_you_recipient' => $this->resolveThankYouRecipient($reunion, $recipient ?: $request->query('to')),
+        ]);
+    }
+
     public function showQueVoDemo()
     {
         $reunion = Reunion::firstOrCreate(
@@ -111,7 +120,7 @@ class ReunionController extends Controller
         );
     }
 
-    private function renderReunionTemplate(Reunion $reunion, ?string $viewPath = null, string $audience = 'default')
+    private function renderReunionTemplate(Reunion $reunion, ?string $viewPath = null, string $audience = 'default', array $context = [])
     {
         $viewPath = $this->resolveTemplateView($viewPath);
 
@@ -136,7 +145,8 @@ class ReunionController extends Controller
             messages: $messages,
             classDirs: $classDirs,
             greeting: $greeting,
-            audience: $audience
+            audience: $audience,
+            context: $context
         );
 
         $rsvpUrl = route('reunion.rsvp.store', ['reunion' => $reunion->slug]);
@@ -201,6 +211,53 @@ class ReunionController extends Controller
     private function hasTeacherInvitation(Reunion $reunion): bool
     {
         return (bool) data_get($this->contentArray($reunion), 'teacher_invitation.enabled', false);
+    }
+
+    private function hasThankYouLetter(Reunion $reunion): bool
+    {
+        $content = $this->contentArray($reunion);
+
+        return (bool) (
+            data_get($content, 'thank_you_letter.enabled', false)
+            ?: data_get($content, 'benefactor_thank_you.enabled', false)
+        );
+    }
+
+    private function getThankYouRecipients(Reunion $reunion): array
+    {
+        $recipients = data_get($this->contentArray($reunion), 'thank_you_letter.recipients', []);
+
+        if (!is_iterable($recipients)) {
+            return [];
+        }
+
+        return collect($recipients)
+            ->filter(fn ($item): bool => is_array($item) && trim((string) ($item['name'] ?? '')) !== '')
+            ->map(function (array $item): array {
+                $name = trim((string) ($item['name'] ?? ''));
+                $code = trim((string) ($item['code'] ?? ''));
+
+                return [
+                    'name' => $name,
+                    'role' => trim((string) ($item['role'] ?? '')),
+                    'note' => trim((string) ($item['note'] ?? '')),
+                    'code' => $code !== '' ? Str::slug($code) : Str::slug($name),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function resolveThankYouRecipient(Reunion $reunion, ?string $code): ?array
+    {
+        $code = Str::slug(trim((string) $code));
+
+        if ($code === '') {
+            return null;
+        }
+
+        return collect($this->getThankYouRecipients($reunion))
+            ->first(fn (array $recipient): bool => ($recipient['code'] ?? '') === $code);
     }
 
     private function approvedMessages(Reunion $reunion)
@@ -445,6 +502,15 @@ class ReunionController extends Controller
             return $greeting !== '' ? $greeting : 'Kính gửi Quý thầy cô giáo';
         }
 
+        if ($audience === 'thank_you') {
+            $greeting = trim((string) (
+                data_get($content, 'thank_you_letter.greeting')
+                ?: data_get($content, 'benefactor_thank_you.greeting')
+            ));
+
+            return $greeting !== '' ? $greeting : 'Kính gửi Quý mạnh thường quân';
+        }
+
         $greeting = trim((string) data_get($content, 'invitation_greeting'));
 
         return $greeting !== '' ? $greeting : 'Quý thầy cô & Các bạn';
@@ -458,6 +524,17 @@ class ReunionController extends Controller
             return $openLetter !== ''
                 ? $openLetter
                 : $this->defaultTeacherOpenLetter($schoolInfo);
+        }
+
+        if ($audience === 'thank_you') {
+            $openLetter = trim((string) (
+                data_get($content, 'thank_you_letter.open_letter')
+                ?: data_get($content, 'benefactor_thank_you.open_letter')
+            ));
+
+            return $openLetter !== ''
+                ? $openLetter
+                : $this->defaultThankYouLetter($schoolInfo);
         }
 
         $openLetter = trim((string) data_get($content, 'open_letter'));
@@ -483,6 +560,18 @@ class ReunionController extends Controller
             . '<p>Nhân dịp ' . e($anniversary) . ' ngày ra trường, tập thể cựu học sinh kính mong được đón quý thầy cô về tham dự buổi hội ngộ, cùng ôn lại những kỷ niệm đẹp dưới mái trường xưa.</p>'
             . '<p>Sự hiện diện của quý thầy cô là niềm vinh dự và là món quà ý nghĩa nhất đối với tập thể chúng em.</p>'
             . '<p><strong>Ban liên lạc trân trọng kính mời.</strong></p>';
+    }
+
+    private function defaultThankYouLetter(array $schoolInfo): string
+    {
+        $schoolName = $schoolInfo['name'] ?? 'mái trường xưa';
+        $course = $schoolInfo['course'] ?? 'niên khóa';
+        $anniversary = $schoolInfo['anniversary'] ?? 'ngày hội ngộ';
+
+        return '<p>Ban tổ chức chương trình ' . e($anniversary) . ' của tập thể ' . e($course) . ' - ' . e($schoolName) . ' xin được gửi lời cảm ơn chân thành tới Quý mạnh thường quân.</p>'
+            . '<p>Sự đồng hành, sẻ chia và đóng góp quý báu của Quý vị đã tiếp thêm nguồn lực để chương trình được chuẩn bị chu đáo, ấm áp và ý nghĩa hơn.</p>'
+            . '<p>Ban tổ chức trân trọng ghi nhận tấm lòng của Quý vị và kính chúc Quý vị cùng gia đình luôn mạnh khỏe, bình an, hạnh phúc và thành công.</p>'
+            . '<p><strong>Xin trân trọng cảm ơn.</strong></p>';
     }
 
     private function getTimeline(array $content): array
@@ -590,9 +679,11 @@ class ReunionController extends Controller
         $messages,
         array $classDirs,
         string $greeting = 'Quý thầy cô & Các bạn',
-        string $audience = 'default'
+        string $audience = 'default',
+        array $context = []
     ): object {
         $isTeacherInvitation = $audience === 'teacher';
+        $isThankYouLetter = $audience === 'thank_you';
         $logoUrl = $reunion->getLogoUrl();
         $shareUrl = $reunion->getShareUrl();
         $coverUrl = $reunion->getCoverUrl();
@@ -625,27 +716,56 @@ class ReunionController extends Controller
 
         $openLetterText = $this->htmlToPlainText($openLetter);
         $content = $this->contentArray($reunion);
-        $eventSlug = $isTeacherInvitation ? $reunion->slug . '/thay-co' : $reunion->slug;
+        $thankYouRecipients = $this->getThankYouRecipients($reunion);
+        $thankYouRecipient = $context['thank_you_recipient'] ?? null;
+        $eventSlug = match ($audience) {
+            'teacher' => $reunion->slug . '/thay-co',
+            'thank_you' => $reunion->slug . '/thu-cam-on' . (!empty($thankYouRecipient['code']) ? '/' . $thankYouRecipient['code'] : ''),
+            default => $reunion->slug,
+        };
         $eventUrl = url('/' . $eventSlug);
         $teacherInvitationUrl = $this->hasTeacherInvitation($reunion)
             ? url('/' . $reunion->slug . '/thay-co')
             : null;
+        $thankYouLetterUrl = $this->hasThankYouLetter($reunion)
+            ? url('/' . $reunion->slug . '/thu-cam-on')
+            : null;
 
-        $defaultTitle = $isTeacherInvitation
-            ? 'Thư Mời Thầy Cô | ' . $eventName
-            : 'Thư Mời Họp Lớp | ' . $eventName;
+        $defaultTitle = match ($audience) {
+            'teacher' => 'Thư Mời Thầy Cô | ' . $eventName,
+            'thank_you' => 'Thư Cảm Ơn' . (!empty($thankYouRecipient['name']) ? ' ' . $thankYouRecipient['name'] : '') . ' | ' . $eventName,
+            default => 'Thư Mời Họp Lớp | ' . $eventName,
+        };
 
-        $defaultMetaDescription = $isTeacherInvitation
-            ? $this->makeDefaultTeacherMetaDescription($eventName, $eventCourse, $eventInfo)
-            : $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo);
+        $defaultMetaDescription = match ($audience) {
+            'teacher' => $this->makeDefaultTeacherMetaDescription($eventName, $eventCourse, $eventInfo),
+            'thank_you' => $this->makeDefaultThankYouMetaDescription($eventName, $eventCourse),
+            default => $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo),
+        };
 
-        $metaTitlePath = $isTeacherInvitation ? 'teacher_invitation.seo.title' : 'seo.title';
-        $metaDescriptionPath = $isTeacherInvitation ? 'teacher_invitation.seo.description' : 'seo.description';
-        $metaTitle = $this->cleanMetaText(data_get($content, $metaTitlePath)) ?: $defaultTitle;
-        $metaDescription = $this->cleanMetaText(data_get($content, $metaDescriptionPath)) ?: $defaultMetaDescription;
-        $description = $isTeacherInvitation
-            ? '<p>Trân trọng kính mời quý thầy cô tham dự ngày hội ngộ - ' . e($eventSlogan) . '</p>'
-            : '<p>' . e($eventAnniversary) . ' ngày ra trường - ' . e($eventSlogan) . '</p>';
+        $metaTitlePath = match ($audience) {
+            'teacher' => 'teacher_invitation.seo.title',
+            'thank_you' => 'thank_you_letter.seo.title',
+            default => 'seo.title',
+        };
+        $metaDescriptionPath = match ($audience) {
+            'teacher' => 'teacher_invitation.seo.description',
+            'thank_you' => 'thank_you_letter.seo.description',
+            default => 'seo.description',
+        };
+        $fallbackMetaTitle = $audience === 'thank_you'
+            ? data_get($content, 'benefactor_thank_you.seo.title')
+            : null;
+        $fallbackMetaDescription = $audience === 'thank_you'
+            ? data_get($content, 'benefactor_thank_you.seo.description')
+            : null;
+        $metaTitle = $this->cleanMetaText(data_get($content, $metaTitlePath) ?: $fallbackMetaTitle) ?: $defaultTitle;
+        $metaDescription = $this->cleanMetaText(data_get($content, $metaDescriptionPath) ?: $fallbackMetaDescription) ?: $defaultMetaDescription;
+        $description = match ($audience) {
+            'teacher' => '<p>Trân trọng kính mời quý thầy cô tham dự ngày hội ngộ - ' . e($eventSlogan) . '</p>',
+            'thank_you' => '<p>Trân trọng cảm ơn ' . e($thankYouRecipient['name'] ?? 'Quý mạnh thường quân') . ' đã đồng hành cùng chương trình - ' . e($eventSlogan) . '</p>',
+            default => '<p>' . e($eventAnniversary) . ' ngày ra trường - ' . e($eventSlogan) . '</p>',
+        };
 
         return (object) [
             'title' => $metaTitle,
@@ -656,8 +776,17 @@ class ReunionController extends Controller
             'canonical_url' => $eventUrl,
             'main_url' => url('/' . $reunion->slug),
             'teacher_url' => $teacherInvitationUrl,
+            'thank_you_url' => $thankYouLetterUrl,
+            'benefactor_url' => $thankYouLetterUrl,
+            'thank_you_recipient' => $thankYouRecipient,
+            'thank_you_recipients' => $thankYouRecipients,
             'audience' => $audience,
             'is_teacher_invitation' => $isTeacherInvitation,
+            'is_thank_you_letter' => $isThankYouLetter,
+            'is_benefactor_thank_you' => $isThankYouLetter,
+            'open_letter_title' => $isThankYouLetter ? 'Thư cảm ơn' : 'Thư ngỏ',
+            'open_letter_nav_label' => $isThankYouLetter ? 'Thư cảm ơn' : 'Thư ngỏ',
+            'open_letter_sign' => $isThankYouLetter ? 'Ban tổ chức trân trọng cảm ơn' : 'Ban tổ chức trân trọng kính mời',
 
             // Có cả 2 tên để không vỡ Blade cũ.
             'course_name' => $eventCourse,
@@ -732,6 +861,11 @@ class ReunionController extends Controller
             $eventDate . '.',
             " .\t\n\r\0\x0B"
         ) . '.';
+    }
+
+    private function makeDefaultThankYouMetaDescription(string $eventName, string $eventCourse): string
+    {
+        return 'Thư cảm ơn Quý mạnh thường quân đã đồng hành cùng chương trình hội ngộ ' . $eventCourse . ' - ' . $eventName . '.';
     }
 
     private function cleanMetaText(mixed $value): string
