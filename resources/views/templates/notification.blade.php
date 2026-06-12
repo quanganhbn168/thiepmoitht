@@ -27,19 +27,24 @@
         .notification-timeline:before {
             content: '';
             position: absolute;
-            left: 1.15rem;
-            top: 1rem;
-            bottom: 1rem;
-            width: 3px;
+            left: 1.5rem;
+            top: .75rem;
+            bottom: .75rem;
+            width: 4px;
             border-radius: 999px;
-            background: linear-gradient(180deg, #dc2626, #f59e0b, #16a34a, #2563eb, #7c3aed);
+            background: linear-gradient(180deg, #1d4ed8, #dc2626, #f59e0b, #16a34a, #7c3aed);
+            box-shadow: 0 0 0 8px rgba(255, 255, 255, .78);
         }
 
         @media (min-width: 768px) {
             .notification-timeline:before {
-                left: 50%;
-                transform: translateX(-50%);
+                left: 2.25rem;
+                transform: none;
             }
+        }
+
+        .program-card {
+            box-shadow: 0 18px 50px rgba(21, 74, 140, .1);
         }
     </style>
 @endpush
@@ -179,39 +184,62 @@
             </div>
         </section>
 
-        <section id="timeline" class="px-5 py-16 sm:px-8 sm:py-20">
+        <section id="timeline" class="relative overflow-hidden px-5 py-16 sm:px-8 sm:py-20">
+            <div class="absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-white to-transparent"></div>
             <div class="mx-auto max-w-6xl">
-                <div class="mx-auto mb-12 max-w-3xl text-center">
-                    <p class="text-xs font-bold uppercase tracking-[0.24em] text-red-700">Chương trình</p>
-                    <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-5xl">Timeline ngày hội ngộ</h2>
-                    <p class="mt-4 text-base leading-7 text-slate-600">Lịch trình có thể được ban tổ chức cập nhật để phù hợp với thực tế chương trình.</p>
+                <div class="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-end">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-[0.24em] text-red-700">Chương trình</p>
+                        <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-5xl">Timeline ngày hội ngộ</h2>
+                        <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">Các mốc chính trong ngày để thầy cô và các bạn tiện theo dõi, check-in và cùng lưu lại trọn vẹn từng khoảnh khắc.</p>
+                    </div>
+                    <div class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm">
+                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Tổng số hoạt động</p>
+                        <p class="mt-2 font-serif text-5xl font-black text-blue-950">{{ $timelineItems->count() }}</p>
+                    </div>
                 </div>
 
                 @if($timelineItems->isNotEmpty())
-                    <div class="notification-timeline relative space-y-5 md:space-y-0">
+                    <div class="notification-timeline relative space-y-4 rounded-lg border border-blue-100 bg-white/70 p-4 backdrop-blur sm:p-6 md:p-8">
                         @foreach($timelineItems as $index => $item)
                             @php
                                 $isHighlight = (bool) ($item->is_highlight ?? false);
-                                $isEven = $index % 2 === 0;
-                                $colors = ['bg-blue-700', 'bg-red-700', 'bg-amber-500', 'bg-emerald-600', 'bg-indigo-700', 'bg-fuchsia-700'];
-                                $dotColor = $colors[$index % count($colors)];
+                                $accentClasses = [
+                                    ['bg' => 'bg-blue-700', 'soft' => 'bg-blue-50', 'text' => 'text-blue-800', 'border' => 'border-blue-200'],
+                                    ['bg' => 'bg-red-700', 'soft' => 'bg-red-50', 'text' => 'text-red-800', 'border' => 'border-red-200'],
+                                    ['bg' => 'bg-amber-500', 'soft' => 'bg-amber-50', 'text' => 'text-amber-800', 'border' => 'border-amber-200'],
+                                    ['bg' => 'bg-emerald-600', 'soft' => 'bg-emerald-50', 'text' => 'text-emerald-800', 'border' => 'border-emerald-200'],
+                                    ['bg' => 'bg-indigo-700', 'soft' => 'bg-indigo-50', 'text' => 'text-indigo-800', 'border' => 'border-indigo-200'],
+                                    ['bg' => 'bg-fuchsia-700', 'soft' => 'bg-fuchsia-50', 'text' => 'text-fuchsia-800', 'border' => 'border-fuchsia-200'],
+                                ][$index % 6];
                             @endphp
-                            <article class="relative grid gap-4 pb-7 md:grid-cols-[1fr_72px_1fr] md:items-start md:pb-9">
-                                <div class="{{ $isEven ? 'md:col-start-1 md:text-right' : 'md:col-start-3' }} ml-12 md:ml-0">
-                                    <div class="rounded-lg border {{ $isHighlight ? 'border-amber-200 bg-amber-50 shadow-lg shadow-amber-100/60' : 'border-blue-100 bg-white shadow-sm' }} p-5 transition hover:-translate-y-0.5 hover:shadow-xl">
-                                        <div class="flex items-start justify-between gap-4 {{ $isEven ? 'md:flex-row-reverse' : '' }}">
-                                            <span class="inline-flex rounded-full bg-blue-950 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white">{{ $item->time }}</span>
-                                            <span class="text-2xl font-black {{ $isHighlight ? 'text-amber-500' : 'text-slate-200' }}">{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
-                                        </div>
-                                        <h3 class="mt-4 text-xl font-black text-blue-950">{{ $item->title }}</h3>
-                                        @if(!empty($item->description))
-                                            <p class="mt-2 text-sm leading-7 text-slate-600">{{ $item->description }}</p>
-                                        @endif
-                                    </div>
+                            <article class="relative pl-14 md:pl-20">
+                                <div class="absolute left-0 top-5 z-10 flex h-12 w-12 items-center justify-center rounded-full {{ $accentClasses['bg'] }} text-sm font-black text-white ring-8 ring-white md:left-0 md:h-[4.5rem] md:w-[4.5rem] md:text-lg">
+                                    {{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}
                                 </div>
 
-                                <div class="absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-full {{ $dotColor }} text-sm font-black text-white ring-8 ring-[#f7fbff] md:static md:col-start-2 md:mx-auto">
-                                    {{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}
+                                <div class="program-card overflow-hidden rounded-lg border {{ $isHighlight ? 'border-amber-200 bg-amber-50' : 'border-slate-100 bg-white' }} transition hover:-translate-y-0.5 hover:shadow-2xl">
+                                    <div class="grid md:grid-cols-[190px_minmax(0,1fr)]">
+                                        <div class="{{ $accentClasses['soft'] }} {{ $accentClasses['text'] }} flex items-center gap-3 border-b {{ $accentClasses['border'] }} p-5 md:flex-col md:items-start md:justify-center md:border-b-0 md:border-r">
+                                            <i class="fa fa-clock text-lg"></i>
+                                            <div>
+                                                <p class="text-[11px] font-black uppercase tracking-[0.18em] opacity-70">Thời gian</p>
+                                                <p class="mt-1 text-lg font-black leading-tight">{{ $item->time }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-5 sm:p-6">
+                                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                                <h3 class="text-xl font-black leading-snug text-blue-950 sm:text-2xl">{{ $item->title }}</h3>
+                                                @if($isHighlight)
+                                                    <span class="inline-flex rounded-full bg-amber-400 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-blue-950">Điểm nhấn</span>
+                                                @endif
+                                            </div>
+                                            @if(!empty($item->description))
+                                                <p class="mt-3 text-sm leading-7 text-slate-600 sm:text-base">{{ $item->description }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </article>
                         @endforeach
