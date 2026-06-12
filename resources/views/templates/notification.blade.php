@@ -12,7 +12,7 @@
     <style>
         body {
             font-family: 'Be Vietnam Pro', sans-serif;
-            background: #f7fbff;
+            background: #fff8eb;
             color: #14213d;
         }
 
@@ -46,10 +46,62 @@
         .program-card {
             box-shadow: 0 18px 50px rgba(21, 74, 140, .1);
         }
+
+        .memory-polaroid {
+            position: relative;
+            width: min(92vw, 620px);
+            aspect-ratio: 1 / 1;
+            filter: drop-shadow(0 28px 45px rgba(48, 37, 23, .2));
+        }
+
+        .memory-polaroid__photo {
+            position: absolute;
+            left: 51.85%;
+            top: 46.36%;
+            width: 46.92%;
+            height: 44.51%;
+            transform: translate(-50%, -50%) rotate(3.85deg);
+            transform-origin: center;
+            overflow: hidden;
+            z-index: 1;
+            background: #111;
+        }
+
+        .memory-polaroid__photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+
+        .memory-polaroid__frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 2;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .decor-float {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+        }
+
+        @media (max-width: 768px) {
+            .memory-polaroid {
+                width: min(96vw, 430px);
+            }
+        }
     </style>
 @endpush
 
-@section('body_class', 'bg-sky-50 text-slate-950 antialiased overflow-x-hidden')
+@section('body_class', 'bg-[#fff8eb] text-slate-950 antialiased overflow-x-hidden')
 
 @section('content')
     @php
@@ -73,15 +125,19 @@
         $locationLabel = trim((string) ($event->address ?? ($eventInfo['location_address'] ?? '') ?: ($eventInfo['location_name'] ?? '')));
     @endphp
 
-    <main class="min-h-screen bg-[#f7fbff]">
-        <section class="relative isolate overflow-hidden bg-[#e7f6ff]">
+    <main class="min-h-screen bg-[#fff8eb]">
+        <section class="relative isolate overflow-hidden bg-[#fff4dc]">
             @if($heroImage)
-                <img src="{{ $heroImage }}" alt="{{ $event->school_name }}" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-25">
+                <img src="{{ $heroImage }}" alt="{{ $event->school_name }}" class="absolute inset-0 -z-20 h-full w-full object-cover opacity-16">
             @endif
-            <div class="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(255,255,255,.96),rgba(231,246,255,.9)_42%,rgba(255,241,226,.9))]"></div>
-            <div class="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-[#f7fbff] to-transparent"></div>
+            <div class="absolute inset-0 -z-10 bg-[linear-gradient(135deg,rgba(255,251,240,.98),rgba(231,246,255,.9)_48%,rgba(255,238,220,.92))]"></div>
+            <div class="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-[#fff8eb] to-transparent"></div>
+            <img src="{{ asset('images/decor/hoa-phuong-do.png') }}" alt="" class="decor-float right-[-7rem] top-[-4rem] hidden w-80 rotate-[-8deg] opacity-90 lg:block">
+            <img src="{{ asset('images/decor/hoa-bang-lang.png') }}" alt="" class="decor-float bottom-[-8rem] left-[-7rem] hidden w-80 rotate-12 opacity-85 lg:block">
+            <img src="{{ asset('images/decor/4.png') }}" alt="" class="decor-float right-[35%] top-16 hidden w-44 opacity-80 xl:block">
+            <img src="{{ asset('images/decor/6.png') }}" alt="" class="decor-float bottom-8 right-[3%] hidden w-48 opacity-75 lg:block">
 
-            <div class="mx-auto grid min-h-[92vh] max-w-7xl gap-9 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:items-center lg:py-12">
+            <div class="relative z-10 mx-auto grid min-h-[92vh] max-w-7xl gap-9 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_560px] lg:items-center lg:py-12">
                 <div class="pt-12 lg:pt-0">
                     <a href="{{ $mainUrl }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-blue-200 bg-white/80 px-4 text-xs font-bold uppercase tracking-[0.16em] text-blue-800 shadow-sm backdrop-blur transition hover:border-blue-300 hover:bg-white">
                         <i class="fa fa-arrow-left text-[11px]"></i>
@@ -104,7 +160,7 @@
                     </p>
 
                     @if($countdownTarget)
-                        <div class="mt-8 max-w-2xl rounded-lg border border-blue-100 bg-white/85 p-4 shadow-sm backdrop-blur" data-countdown-target="{{ $countdownTarget }}">
+                        <div class="mt-8 max-w-2xl rounded-lg border border-[#ead8b4] bg-white/82 p-4 shadow-[0_18px_45px_rgba(77,54,20,.1)] backdrop-blur" data-countdown-target="{{ $countdownTarget }}">
                             <p class="text-xs font-bold uppercase tracking-[0.18em] text-red-700">Chỉ còn</p>
                             <div class="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
                                 <div class="rounded-md bg-blue-950 px-2 py-3 text-center text-white">
@@ -128,7 +184,7 @@
                     @endif
 
                     <div class="mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
-                        <div class="rounded-lg border border-blue-100 bg-white/85 p-4 shadow-sm backdrop-blur">
+                        <div class="rounded-lg border border-[#ead8b4] bg-white/82 p-4 shadow-sm backdrop-blur">
                             <div class="flex items-start gap-3">
                                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white">
                                     <i class="fa fa-calendar-days"></i>
@@ -139,7 +195,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="rounded-lg border border-red-100 bg-white/85 p-4 shadow-sm backdrop-blur">
+                        <div class="rounded-lg border border-[#ead8b4] bg-white/82 p-4 shadow-sm backdrop-blur">
                             <div class="flex items-start gap-3">
                                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-700 text-white">
                                     <i class="fa fa-location-dot"></i>
@@ -164,20 +220,25 @@
                     </div>
                 </div>
 
-                <aside class="relative">
-                    <div class="overflow-hidden rounded-lg border border-white bg-white shadow-2xl shadow-blue-900/12">
-                        @if($heroImage)
-                            <img src="{{ $heroImage }}" alt="{{ $event->school_name }}" class="h-80 w-full object-cover sm:h-[440px]">
-                        @else
-                            <div class="flex h-80 items-center justify-center bg-blue-100 sm:h-[440px]">
-                                <img src="{{ $logoImage }}" alt="{{ $event->school_name }}" class="h-44 w-44 object-contain">
+                <aside class="relative flex justify-center lg:justify-end">
+                    <img src="{{ asset('images/decor/so-luu-but.png') }}" alt="" class="absolute -bottom-16 -right-10 hidden w-52 rotate-6 opacity-95 lg:block">
+                    <img src="{{ asset('images/decor/7.png') }}" alt="" class="absolute -bottom-6 left-4 hidden w-36 rotate-[-18deg] opacity-95 sm:block">
+
+                    <div class="memory-polaroid">
+                        <div class="memory-polaroid__photo">
+                            <img src="{{ $heroImage ?: $logoImage }}" alt="{{ $event->school_name }}">
+                        </div>
+
+                        <img class="memory-polaroid__frame" src="{{ asset('images/decor/frame-polaroid-cutout.png') }}" alt="">
+                    </div>
+
+                    <div class="absolute bottom-0 left-1/2 z-10 w-[min(84vw,360px)] -translate-x-1/2 translate-y-6 rounded-lg border border-[#ead8b4] bg-white/90 p-4 shadow-xl backdrop-blur lg:left-auto lg:right-8 lg:translate-x-0">
+                        <div class="flex items-center gap-3">
+                            <img src="{{ $logoImage }}" alt="{{ $event->school_name }}" class="h-14 w-14 shrink-0 rounded-full object-contain ring-1 ring-[#ead8b4]">
+                            <div>
+                                <p class="font-accent text-3xl font-bold leading-none text-red-700">Trở về thanh xuân</p>
+                                <p class="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-blue-900">{{ $event->course_name }}</p>
                             </div>
-                        @endif
-                        <div class="bg-white p-5">
-                            <p class="font-accent text-4xl font-bold text-red-700">Trở về thanh xuân</p>
-                            <p class="mt-2 text-sm leading-6 text-slate-600">
-                                Cảm ơn thầy cô và các bạn đã là một phần thanh xuân không thể nào quên.
-                            </p>
                         </div>
                     </div>
                 </aside>
@@ -186,6 +247,8 @@
 
         <section id="timeline" class="relative overflow-hidden px-5 py-16 sm:px-8 sm:py-20">
             <div class="absolute inset-x-0 top-0 -z-10 h-72 bg-gradient-to-b from-white to-transparent"></div>
+            <img src="{{ asset('images/decor/5.png') }}" alt="" class="decor-float -right-20 top-8 hidden w-72 rotate-[-4deg] opacity-80 lg:block">
+            <img src="{{ asset('images/decor/6.png') }}" alt="" class="decor-float -left-16 top-28 hidden w-60 rotate-12 opacity-70 lg:block">
             <div class="mx-auto max-w-6xl">
                 <div class="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-end">
                     <div>
@@ -193,14 +256,15 @@
                         <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-5xl">Timeline ngày hội ngộ</h2>
                         <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">Các mốc chính trong ngày để thầy cô và các bạn tiện theo dõi, check-in và cùng lưu lại trọn vẹn từng khoảnh khắc.</p>
                     </div>
-                    <div class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm">
-                        <p class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Tổng số hoạt động</p>
-                        <p class="mt-2 font-serif text-5xl font-black text-blue-950">{{ $timelineItems->count() }}</p>
+                    <div class="relative overflow-hidden rounded-lg border border-[#ead8b4] bg-[#fffaf0] p-5 shadow-sm">
+                        <img src="{{ asset('images/decor/hoa-phuong-do.png') }}" alt="" class="absolute -right-12 -top-10 w-32 rotate-12 opacity-55">
+                        <p class="relative text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Tổng số hoạt động</p>
+                        <p class="relative mt-2 font-serif text-5xl font-black text-blue-950">{{ $timelineItems->count() }}</p>
                     </div>
                 </div>
 
                 @if($timelineItems->isNotEmpty())
-                    <div class="notification-timeline relative space-y-4 rounded-lg border border-blue-100 bg-white/70 p-4 backdrop-blur sm:p-6 md:p-8">
+                    <div class="notification-timeline relative space-y-4 rounded-lg border border-[#ead8b4] bg-[#fffdf7]/85 p-4 shadow-[0_28px_80px_rgba(101,71,25,.1)] backdrop-blur sm:p-6 md:p-8">
                         @foreach($timelineItems as $index => $item)
                             @php
                                 $isHighlight = (bool) ($item->is_highlight ?? false);
