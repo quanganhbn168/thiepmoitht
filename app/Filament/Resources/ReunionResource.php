@@ -556,6 +556,126 @@ class ReunionResource extends Resource
                                     ->columnSpanFull(),
                             ]),
 
+                        Tab::make('Thông báo')
+                            ->schema([
+                                Placeholder::make('notification_url')
+                                    ->label('Link trang thông báo')
+                                    ->content(function (?Reunion $record): HtmlString {
+                                        if (!$record?->slug) {
+                                            return new HtmlString('<span style="color: #64748b;">Lưu thiệp trước để lấy link thông báo.</span>');
+                                        }
+
+                                        $url = url('/' . $record->slug . '/thong-bao');
+
+                                        return new HtmlString(
+                                            '<a href="' . e($url) . '" target="_blank" style="color: #2563eb; font-weight: 600;">' . e($url) . '</a>'
+                                        );
+                                    })
+                                    ->columnSpanFull(),
+
+                                Toggle::make('content.notification.enabled')
+                                    ->label('Bật trang thông báo')
+                                    ->helperText('Bật để dùng link /thong-bao riêng cho chương trình.')
+                                    ->live()
+                                    ->default(false)
+                                    ->columnSpanFull(),
+
+                                TextInput::make('content.notification.title')
+                                    ->label('Tiêu đề trang')
+                                    ->placeholder('VD: Thông báo chương trình hội ngộ')
+                                    ->default('Thông báo chương trình hội ngộ')
+                                    ->maxLength(160)
+                                    ->visible(fn (Get $get): bool => (bool) $get('content.notification.enabled')),
+
+                                Textarea::make('content.notification.description')
+                                    ->label('Mô tả ngắn')
+                                    ->placeholder('VD: Lịch trình chính thức ngày trở về thanh xuân...')
+                                    ->rows(3)
+                                    ->maxLength(300)
+                                    ->default('Lịch trình chính thức và những thông tin cần lưu ý cho ngày hội ngộ.')
+                                    ->visible(fn (Get $get): bool => (bool) $get('content.notification.enabled')),
+
+                                Toggle::make('content.notification.show_video')
+                                    ->label('Hiện video trailer nếu có')
+                                    ->default(true)
+                                    ->visible(fn (Get $get): bool => (bool) $get('content.notification.enabled')),
+
+                                Toggle::make('content.notification.show_organizers')
+                                    ->label('Hiện danh sách ban liên lạc')
+                                    ->default(true)
+                                    ->visible(fn (Get $get): bool => (bool) $get('content.notification.enabled')),
+
+                                SpatieMediaLibraryFileUpload::make('media_notification_share')
+                                    ->collection('notification_share')
+                                    ->disk('public')
+                                    ->label('Ảnh share riêng trang thông báo')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->maxFiles(1)
+                                    ->maxSize(10240)
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                    ->helperText('Nên dùng tỷ lệ 1200x630. Nếu bỏ trống sẽ dùng ảnh share chung.')
+                                    ->visible(fn (Get $get): bool => (bool) $get('content.notification.enabled'))
+                                    ->columnSpanFull(),
+
+                                Actions::make([
+                                    FormAction::make('loadNotificationTimeline')
+                                        ->label('Nạp timeline thông báo')
+                                        ->icon('heroicon-o-clock')
+                                        ->color('success')
+                                        ->requiresConfirmation()
+                                        ->modalHeading('Nạp mẫu timeline cho trang thông báo?')
+                                        ->modalDescription('Hành động này sẽ thay thế timeline thông báo hiện tại bằng mẫu ngắn gọn.')
+                                        ->action(function (Set $set): void {
+                                            $newState = [];
+
+                                            foreach (self::defaultNotificationTimelineItems() as $item) {
+                                                $newState[(string) Str::uuid()] = $item;
+                                            }
+
+                                            $set('content.notification.timeline', $newState);
+
+                                            Notification::make()
+                                                ->success()
+                                                ->title('Đã nạp timeline thông báo!')
+                                                ->send();
+                                        }),
+                                ])
+                                    ->alignEnd()
+                                    ->visible(fn (Get $get): bool => (bool) $get('content.notification.enabled'))
+                                    ->columnSpanFull(),
+
+                                Repeater::make('content.notification.timeline')
+                                    ->label('Timeline trang thông báo')
+                                    ->schema([
+                                        TextInput::make('time')
+                                            ->label('Thời gian')
+                                            ->placeholder('VD: 06:00 - 07:45')
+                                            ->required(),
+
+                                        TextInput::make('title')
+                                            ->label('Tiêu đề')
+                                            ->placeholder('VD: Ký ức thanh xuân')
+                                            ->required(),
+
+                                        Textarea::make('description')
+                                            ->label('Mô tả')
+                                            ->rows(2),
+
+                                        Toggle::make('is_highlight')
+                                            ->label('Tô đậm')
+                                            ->default(false),
+                                    ])
+                                    ->columns(2)
+                                    ->collapsible()
+                                    ->cloneable()
+                                    ->reorderable()
+                                    ->default(self::defaultNotificationTimelineItems())
+                                    ->visible(fn (Get $get): bool => (bool) $get('content.notification.enabled'))
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
+
                         Tab::make('Hiệu ứng & Cấu hình')
                             ->schema([
                                 Select::make('status')
@@ -992,6 +1112,48 @@ class ReunionResource extends Resource
         ];
     }
 
+    private static function defaultNotificationTimelineItems(): array
+    {
+        return [
+            [
+                'time' => '06:00 - 07:45',
+                'title' => 'Ký ức thanh xuân',
+                'description' => 'Đón tiếp, check-in và gặp gỡ đầu ngày.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '08:00 - 09:40',
+                'title' => 'Gặp gỡ và tri ân',
+                'description' => 'Văn nghệ chào mừng, phát biểu và tri ân thầy cô.',
+                'is_highlight' => true,
+            ],
+            [
+                'time' => '09:40 - 10:00',
+                'title' => 'Khoảnh khắc gắn kết',
+                'description' => 'Tri ân nhà tài trợ, giao lưu sân khấu và lưu lại kỷ niệm.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '10:00 - 11:00',
+                'title' => 'Chụp ảnh kỷ niệm',
+                'description' => 'Chụp ảnh theo lớp, cùng giáo viên chủ nhiệm và tham quan trường xưa.',
+                'is_highlight' => true,
+            ],
+            [
+                'time' => '11:00 - 13:30',
+                'title' => 'Liên hoan và giao lưu',
+                'description' => 'Dùng tiệc, kết nối và chia sẻ những câu chuyện sau nhiều năm gặp lại.',
+                'is_highlight' => false,
+            ],
+            [
+                'time' => '13:30 - 14:00',
+                'title' => 'Bế mạc và hẹn gặp lại',
+                'description' => 'Tổng kết, chụp ảnh tập thể và gửi lời hẹn ngày trở về tiếp theo.',
+                'is_highlight' => false,
+            ],
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -1050,6 +1212,13 @@ class ReunionResource extends Resource
                         ?: data_get($record->content, 'benefactor_thank_you.enabled', false)
                     ))
                     ->url(fn (Reunion $record): string => url('/' . $record->slug . '/thu-cam-on'))
+                    ->openUrlInNewTab(),
+
+                Action::make('view_notification')
+                    ->label('Xem Thông Báo')
+                    ->icon('heroicon-o-megaphone')
+                    ->visible(fn (Reunion $record): bool => (bool) data_get($record->content, 'notification.enabled', false))
+                    ->url(fn (Reunion $record): string => url('/' . $record->slug . '/thong-bao'))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([

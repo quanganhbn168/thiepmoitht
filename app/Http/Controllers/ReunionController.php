@@ -66,6 +66,13 @@ class ReunionController extends Controller
         ]);
     }
 
+    public function showNotification(Reunion $reunion, Request $request)
+    {
+        abort_unless($this->hasNotification($reunion), 404);
+
+        return $this->renderReunionTemplate($reunion, 'templates.notification', 'notification');
+    }
+
     public function showQueVoDemo()
     {
         $reunion = Reunion::firstOrCreate(
@@ -221,6 +228,11 @@ class ReunionController extends Controller
             data_get($content, 'thank_you_letter.enabled', false)
             ?: data_get($content, 'benefactor_thank_you.enabled', false)
         );
+    }
+
+    private function hasNotification(Reunion $reunion): bool
+    {
+        return (bool) data_get($this->contentArray($reunion), 'notification.enabled', false);
     }
 
     private function getThankYouRecipients(Reunion $reunion): array
@@ -652,6 +664,44 @@ class ReunionController extends Controller
         ];
     }
 
+    private function getNotificationTimeline(array $content, array $fallbackTimeline): array
+    {
+        $timeline = data_get($content, 'notification.timeline');
+
+        if (is_array($timeline) && !empty($timeline)) {
+            return array_values($timeline);
+        }
+
+        return !empty($fallbackTimeline)
+            ? $fallbackTimeline
+            : [
+                [
+                    'time' => '06:00 - 07:45',
+                    'title' => 'Ký ức thanh xuân',
+                    'description' => 'Đón tiếp, check-in và gặp gỡ đầu ngày.',
+                    'is_highlight' => false,
+                ],
+                [
+                    'time' => '08:00 - 09:40',
+                    'title' => 'Gặp gỡ và tri ân',
+                    'description' => 'Văn nghệ chào mừng, phát biểu và tri ân thầy cô.',
+                    'is_highlight' => true,
+                ],
+                [
+                    'time' => '10:00 - 11:00',
+                    'title' => 'Chụp ảnh kỷ niệm',
+                    'description' => 'Chụp ảnh theo lớp, cùng giáo viên chủ nhiệm và tham quan trường xưa.',
+                    'is_highlight' => true,
+                ],
+                [
+                    'time' => '11:00 - 13:30',
+                    'title' => 'Liên hoan và giao lưu',
+                    'description' => 'Dùng tiệc, kết nối và chia sẻ.',
+                    'is_highlight' => false,
+                ],
+            ];
+    }
+
     private function getOrganizers(array $content): array
     {
         $organizers = data_get($content, 'organizers');
@@ -684,8 +734,11 @@ class ReunionController extends Controller
     ): object {
         $isTeacherInvitation = $audience === 'teacher';
         $isThankYouLetter = $audience === 'thank_you';
+        $isNotification = $audience === 'notification';
         $logoUrl = $reunion->getLogoUrl();
-        $shareUrl = $reunion->getShareUrl();
+        $shareUrl = $isNotification
+            ? $reunion->getMediaUrlByCollection('notification_share', $reunion->getShareUrl())
+            : $reunion->getShareUrl();
         $coverUrl = $reunion->getCoverUrl();
         $heroUrl = $reunion->getHeroUrl();
 
@@ -721,6 +774,7 @@ class ReunionController extends Controller
         $eventSlug = match ($audience) {
             'teacher' => $reunion->slug . '/thay-co',
             'thank_you' => $reunion->slug . '/thu-cam-on' . (!empty($thankYouRecipient['code']) ? '/' . $thankYouRecipient['code'] : ''),
+            'notification' => $reunion->slug . '/thong-bao',
             default => $reunion->slug,
         };
         $eventUrl = url('/' . $eventSlug);
@@ -730,27 +784,34 @@ class ReunionController extends Controller
         $thankYouLetterUrl = $this->hasThankYouLetter($reunion)
             ? url('/' . $reunion->slug . '/thu-cam-on')
             : null;
+        $notificationUrl = $this->hasNotification($reunion)
+            ? url('/' . $reunion->slug . '/thong-bao')
+            : null;
 
         $defaultTitle = match ($audience) {
             'teacher' => 'Thư Mời Thầy Cô | ' . $eventName,
             'thank_you' => 'Thư Cảm Ơn' . (!empty($thankYouRecipient['name']) ? ' ' . $thankYouRecipient['name'] : '') . ' | ' . $eventName,
+            'notification' => 'Thông báo chương trình | ' . $eventName,
             default => 'Thư Mời Họp Lớp | ' . $eventName,
         };
 
         $defaultMetaDescription = match ($audience) {
             'teacher' => $this->makeDefaultTeacherMetaDescription($eventName, $eventCourse, $eventInfo),
             'thank_you' => $this->makeDefaultThankYouMetaDescription($eventName, $eventCourse),
+            'notification' => $this->makeDefaultNotificationMetaDescription($eventName, $eventCourse, $eventInfo),
             default => $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo),
         };
 
         $metaTitlePath = match ($audience) {
             'teacher' => 'teacher_invitation.seo.title',
             'thank_you' => 'thank_you_letter.seo.title',
+            'notification' => 'notification.title',
             default => 'seo.title',
         };
         $metaDescriptionPath = match ($audience) {
             'teacher' => 'teacher_invitation.seo.description',
             'thank_you' => 'thank_you_letter.seo.description',
+            'notification' => 'notification.description',
             default => 'seo.description',
         };
         $fallbackMetaTitle = $audience === 'thank_you'
@@ -764,8 +825,10 @@ class ReunionController extends Controller
         $description = match ($audience) {
             'teacher' => '<p>Trân trọng kính mời quý thầy cô tham dự ngày hội ngộ - ' . e($eventSlogan) . '</p>',
             'thank_you' => '<p>Trân trọng cảm ơn ' . e($thankYouRecipient['name'] ?? 'Quý mạnh thường quân') . ' đã đồng hành cùng chương trình - ' . e($eventSlogan) . '</p>',
+            'notification' => '<p>' . e($metaDescription) . '</p>',
             default => '<p>' . e($eventAnniversary) . ' ngày ra trường - ' . e($eventSlogan) . '</p>',
         };
+        $notificationTimeline = $this->getNotificationTimeline($content, $timeline);
 
         return (object) [
             'title' => $metaTitle,
@@ -778,12 +841,14 @@ class ReunionController extends Controller
             'teacher_url' => $teacherInvitationUrl,
             'thank_you_url' => $thankYouLetterUrl,
             'benefactor_url' => $thankYouLetterUrl,
+            'notification_url' => $notificationUrl,
             'thank_you_recipient' => $thankYouRecipient,
             'thank_you_recipients' => $thankYouRecipients,
             'audience' => $audience,
             'is_teacher_invitation' => $isTeacherInvitation,
             'is_thank_you_letter' => $isThankYouLetter,
             'is_benefactor_thank_you' => $isThankYouLetter,
+            'is_notification' => $isNotification,
             'open_letter_title' => $isThankYouLetter ? 'Thư cảm ơn' : 'Thư ngỏ',
             'open_letter_nav_label' => $isThankYouLetter ? 'Thư cảm ơn' : 'Thư ngỏ',
             'open_letter_sign' => $isThankYouLetter ? 'Ban tổ chức trân trọng cảm ơn' : 'Ban tổ chức trân trọng kính mời',
@@ -825,6 +890,13 @@ class ReunionController extends Controller
             'album_masonry_enabled' => (bool) data_get($content, 'album_masonry_enabled', true),
             'guestbooks' => $this->mapMessagesForTemplate($messages),
             'contacts' => $this->mapOrganizersForTemplate($organizers),
+            'notification' => (object) [
+                'title' => $metaTitle,
+                'description' => $metaDescription,
+                'timeline' => $this->mapTimelineForTemplate($notificationTimeline),
+                'show_video' => (bool) data_get($content, 'notification.show_video', true),
+                'show_organizers' => (bool) data_get($content, 'notification.show_organizers', true),
+            ],
 
             'map_embed' => $this->makeMapEmbed($eventInfo['map_iframe'] ?? null),
             'countdown_time' => $eventInfo['datetime_iso'] ?? self::DEFAULT_EVENT_DATETIME,
@@ -866,6 +938,21 @@ class ReunionController extends Controller
     private function makeDefaultThankYouMetaDescription(string $eventName, string $eventCourse): string
     {
         return 'Thư cảm ơn Quý mạnh thường quân đã đồng hành cùng chương trình hội ngộ ' . $eventCourse . ' - ' . $eventName . '.';
+    }
+
+    private function makeDefaultNotificationMetaDescription(string $eventName, string $eventCourse, array $eventInfo): string
+    {
+        $eventDate = trim(
+            ($eventInfo['time'] ?? '') . ' ' .
+            ($eventInfo['day'] ?? '') . ' ' .
+            ($eventInfo['date'] ?? '')
+        );
+
+        return trim(
+            'Thông báo lịch trình chương trình hội ngộ ' . $eventCourse . ' - ' . $eventName . '. ' .
+            $eventDate . '.',
+            " .\t\n\r\0\x0B"
+        ) . '.';
     }
 
     private function cleanMetaText(mixed $value): string

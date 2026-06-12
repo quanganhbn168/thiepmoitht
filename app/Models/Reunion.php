@@ -212,6 +212,7 @@ class Reunion extends Model implements HasMedia
             'school_photo',
             'class_photo',
             'qr_code',
+            'notification_share',
         ];
 
         foreach ($singleFileCollections as $collection) {
@@ -233,7 +234,7 @@ class Reunion extends Model implements HasMedia
             ->width(1200)
             ->height(630)
             ->sharpen(10)
-            ->performOnCollections('share', 'cover');
+            ->performOnCollections('share', 'cover', 'notification_share');
 
         $this
             ->addMediaConversion('optimized')
@@ -271,6 +272,7 @@ class Reunion extends Model implements HasMedia
                 'school_photo',
                 'class_photo',
                 'qr_code',
+                'notification_share',
                 'gallery'
             );
     }
