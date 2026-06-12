@@ -250,17 +250,10 @@
             <img src="{{ asset('images/decor/5.png') }}" alt="" class="decor-float -right-20 top-8 hidden w-72 rotate-[-4deg] opacity-80 lg:block">
             <img src="{{ asset('images/decor/6.png') }}" alt="" class="decor-float -left-16 top-28 hidden w-60 rotate-12 opacity-70 lg:block">
             <div class="mx-auto max-w-6xl">
-                <div class="mb-10 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-end">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-[0.24em] text-red-700">Chương trình</p>
-                        <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-5xl">Timeline ngày hội ngộ</h2>
-                        <p class="mt-4 max-w-2xl text-base leading-7 text-slate-600">Các mốc chính trong ngày để thầy cô và các bạn tiện theo dõi, check-in và cùng lưu lại trọn vẹn từng khoảnh khắc.</p>
-                    </div>
-                    <div class="relative overflow-hidden rounded-lg border border-[#ead8b4] bg-[#fffaf0] p-5 shadow-sm">
-                        <img src="{{ asset('images/decor/hoa-phuong-do.png') }}" alt="" class="absolute -right-12 -top-10 w-32 rotate-12 opacity-55">
-                        <p class="relative text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Tổng số hoạt động</p>
-                        <p class="relative mt-2 font-serif text-5xl font-black text-blue-950">{{ $timelineItems->count() }}</p>
-                    </div>
+                <div class="mx-auto mb-10 max-w-3xl text-center">
+                    <p class="text-xs font-bold uppercase tracking-[0.24em] text-red-700">Chương trình</p>
+                    <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-5xl">Timeline ngày hội ngộ</h2>
+                    <p class="mt-4 text-base leading-7 text-slate-600">Các mốc chính trong ngày để thầy cô và các bạn tiện theo dõi, check-in và cùng lưu lại trọn vẹn từng khoảnh khắc.</p>
                 </div>
 
                 @if($timelineItems->isNotEmpty())
@@ -276,13 +269,23 @@
                                     ['bg' => 'bg-indigo-700', 'soft' => 'bg-indigo-50', 'text' => 'text-indigo-800', 'border' => 'border-indigo-200'],
                                     ['bg' => 'bg-fuchsia-700', 'soft' => 'bg-fuchsia-50', 'text' => 'text-fuchsia-800', 'border' => 'border-fuchsia-200'],
                                 ][$index % 6];
+                                $decorImages = [
+                                    ['src' => 'images/decor/hoa-phuong-do.png', 'class' => '-right-10 -top-10 w-28 rotate-12 opacity-55'],
+                                    ['src' => 'images/decor/hoa-bang-lang.png', 'class' => '-left-8 -bottom-12 w-28 rotate-[-14deg] opacity-50'],
+                                    ['src' => 'images/decor/4.png', 'class' => '-right-14 bottom-1 w-24 rotate-[-8deg] opacity-45'],
+                                    ['src' => 'images/decor/6.png', 'class' => '-left-10 -top-8 w-24 rotate-12 opacity-45'],
+                                    ['src' => 'images/decor/7.png', 'class' => '-right-8 -bottom-10 w-20 rotate-[-22deg] opacity-45'],
+                                    ['src' => 'images/decor/so-luu-but.png', 'class' => '-left-12 bottom-0 w-24 rotate-12 opacity-40'],
+                                ];
+                                $decor = $decorImages[$index % count($decorImages)];
                             @endphp
                             <article class="relative pl-14 md:pl-20">
                                 <div class="absolute left-0 top-5 z-10 flex h-12 w-12 items-center justify-center rounded-full {{ $accentClasses['bg'] }} text-sm font-black text-white ring-8 ring-white md:left-0 md:h-[4.5rem] md:w-[4.5rem] md:text-lg">
                                     {{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}
                                 </div>
 
-                                <div class="program-card overflow-hidden rounded-lg border {{ $isHighlight ? 'border-amber-200 bg-amber-50' : 'border-slate-100 bg-white' }} transition hover:-translate-y-0.5 hover:shadow-2xl">
+                                <div class="program-card relative overflow-hidden rounded-lg border {{ $isHighlight ? 'border-amber-200 bg-amber-50' : 'border-slate-100 bg-white' }} transition hover:-translate-y-0.5 hover:shadow-2xl">
+                                    <img src="{{ asset($decor['src']) }}" alt="" class="pointer-events-none absolute hidden select-none sm:block {{ $decor['class'] }}">
                                     <div class="grid md:grid-cols-[190px_minmax(0,1fr)]">
                                         <div class="{{ $accentClasses['soft'] }} {{ $accentClasses['text'] }} flex items-center gap-3 border-b {{ $accentClasses['border'] }} p-5 md:flex-col md:items-start md:justify-center md:border-b-0 md:border-r">
                                             <i class="fa fa-clock text-lg"></i>
