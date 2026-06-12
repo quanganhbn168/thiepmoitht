@@ -139,13 +139,13 @@
             <img src="{{ asset('images/decor/6.png') }}" alt="" class="decor-float bottom-8 right-[3%] hidden w-48 opacity-75 lg:block">
 
             <div class="relative z-10 mx-auto grid min-h-[92vh] max-w-7xl gap-9 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_560px] lg:items-center lg:py-12">
-                <div class="pt-12 lg:pt-0">
+                <div class="pt-12 lg:pt-0" data-aos="fade-right" data-aos-duration="900">
                     <a href="{{ $mainUrl }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-blue-200 bg-white/80 px-4 text-xs font-bold uppercase tracking-[0.16em] text-blue-800 shadow-sm backdrop-blur transition hover:border-blue-300 hover:bg-white">
                         <i class="fa fa-arrow-left text-[11px]"></i>
                         Trang chương trình
                     </a>
 
-                    <div class="mt-9 flex items-center gap-5">
+                    <div class="mt-9 flex items-center gap-5" data-aos="fade-up" data-aos-delay="80">
                         <img src="{{ $logoImage }}" alt="{{ $event->school_name }}" class="h-24 w-24 rounded-full object-contain ring-8 ring-white/80 sm:h-32 sm:w-32">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-[0.22em] text-red-700">{{ $event->school_name }}</p>
@@ -153,15 +153,15 @@
                         </div>
                     </div>
 
-                    <h1 class="mt-8 font-serif text-4xl font-black leading-[1.05] text-blue-950 sm:text-6xl lg:text-7xl">
+                    <h1 class="mt-8 font-serif text-4xl font-black leading-[1.05] text-blue-950 sm:text-6xl lg:text-7xl" data-aos="fade-up" data-aos-delay="140">
                         Ban liên lạc xin trân trọng thông báo
                     </h1>
-                    <p class="mt-6 max-w-2xl text-base leading-8 text-slate-700 sm:text-lg">
+                    <p class="mt-6 max-w-2xl text-base leading-8 text-slate-700 sm:text-lg" data-aos="fade-up" data-aos-delay="200">
                         Chương trình {{ $programName }} - {{ $programSlogan }} của {{ $event->course_name }} sẽ được tổ chức tại {{ $locationLabel ?: 'địa điểm chương trình' }}.
                     </p>
 
                     @if($countdownTarget)
-                        <div class="mt-8 max-w-2xl rounded-lg border border-[#ead8b4] bg-white/82 p-4 shadow-[0_18px_45px_rgba(77,54,20,.1)] backdrop-blur" data-countdown-target="{{ $countdownTarget }}">
+                        <div class="mt-8 max-w-2xl rounded-lg border border-[#ead8b4] bg-white/82 p-4 shadow-[0_18px_45px_rgba(77,54,20,.1)] backdrop-blur" data-countdown-target="{{ $countdownTarget }}" data-aos="zoom-in" data-aos-delay="260">
                             <p class="text-xs font-bold uppercase tracking-[0.18em] text-red-700">Chỉ còn</p>
                             <div class="mt-4 grid grid-cols-4 gap-2 sm:gap-3">
                                 <div class="rounded-md bg-blue-950 px-2 py-3 text-center text-white">
@@ -184,7 +184,7 @@
                         </div>
                     @endif
 
-                    <div class="mt-8 grid max-w-2xl gap-3 sm:grid-cols-2">
+                    <div class="mt-8 grid max-w-2xl gap-3 sm:grid-cols-2" data-aos="fade-up" data-aos-delay="320">
                         <div class="rounded-lg border border-[#ead8b4] bg-white/82 p-4 shadow-sm backdrop-blur">
                             <div class="flex items-start gap-3">
                                 <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white">
@@ -209,7 +209,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-8 flex flex-wrap gap-3">
+                    <div class="mt-8 flex flex-wrap gap-3" data-aos="fade-up" data-aos-delay="380">
                         <a href="#timeline" class="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-blue-800 px-6 text-sm font-bold uppercase tracking-[0.13em] text-white shadow-lg shadow-blue-900/20 transition hover:bg-blue-700">
                             <i class="fa fa-list-check"></i>
                             Xem lịch trình
@@ -221,11 +221,11 @@
                     </div>
                 </div>
 
-                <aside class="relative flex justify-center lg:justify-end">
+                <aside class="relative flex justify-center lg:justify-end" data-aos="fade-left" data-aos-duration="950" data-aos-delay="180">
                     <img src="{{ asset('images/decor/so-luu-but.png') }}" alt="" class="absolute -bottom-16 -right-10 hidden w-52 rotate-6 opacity-95 lg:block">
                     <img src="{{ asset('images/decor/7.png') }}" alt="" class="absolute -bottom-6 left-4 hidden w-36 rotate-[-18deg] opacity-95 sm:block">
 
-                    <div class="memory-polaroid">
+                    <div class="memory-polaroid" data-aos="zoom-in" data-aos-delay="260">
                         <div class="memory-polaroid__photo">
                             <img src="{{ $polaroidImage }}" alt="{{ $event->school_name }}">
                         </div>
@@ -233,7 +233,7 @@
                         <img class="memory-polaroid__frame" src="{{ asset('images/decor/frame-polaroid-cutout.png') }}" alt="">
                     </div>
 
-                    <div class="absolute bottom-0 left-1/2 z-10 w-[min(84vw,360px)] -translate-x-1/2 translate-y-6 rounded-lg border border-[#ead8b4] bg-white/90 p-4 shadow-xl backdrop-blur lg:left-auto lg:right-8 lg:translate-x-0">
+                    <div class="absolute bottom-0 left-1/2 z-10 w-[min(84vw,360px)] -translate-x-1/2 translate-y-6 rounded-lg border border-[#ead8b4] bg-white/90 p-4 shadow-xl backdrop-blur lg:left-auto lg:right-8 lg:translate-x-0" data-aos="fade-up" data-aos-delay="430">
                         <div class="flex items-center gap-3">
                             <img src="{{ $logoImage }}" alt="{{ $event->school_name }}" class="h-14 w-14 shrink-0 rounded-full object-contain ring-1 ring-[#ead8b4]">
                             <div>
@@ -251,7 +251,7 @@
             <img src="{{ asset('images/decor/5.png') }}" alt="" class="decor-float -right-20 top-8 hidden w-72 rotate-[-4deg] opacity-80 lg:block">
             <img src="{{ asset('images/decor/6.png') }}" alt="" class="decor-float -left-16 top-28 hidden w-60 rotate-12 opacity-70 lg:block">
             <div class="mx-auto max-w-6xl">
-                <div class="mx-auto mb-10 max-w-3xl text-center">
+                <div class="mx-auto mb-10 max-w-3xl text-center" data-aos="fade-up">
                     <p class="text-xs font-bold uppercase tracking-[0.24em] text-red-700">Chương trình</p>
                     <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-5xl">Timeline ngày hội ngộ</h2>
                     <p class="mt-4 text-base leading-7 text-slate-600">Các mốc chính trong ngày để thầy cô và các bạn tiện theo dõi, check-in và cùng lưu lại trọn vẹn từng khoảnh khắc.</p>
@@ -280,7 +280,7 @@
                                 ];
                                 $decor = $decorImages[$index % count($decorImages)];
                             @endphp
-                            <article class="relative pl-14 md:pl-20">
+                            <article class="relative pl-14 md:pl-20" data-aos="fade-up" data-aos-delay="{{ min($index * 70, 420) }}">
                                 <div class="absolute left-0 top-5 z-10 flex h-12 w-12 items-center justify-center rounded-full {{ $accentClasses['bg'] }} text-sm font-black text-white ring-8 ring-white md:left-0 md:h-[4.5rem] md:w-[4.5rem] md:text-lg">
                                     {{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}
                                 </div>
@@ -321,12 +321,12 @@
         @if($showVideo && $videoUrl)
             <section class="bg-white px-5 py-16 sm:px-8 sm:py-20">
                 <div class="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[360px_minmax(0,1fr)] lg:items-center">
-                    <div>
+                    <div data-aos="fade-right">
                         <p class="text-xs font-bold uppercase tracking-[0.24em] text-red-700">Trailer</p>
                         <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-4xl">Video chương trình</h2>
                         <p class="mt-4 leading-7 text-slate-600">Một vài khoảnh khắc mở đầu cho ngày trở về thật nhiều cảm xúc.</p>
                     </div>
-                    <a href="{{ $videoUrl }}" class="glightbox-video group relative block overflow-hidden rounded-lg bg-blue-950 shadow-2xl shadow-blue-900/18">
+                    <a href="{{ $videoUrl }}" class="glightbox-video group relative block overflow-hidden rounded-lg bg-blue-950 shadow-2xl shadow-blue-900/18" data-aos="zoom-in" data-aos-delay="120">
                         <img src="{{ $videoCover }}" alt="Video trailer" class="aspect-video w-full object-cover opacity-90 transition duration-700 group-hover:scale-105 group-hover:opacity-75">
                         <span class="absolute inset-0 flex items-center justify-center">
                             <span class="flex h-20 w-20 items-center justify-center rounded-full bg-white text-2xl text-red-700 shadow-2xl">
@@ -341,7 +341,7 @@
         @if($showOrganizers)
             <section class="px-5 py-16 sm:px-8 sm:py-20">
                 <div class="mx-auto max-w-6xl">
-                    <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div class="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between" data-aos="fade-up">
                         <div>
                             <p class="text-xs font-bold uppercase tracking-[0.24em] text-red-700">Ban liên lạc</p>
                             <h2 class="mt-3 font-serif text-3xl font-black text-blue-950 sm:text-4xl">Đầu mối hỗ trợ</h2>
@@ -356,7 +356,7 @@
 
                     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         @forelse($contacts as $contact)
-                            <div class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm">
+                            <div class="rounded-lg border border-blue-100 bg-white p-5 shadow-sm" data-aos="fade-up" data-aos-delay="{{ min($loop->index * 80, 320) }}">
                                 <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{{ $contact->role ?? 'Ban tổ chức' }}</p>
                                 <p class="mt-2 text-lg font-black text-blue-950">{{ $contact->name ?: 'Ban tổ chức' }}</p>
                                 @if(!empty($contact->phone))
@@ -376,7 +376,7 @@
             </section>
         @endif
 
-        <footer class="bg-blue-950 px-5 py-10 text-white sm:px-8">
+        <footer class="bg-blue-950 px-5 py-10 text-white sm:px-8" data-aos="fade-up">
             <div class="mx-auto flex max-w-6xl flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">{{ $event->course_name }}</p>
