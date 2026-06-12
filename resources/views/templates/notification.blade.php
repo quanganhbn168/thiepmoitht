@@ -114,6 +114,7 @@
         if (!$logoImage || str_contains($logoImage, 'default-logo')) {
             $logoImage = asset('images/20-nam-tro-ve-thanh-xuan.png');
         }
+        $polaroidImage = $logoImage;
         $videoUrl = $event->video_url ?? null;
         $videoCover = $event->video_cover ?? $event->cover ?? $heroImage;
         $showVideo = (bool) ($notification->show_video ?? true);
@@ -226,7 +227,7 @@
 
                     <div class="memory-polaroid">
                         <div class="memory-polaroid__photo">
-                            <img src="{{ $heroImage ?: $logoImage }}" alt="{{ $event->school_name }}">
+                            <img src="{{ $polaroidImage }}" alt="{{ $event->school_name }}">
                         </div>
 
                         <img class="memory-polaroid__frame" src="{{ asset('images/decor/frame-polaroid-cutout.png') }}" alt="">
