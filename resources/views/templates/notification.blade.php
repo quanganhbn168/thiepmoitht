@@ -65,6 +65,7 @@
         $programName = $schoolInfo['anniversary'] ?? 'Ngày hội ngộ';
         $programSlogan = $schoolInfo['slogan'] ?? 'Trở về thanh xuân';
         $countdownTarget = $event->countdown_time ?? $event->time_countdown ?? null;
+        $locationLabel = trim((string) ($event->address ?? ($eventInfo['location_address'] ?? '') ?: ($eventInfo['location_name'] ?? '')));
     @endphp
 
     <main class="min-h-screen bg-[#f7fbff]">
@@ -94,7 +95,7 @@
                         Ban liên lạc xin trân trọng thông báo
                     </h1>
                     <p class="mt-6 max-w-2xl text-base leading-8 text-slate-700 sm:text-lg">
-                        Chương trình {{ $programName }} - {{ $programSlogan }} của {{ $event->course_name }} sẽ được tổ chức tại {{ $eventInfo['location_name'] ?? 'địa điểm chương trình' }}.
+                        Chương trình {{ $programName }} - {{ $programSlogan }} của {{ $event->course_name }} sẽ được tổ chức tại {{ $locationLabel ?: 'địa điểm chương trình' }}.
                     </p>
 
                     @if($countdownTarget)
@@ -140,8 +141,7 @@
                                 </span>
                                 <div>
                                     <p class="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Địa điểm</p>
-                                    <p class="mt-1 font-bold text-blue-950">{{ $eventInfo['location_name'] ?? 'Đang cập nhật' }}</p>
-                                    <p class="mt-1 text-sm leading-5 text-slate-600">{{ $event->address ?? ($eventInfo['location_address'] ?? '') }}</p>
+                                    <p class="mt-1 font-bold text-blue-950">{{ $locationLabel ?: 'Đang cập nhật' }}</p>
                                 </div>
                             </div>
                         </div>
