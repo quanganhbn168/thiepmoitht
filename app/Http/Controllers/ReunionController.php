@@ -877,10 +877,14 @@ class ReunionController extends Controller
             ? url('/' . $reunion->slug . '/thong-bao')
             : null;
 
+        $thankYouClassShortName = trim((string) ($thankYouClass['name'] ?? ''));
+        $thankYouClassShortName = trim((string) preg_replace('/^(?:tập\s*thể\s*)?(?:lớp\s*)?/iu', '', $thankYouClassShortName));
+        $thankYouClassTitle = 'Tập Thể Lớp ' . ($thankYouClassShortName !== '' ? $thankYouClassShortName : '');
+        $thankYouClassTitle = trim($thankYouClassTitle);
         $defaultTitle = match ($audience) {
             'teacher' => 'Thư Mời Thầy Cô | ' . $eventName,
             'thank_you' => 'Thư Cảm Ơn' . (!empty($thankYouRecipient['name']) ? ' ' . $thankYouRecipient['name'] : '') . ' | ' . $eventName,
-            'thank_you_class' => 'Thư Cảm Ơn ' . ($thankYouClass['name'] ?? 'Tập Thể Các Lớp') . ' | ' . $eventName,
+            'thank_you_class' => 'Thư Cảm Ơn ' . $thankYouClassTitle . ' | ' . $eventName,
             'notification' => 'Thông báo chương trình | ' . $eventName,
             default => 'Thư Mời Họp Lớp | ' . $eventName,
         };
@@ -888,7 +892,7 @@ class ReunionController extends Controller
         $defaultMetaDescription = match ($audience) {
             'teacher' => $this->makeDefaultTeacherMetaDescription($eventName, $eventCourse, $eventInfo),
             'thank_you' => $this->makeDefaultThankYouMetaDescription($eventName, $eventCourse),
-            'thank_you_class' => 'Ban tổ chức trân trọng cảm ơn ' . ($thankYouClass['name'] ?? 'tập thể các lớp') . ' đã chung tay, hưởng ứng và đồng hành cùng chương trình ' . $eventCourse . ' - ' . $eventName . '.',
+            'thank_you_class' => 'Ban liên lạc trân trọng cảm ơn tập thể lớp ' . ($thankYouClassShortName !== '' ? $thankYouClassShortName : '') . ' đã đồng hành, gắn kết và chung tay cùng chương trình ' . $eventCourse . ' - ' . $eventName . '.',
             'notification' => $this->makeDefaultNotificationMetaDescription($eventName, $eventCourse, $eventInfo),
             default => $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo),
         };
@@ -913,8 +917,12 @@ class ReunionController extends Controller
         $fallbackMetaDescription = $audience === 'thank_you'
             ? data_get($content, 'benefactor_thank_you.seo.description')
             : null;
-        $metaTitle = $this->cleanMetaText(data_get($content, $metaTitlePath) ?: $fallbackMetaTitle) ?: $defaultTitle;
-        $metaDescription = $this->cleanMetaText(data_get($content, $metaDescriptionPath) ?: $fallbackMetaDescription) ?: $defaultMetaDescription;
+        $metaTitle = $audience === 'thank_you_class'
+            ? $defaultTitle
+            : ($this->cleanMetaText(data_get($content, $metaTitlePath) ?: $fallbackMetaTitle) ?: $defaultTitle);
+        $metaDescription = $audience === 'thank_you_class'
+            ? $defaultMetaDescription
+            : ($this->cleanMetaText(data_get($content, $metaDescriptionPath) ?: $fallbackMetaDescription) ?: $defaultMetaDescription);
         $description = match ($audience) {
             'teacher' => '<p>Trân trọng kính mời quý thầy cô tham dự ngày hội ngộ - ' . e($eventSlogan) . '</p>',
             'thank_you' => '<p>Trân trọng cảm ơn ' . e($thankYouRecipient['name'] ?? 'Quý mạnh thường quân') . ' đã đồng hành cùng chương trình - ' . e($eventSlogan) . '</p>',

@@ -438,18 +438,6 @@ class ReunionResource extends Resource
                                             ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled'))
                                             ->columnSpanFull(),
 
-                                        TextInput::make('content.thank_you_by_class.seo.title')
-                                            ->label('Tiêu đề SEO / Share riêng')
-                                            ->placeholder('VD: Thư Cảm Ơn Tập Thể Các Lớp | Chương trình hội ngộ')
-                                            ->maxLength(160)
-                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled')),
-
-                                        Textarea::make('content.thank_you_by_class.seo.description')
-                                            ->label('Mô tả SEO / Share riêng')
-                                            ->rows(3)
-                                            ->maxLength(300)
-                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled')),
-
                                         Repeater::make('content.thank_you_by_class.classes')
                                             ->label('Thư riêng của từng lớp')
                                             ->addActionLabel('Thêm lớp')

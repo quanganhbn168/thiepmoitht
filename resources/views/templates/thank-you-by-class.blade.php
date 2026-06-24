@@ -37,7 +37,8 @@
         }
 
         .font-handwriting {
-            font-family: 'Dancing Script', cursive;
+            font-family: 'Great Vibes', 'Dancing Script', cursive;
+            font-weight: 400;
         }
     </style>
 @endpush
