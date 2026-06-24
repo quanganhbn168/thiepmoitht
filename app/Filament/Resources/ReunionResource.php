@@ -403,6 +403,142 @@ class ReunionResource extends Resource
                                     ])
                                     ->columns(2)
                                     ->columnSpanFull(),
+                                Fieldset::make('Thư cảm ơn tập thể theo lớp')
+                                    ->schema([
+                                        Toggle::make('content.thank_you_by_class.enabled')
+                                            ->label('Bật thư cảm ơn theo lớp')
+                                            ->helperText('Tạo trang /thu-cam-on-lop và link riêng cho từng tập thể lớp.')
+                                            ->live()
+                                            ->afterStateUpdated(function (Set $set, Get $get, bool $state): void {
+                                                if (!$state) {
+                                                    return;
+                                                }
+
+                                                if (blank($get('content.thank_you_by_class.greeting'))) {
+                                                    $set('content.thank_you_by_class.greeting', 'Thân gửi tập thể các lớp');
+                                                }
+
+                                                if (blank($get('content.thank_you_by_class.open_letter'))) {
+                                                    $set('content.thank_you_by_class.open_letter', '<p>Ban tổ chức xin gửi lời cảm ơn chân thành tới tập thể các lớp đã nhiệt tình hưởng ứng, kết nối thành viên và đồng hành cùng chương trình hội ngộ.</p><p>Sự chung tay của từng lớp đã tạo nên sức mạnh đoàn kết, góp phần để ngày trở về của cả niên khóa thêm chu đáo, ấm áp và trọn vẹn.</p><p>Ban tổ chức trân trọng ghi nhận tình cảm, trách nhiệm và tinh thần gắn bó của các tập thể lớp.</p><p><strong>Xin trân trọng cảm ơn.</strong></p>');
+                                                }
+
+                                                if (blank($get('content.thank_you_by_class.seo.title'))) {
+                                                    $set('content.thank_you_by_class.seo.title', 'Thư Cảm Ơn Tập Thể Các Lớp | Chương trình hội ngộ');
+                                                }
+
+                                                if (blank($get('content.thank_you_by_class.seo.description'))) {
+                                                    $set('content.thank_you_by_class.seo.description', 'Ban tổ chức trân trọng cảm ơn tập thể các lớp đã chung tay, hưởng ứng và đồng hành cùng chương trình hội ngộ.');
+                                                }
+
+                                                if (blank($get('content.thank_you_by_class.classes'))) {
+                                                    $set('content.thank_you_by_class.classes', [[
+                                                        'name' => '',
+                                                        'representative' => '',
+                                                        'note' => 'Đã nhiệt tình kết nối, hưởng ứng và đồng hành cùng chương trình.',
+                                                        'code' => '',
+                                                    ]]);
+                                                }
+                                            })
+                                            ->default(false)
+                                            ->columnSpanFull(),
+
+                                        Placeholder::make('thank_you_by_class_url')
+                                            ->label('Link thư cảm ơn tập thể')
+                                            ->content(function (?Reunion $record): HtmlString {
+                                                if (!$record?->slug) {
+                                                    return new HtmlString('<span style="color: #64748b;">Lưu thiệp trước để lấy link.</span>');
+                                                }
+
+                                                $url = url('/' . $record->slug . '/thu-cam-on-lop');
+
+                                                return new HtmlString('<a href="' . e($url) . '" target="_blank" style="color: #2563eb; font-weight: 600;">' . e($url) . '</a>');
+                                            })
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled'))
+                                            ->columnSpanFull(),
+
+                                        TextInput::make('content.thank_you_by_class.greeting')
+                                            ->label('Lời xưng hô chung')
+                                            ->placeholder('VD: Thân gửi tập thể các lớp')
+                                            ->default('Thân gửi tập thể các lớp')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled'))
+                                            ->columnSpanFull(),
+
+                                        RichEditor::make('content.thank_you_by_class.open_letter')
+                                            ->label('Nội dung thư cảm ơn tập thể')
+                                            ->toolbarButtons([
+                                                'bold', 'italic', 'underline', 'strike', 'h2', 'h3',
+                                                'bulletList', 'orderedList', 'link', 'redo', 'undo',
+                                            ])
+                                            ->default('<p>Ban tổ chức xin gửi lời cảm ơn chân thành tới tập thể các lớp đã nhiệt tình hưởng ứng, kết nối thành viên và đồng hành cùng chương trình hội ngộ.</p><p>Sự chung tay của từng lớp đã tạo nên sức mạnh đoàn kết, góp phần để ngày trở về của cả niên khóa thêm chu đáo, ấm áp và trọn vẹn.</p><p>Ban tổ chức trân trọng ghi nhận tình cảm, trách nhiệm và tinh thần gắn bó của các tập thể lớp.</p><p><strong>Xin trân trọng cảm ơn.</strong></p>')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled'))
+                                            ->columnSpanFull(),
+
+                                        TextInput::make('content.thank_you_by_class.seo.title')
+                                            ->label('Tiêu đề SEO / Share riêng')
+                                            ->maxLength(160)
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled')),
+
+                                        Textarea::make('content.thank_you_by_class.seo.description')
+                                            ->label('Mô tả SEO / Share riêng')
+                                            ->rows(3)
+                                            ->maxLength(300)
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled')),
+
+                                        Repeater::make('content.thank_you_by_class.classes')
+                                            ->label('Danh sách tập thể lớp')
+                                            ->helperText('Mỗi lớp có link riêng. VD mã “12a1” sẽ mở ở /thu-cam-on-lop/12a1.')
+                                            ->schema([
+                                                TextInput::make('name')
+                                                    ->label('Tên lớp')
+                                                    ->placeholder('VD: Tập thể lớp 12A1')
+                                                    ->live(onBlur: true)
+                                                    ->afterStateUpdated(function (Set $set, Get $get, ?string $state): void {
+                                                        if (blank($get('code')) && filled($state)) {
+                                                            $set('code', Str::slug($state));
+                                                        }
+                                                    })
+                                                    ->required(),
+
+                                                TextInput::make('representative')
+                                                    ->label('Đại diện lớp')
+                                                    ->placeholder('VD: Lớp trưởng Nguyễn Văn A'),
+
+                                                TextInput::make('code')
+                                                    ->label('Mã link')
+                                                    ->helperText('Không dấu, không khoảng trắng. VD: 12a1')
+                                                    ->required(),
+
+                                                FileUpload::make('image')
+                                                    ->label('Ảnh riêng của lớp')
+                                                    ->disk('public')
+                                                    ->directory('reunion-thank-you-classes')
+                                                    ->visibility('public')
+                                                    ->image()
+                                                    ->imageEditor()
+                                                    ->imagePreviewHeight('180')
+                                                    ->acceptedFileTypes([
+                                                        'image/jpeg',
+                                                        'image/png',
+                                                        'image/webp',
+                                                    ])
+                                                    ->maxSize(10240)
+                                                    ->helperText('Dùng làm ảnh bìa thư và ảnh đại diện trong danh sách lớp. Tối đa 10MB.')
+                                                    ->columnSpanFull(),
+
+                                                Textarea::make('note')
+                                                    ->label('Lời ghi nhận riêng')
+                                                    ->placeholder('VD: Đã nhiệt tình kết nối và vận động thành viên tham gia.')
+                                                    ->rows(2)
+                                                    ->columnSpanFull(),
+                                            ])
+                                            ->columns(3)
+                                            ->defaultItems(1)
+                                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Tập thể lớp')
+                                            ->visible(fn (Get $get): bool => (bool) $get('content.thank_you_by_class.enabled'))
+                                            ->columnSpanFull(),
+                                    ])
+                                    ->columns(2)
+                                    ->columnSpanFull(),
 
                                 Repeater::make('content.organizers')
                                     ->label('Thông tin Ban Tổ Chức / Đầu mối liên hệ')
@@ -1214,6 +1350,12 @@ class ReunionResource extends Resource
                     ->url(fn (Reunion $record): string => url('/' . $record->slug . '/thu-cam-on'))
                     ->openUrlInNewTab(),
 
+                Action::make('view_thank_you_by_class')
+                    ->label('Xem Cảm Ơn Theo Lớp')
+                    ->icon('heroicon-o-user-group')
+                    ->visible(fn (Reunion $record): bool => (bool) data_get($record->content, 'thank_you_by_class.enabled', false))
+                    ->url(fn (Reunion $record): string => url('/' . $record->slug . '/thu-cam-on-lop'))
+                    ->openUrlInNewTab(),
                 Action::make('view_notification')
                     ->label('Xem Thông Báo')
                     ->icon('heroicon-o-megaphone')

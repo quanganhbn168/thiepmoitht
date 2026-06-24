@@ -28,6 +28,8 @@ Route::post('/demo-hop-lop-rsvp', [ReunionController::class, 'storeRsvpDemo'])->
 Route::post('/demo-hop-lop-message', [ReunionController::class, 'storeMessageDemo'])->name('reunion.demo.message');
 Route::get('/{reunion:slug}/thay-co', [ReunionController::class, 'showTeacherInvitation'])->name('reunion.teacher.show');
 Route::get('/{reunion:slug}/thu-cam-on/{recipient?}', [ReunionController::class, 'showThankYouLetter'])->name('reunion.thank-you.show');
+Route::get('/{reunion:slug}/thu-cam-on-lop/{class?}', [ReunionController::class, 'showThankYouLetterByClass'])->name('reunion.thank-you-class.show');
+
 Route::get('/{reunion:slug}/thong-bao', [ReunionController::class, 'showNotification'])->name('reunion.notification.show');
 Route::post('/{reunion:slug}/rsvp', [ReunionController::class, 'storeRsvp'])->name('reunion.rsvp.store');
 Route::post('/{reunion:slug}/message', [ReunionController::class, 'storeMessage'])->name('reunion.message.store');

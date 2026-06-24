@@ -66,6 +66,15 @@ class ReunionController extends Controller
         ]);
     }
 
+    public function showThankYouLetterByClass(Reunion $reunion, Request $request, ?string $class = null)
+    {
+        abort_unless($this->hasThankYouLetterByClass($reunion), 404);
+
+        return $this->renderReunionTemplate($reunion, 'templates.thank-you-by-class', 'thank_you_class', [
+            'thank_you_class' => $this->resolveThankYouClass($reunion, $class ?: $request->query('class')),
+        ]);
+    }
+
     public function showNotification(Reunion $reunion, Request $request)
     {
         abort_unless($this->hasNotification($reunion), 404);
@@ -230,6 +239,11 @@ class ReunionController extends Controller
         );
     }
 
+    private function hasThankYouLetterByClass(Reunion $reunion): bool
+    {
+        return (bool) data_get($this->contentArray($reunion), 'thank_you_by_class.enabled', false);
+    }
+
     private function hasNotification(Reunion $reunion): bool
     {
         return (bool) data_get($this->contentArray($reunion), 'notification.enabled', false);
@@ -270,6 +284,44 @@ class ReunionController extends Controller
 
         return collect($this->getThankYouRecipients($reunion))
             ->first(fn (array $recipient): bool => ($recipient['code'] ?? '') === $code);
+    }
+
+    private function getThankYouClasses(Reunion $reunion): array
+    {
+        $classes = data_get($this->contentArray($reunion), 'thank_you_by_class.classes', []);
+
+        if (!is_iterable($classes)) {
+            return [];
+        }
+
+        return collect($classes)
+            ->filter(fn ($item): bool => is_array($item) && trim((string) ($item['name'] ?? '')) !== '')
+            ->map(function (array $item): array {
+                $name = trim((string) ($item['name'] ?? ''));
+                $code = trim((string) ($item['code'] ?? ''));
+
+                return [
+                    'name' => $name,
+                    'representative' => trim((string) ($item['representative'] ?? '')),
+                    'image' => $this->publicDiskUrl($item['image'] ?? null),
+                    'note' => trim((string) ($item['note'] ?? '')),
+                    'code' => $code !== '' ? Str::slug($code) : Str::slug($name),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    private function resolveThankYouClass(Reunion $reunion, ?string $code): ?array
+    {
+        $code = Str::slug(trim((string) $code));
+
+        if ($code === '') {
+            return null;
+        }
+
+        return collect($this->getThankYouClasses($reunion))
+            ->first(fn (array $class): bool => ($class['code'] ?? '') === $code);
     }
 
     private function approvedMessages(Reunion $reunion)
@@ -523,6 +575,12 @@ class ReunionController extends Controller
             return $greeting !== '' ? $greeting : 'Kính gửi Quý mạnh thường quân';
         }
 
+        if ($audience === 'thank_you_class') {
+            $greeting = trim((string) data_get($content, 'thank_you_by_class.greeting'));
+
+            return $greeting !== '' ? $greeting : 'Thân gửi tập thể các lớp';
+        }
+
         $greeting = trim((string) data_get($content, 'invitation_greeting'));
 
         return $greeting !== '' ? $greeting : 'Quý thầy cô & Các bạn';
@@ -547,6 +605,14 @@ class ReunionController extends Controller
             return $openLetter !== ''
                 ? $openLetter
                 : $this->defaultThankYouLetter($schoolInfo);
+        }
+
+        if ($audience === 'thank_you_class') {
+            $openLetter = trim((string) data_get($content, 'thank_you_by_class.open_letter'));
+
+            return $openLetter !== ''
+                ? $openLetter
+                : $this->defaultThankYouLetterByClass($schoolInfo);
         }
 
         $openLetter = trim((string) data_get($content, 'open_letter'));
@@ -583,6 +649,18 @@ class ReunionController extends Controller
         return '<p>Ban tổ chức chương trình ' . e($anniversary) . ' của tập thể ' . e($course) . ' - ' . e($schoolName) . ' xin được gửi lời cảm ơn chân thành tới Quý mạnh thường quân.</p>'
             . '<p>Sự đồng hành, sẻ chia và đóng góp quý báu của Quý vị đã tiếp thêm nguồn lực để chương trình được chuẩn bị chu đáo, ấm áp và ý nghĩa hơn.</p>'
             . '<p>Ban tổ chức trân trọng ghi nhận tấm lòng của Quý vị và kính chúc Quý vị cùng gia đình luôn mạnh khỏe, bình an, hạnh phúc và thành công.</p>'
+            . '<p><strong>Xin trân trọng cảm ơn.</strong></p>';
+    }
+
+    private function defaultThankYouLetterByClass(array $schoolInfo): string
+    {
+        $schoolName = $schoolInfo['name'] ?? 'mái trường xưa';
+        $course = $schoolInfo['course'] ?? 'niên khóa';
+        $anniversary = $schoolInfo['anniversary'] ?? 'ngày hội ngộ';
+
+        return '<p>Ban tổ chức chương trình ' . e($anniversary) . ' của ' . e($course) . ' - ' . e($schoolName) . ' xin gửi lời cảm ơn chân thành tới tập thể các lớp đã nhiệt tình hưởng ứng và đồng hành.</p>'
+            . '<p>Sự chung tay của từng lớp, từ kết nối thành viên, đóng góp ý tưởng đến hỗ trợ công tác tổ chức, đã tạo nên sức mạnh đoàn kết và giúp ngày trở về của cả niên khóa thêm trọn vẹn.</p>'
+            . '<p>Ban tổ chức trân trọng ghi nhận tình cảm, trách nhiệm và tinh thần gắn bó của các tập thể lớp.</p>'
             . '<p><strong>Xin trân trọng cảm ơn.</strong></p>';
     }
 
@@ -734,6 +812,7 @@ class ReunionController extends Controller
     ): object {
         $isTeacherInvitation = $audience === 'teacher';
         $isThankYouLetter = $audience === 'thank_you';
+        $isThankYouByClass = $audience === 'thank_you_class';
         $isNotification = $audience === 'notification';
         $logoUrl = $reunion->getLogoUrl();
         $shareUrl = $isNotification
@@ -771,9 +850,12 @@ class ReunionController extends Controller
         $content = $this->contentArray($reunion);
         $thankYouRecipients = $this->getThankYouRecipients($reunion);
         $thankYouRecipient = $context['thank_you_recipient'] ?? null;
+        $thankYouClasses = $this->getThankYouClasses($reunion);
+        $thankYouClass = $context['thank_you_class'] ?? null;
         $eventSlug = match ($audience) {
             'teacher' => $reunion->slug . '/thay-co',
             'thank_you' => $reunion->slug . '/thu-cam-on' . (!empty($thankYouRecipient['code']) ? '/' . $thankYouRecipient['code'] : ''),
+            'thank_you_class' => $reunion->slug . '/thu-cam-on-lop' . (!empty($thankYouClass['code']) ? '/' . $thankYouClass['code'] : ''),
             'notification' => $reunion->slug . '/thong-bao',
             default => $reunion->slug,
         };
@@ -784,6 +866,9 @@ class ReunionController extends Controller
         $thankYouLetterUrl = $this->hasThankYouLetter($reunion)
             ? url('/' . $reunion->slug . '/thu-cam-on')
             : null;
+        $thankYouByClassUrl = $this->hasThankYouLetterByClass($reunion)
+            ? url('/' . $reunion->slug . '/thu-cam-on-lop')
+            : null;
         $notificationUrl = $this->hasNotification($reunion)
             ? url('/' . $reunion->slug . '/thong-bao')
             : null;
@@ -791,6 +876,7 @@ class ReunionController extends Controller
         $defaultTitle = match ($audience) {
             'teacher' => 'Thư Mời Thầy Cô | ' . $eventName,
             'thank_you' => 'Thư Cảm Ơn' . (!empty($thankYouRecipient['name']) ? ' ' . $thankYouRecipient['name'] : '') . ' | ' . $eventName,
+            'thank_you_class' => 'Thư Cảm Ơn ' . ($thankYouClass['name'] ?? 'Tập Thể Các Lớp') . ' | ' . $eventName,
             'notification' => 'Thông báo chương trình | ' . $eventName,
             default => 'Thư Mời Họp Lớp | ' . $eventName,
         };
@@ -798,6 +884,7 @@ class ReunionController extends Controller
         $defaultMetaDescription = match ($audience) {
             'teacher' => $this->makeDefaultTeacherMetaDescription($eventName, $eventCourse, $eventInfo),
             'thank_you' => $this->makeDefaultThankYouMetaDescription($eventName, $eventCourse),
+            'thank_you_class' => 'Ban tổ chức trân trọng cảm ơn ' . ($thankYouClass['name'] ?? 'tập thể các lớp') . ' đã chung tay, hưởng ứng và đồng hành cùng chương trình ' . $eventCourse . ' - ' . $eventName . '.',
             'notification' => $this->makeDefaultNotificationMetaDescription($eventName, $eventCourse, $eventInfo),
             default => $this->makeDefaultMetaDescription($eventName, $eventCourse, $eventAnniversary, $eventInfo),
         };
@@ -805,12 +892,14 @@ class ReunionController extends Controller
         $metaTitlePath = match ($audience) {
             'teacher' => 'teacher_invitation.seo.title',
             'thank_you' => 'thank_you_letter.seo.title',
+            'thank_you_class' => 'thank_you_by_class.seo.title',
             'notification' => 'notification.title',
             default => 'seo.title',
         };
         $metaDescriptionPath = match ($audience) {
             'teacher' => 'teacher_invitation.seo.description',
             'thank_you' => 'thank_you_letter.seo.description',
+            'thank_you_class' => 'thank_you_by_class.seo.description',
             'notification' => 'notification.description',
             default => 'seo.description',
         };
@@ -825,6 +914,7 @@ class ReunionController extends Controller
         $description = match ($audience) {
             'teacher' => '<p>Trân trọng kính mời quý thầy cô tham dự ngày hội ngộ - ' . e($eventSlogan) . '</p>',
             'thank_you' => '<p>Trân trọng cảm ơn ' . e($thankYouRecipient['name'] ?? 'Quý mạnh thường quân') . ' đã đồng hành cùng chương trình - ' . e($eventSlogan) . '</p>',
+            'thank_you_class' => '<p>Trân trọng cảm ơn ' . e($thankYouClass['name'] ?? 'tập thể các lớp') . ' đã chung tay làm nên ngày hội ngộ - ' . e($eventSlogan) . '</p>',
             'notification' => '<p>' . e($metaDescription) . '</p>',
             default => '<p>' . e($eventAnniversary) . ' ngày ra trường - ' . e($eventSlogan) . '</p>',
         };
@@ -840,18 +930,22 @@ class ReunionController extends Controller
             'main_url' => url('/' . $reunion->slug),
             'teacher_url' => $teacherInvitationUrl,
             'thank_you_url' => $thankYouLetterUrl,
+            'thank_you_by_class_url' => $thankYouByClassUrl,
             'benefactor_url' => $thankYouLetterUrl,
             'notification_url' => $notificationUrl,
             'thank_you_recipient' => $thankYouRecipient,
             'thank_you_recipients' => $thankYouRecipients,
+            'thank_you_class' => $thankYouClass,
+            'thank_you_classes' => $thankYouClasses,
             'audience' => $audience,
             'is_teacher_invitation' => $isTeacherInvitation,
             'is_thank_you_letter' => $isThankYouLetter,
+            'is_thank_you_by_class' => $isThankYouByClass,
             'is_benefactor_thank_you' => $isThankYouLetter,
             'is_notification' => $isNotification,
-            'open_letter_title' => $isThankYouLetter ? 'Thư cảm ơn' : 'Thư ngỏ',
-            'open_letter_nav_label' => $isThankYouLetter ? 'Thư cảm ơn' : 'Thư ngỏ',
-            'open_letter_sign' => $isThankYouLetter ? 'Ban tổ chức trân trọng cảm ơn' : 'Ban tổ chức trân trọng kính mời',
+            'open_letter_title' => ($isThankYouLetter || $isThankYouByClass) ? 'Thư cảm ơn' : 'Thư ngỏ',
+            'open_letter_nav_label' => ($isThankYouLetter || $isThankYouByClass) ? 'Thư cảm ơn' : 'Thư ngỏ',
+            'open_letter_sign' => ($isThankYouLetter || $isThankYouByClass) ? 'Ban tổ chức trân trọng cảm ơn' : 'Ban tổ chức trân trọng kính mời',
 
             // Có cả 2 tên để không vỡ Blade cũ.
             'course_name' => $eventCourse,
@@ -862,7 +956,7 @@ class ReunionController extends Controller
 
             // Media dùng chung.
             'logo' => $logoUrl,
-            'share_image' => $shareUrl,
+            'share_image' => $thankYouClass['image'] ?? $shareUrl,
             'cover' => $coverUrl,
             'video_cover' => $videoCoverUrl,
             'video_url' => $videoUrl,
