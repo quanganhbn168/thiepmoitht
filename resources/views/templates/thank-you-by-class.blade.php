@@ -40,6 +40,10 @@
             font-family: 'Great Vibes', 'Dancing Script', cursive;
             font-weight: 400;
         }
+        .font-class-name {
+            font-family: 'Dancing Script', cursive;
+            font-weight: 700;
+        }
     </style>
 @endpush
 
@@ -88,7 +92,7 @@
                         <h1 class="mt-6 font-serif text-4xl font-bold uppercase tracking-[0.08em] text-[#8f2d25] sm:text-5xl lg:text-6xl">
                             Thư cảm ơn
                         </h1>
-                        <p class="font-handwriting mt-3 text-4xl font-bold leading-tight text-[#624126] sm:text-5xl">
+                        <p class="font-class-name mt-3 text-4xl leading-tight text-[#624126] sm:text-5xl">
                             {{ $className }}
                         </p>
                     </header>
@@ -117,7 +121,7 @@
                             @if($recognition !== '')
                                 {!! nl2br(e($recognition)) !!}
                             @else
-                                <p>Ban liên lạc trân trọng cảm ơn sự đồng hành, sẻ chia và tinh thần gắn kết của {{ $className }} trong hành trình trở về thanh xuân.</p>
+                                <p>Ban tổ chức trân trọng cảm ơn sự đồng hành, sẻ chia và tinh thần gắn kết của {{ $className }} trong hành trình trở về thanh xuân.</p>
                             @endif
                         </div>
                     </section>
@@ -125,7 +129,7 @@
                     <footer class="relative mt-12 border-t border-[#ccb592] pt-8 text-right">
                         <img src="{{ asset('images/pen.png') }}" alt="" aria-hidden="true" class="pointer-events-none absolute -bottom-5 left-0 w-24 -rotate-12 opacity-45 sm:w-32">
                         <p class="font-handwriting text-3xl font-bold text-[#8f2d25] sm:text-4xl">Trân trọng</p>
-                        <p class="mt-2 text-sm font-bold uppercase tracking-[0.2em] text-[#68492f]">Ban liên lạc</p>
+                        <p class="mt-2 text-sm font-bold uppercase tracking-[0.2em] text-[#68492f]">Ban tổ chức</p>
                         <p class="mt-1 text-xs font-semibold text-[#9a7959]">{{ $event->course_name }}</p>
                     </footer>
                 </div>
