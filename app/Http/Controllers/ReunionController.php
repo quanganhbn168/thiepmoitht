@@ -70,8 +70,12 @@ class ReunionController extends Controller
     {
         abort_unless($this->hasThankYouLetterByClass($reunion), 404);
 
+        $thankYouClass = $this->resolveThankYouClass($reunion, $class ?: $request->query('class'));
+
+        abort_unless($thankYouClass, 404);
+
         return $this->renderReunionTemplate($reunion, 'templates.thank-you-by-class', 'thank_you_class', [
-            'thank_you_class' => $this->resolveThankYouClass($reunion, $class ?: $request->query('class')),
+            'thank_you_class' => $thankYouClass,
         ]);
     }
 
