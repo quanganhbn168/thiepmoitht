@@ -91,8 +91,8 @@
     }
     .seal-ring {
       background:
-        radial-gradient(circle, rgba(255,248,234,1) 0 48%, transparent 49%),
-        conic-gradient(from 180deg, #C99A35, #F5E6B8, #C99A35, #8F1D1D, #C99A35);
+        radial-gradient(circle, rgba(255,248,234,1) 0 57%, transparent 81%),
+        conic-gradient(from 180deg, #C99A35, #F5E6B8, #C99A35, #8F1D1D, #C99A35)
     }
     .content p { margin-bottom: 1rem; }
     .content strong { color: #641313; }
@@ -162,10 +162,10 @@
             Sở Giáo dục và Đào tạo Bắc Ninh · Trường THPT Lương Tài số 3
           </div>
 
-          <p class="font-script text-4xl text-school-red sm:text-5xl">Thư ngỏ</p>
-          <h1 class="mt-3 max-w-4xl font-serif text-4xl font-black leading-[1.08] tracking-tight text-school-redDark sm:text-5xl lg:text-6xl">
-            Lễ kỷ niệm 30 năm ngày thành lập Trường THPT Lương Tài số 3
-          </h1>
+          <p class="font-script text-5xl sm:text-6xl lg:text-8xl text-school-red leading-none">Thư ngỏ</p>
+          <h1 class="mt-3 max-w-4xl font-serif text-3xl/[1.2] font-black tracking-tight text-school-redDark sm:text-4xl/[1.2] lg:text-5xl/[1.2]">
+  Lễ kỷ niệm 30 năm <br/> ngày thành lập <br/> Trường THPT Lương Tài số 3
+</h1>
 
           <p class="mt-7 max-w-2xl text-lg leading-8 text-stone-700">
             Ba mươi năm xây dựng và phát triển là dấu mốc đáng tự hào, ghi nhận sự tâm huyết của các thế hệ thầy cô, cán bộ, nhân viên, học sinh, phụ huynh và những người luôn đồng hành cùng Nhà trường.
@@ -188,10 +188,7 @@
 
             <div class="relative rounded-[1.5rem] border border-school-gold/30 bg-white/70 p-8 text-center shadow-card">
               <div class="seal-ring mx-auto flex h-36 w-36 items-center justify-center rounded-full p-1">
-                <div class="flex h-full w-full flex-col items-center justify-center rounded-full bg-school-cream text-school-redDark">
-                  <span class="font-serif text-6xl font-black leading-none">30</span>
-                  <span class="mt-1 text-xs font-extrabold uppercase section-label">Năm</span>
-                </div>
+                <img src="{{ asset('images/luong-tai-so-3-tranpet.png') }}" alt="Logo Trường THPT Lương Tài số 3" class="h-28 w-28 object-cover" />
               </div>
 
               <p class="mt-8 font-script text-4xl text-school-red">1996 – 2026</p>
@@ -227,10 +224,10 @@
     </section>
 
     <section id="thu-ngo" class="px-4 py-20 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-5xl">
+      <div class="mx-auto max-w-6xl">
         <div class="mb-10 text-center" data-aos="fade-up">
           <p class="font-script text-4xl text-school-red sm:text-5xl">Kính gửi</p>
-          <h2 class="mt-3 font-serif text-3xl font-black text-school-redDark sm:text-4xl">Quý thầy cô, các thế hệ học sinh, phụ huynh và các đơn vị đồng hành</h2>
+          <h2 class="mt-3 font-serif text-3xl font-black text-school-redDark sm:text-4xl leading-none">Quý thầy cô, các thế hệ học sinh, phụ huynh và các đơn vị đồng hành</h2>
           <div class="gold-line mx-auto mt-6"></div>
         </div>
 
@@ -335,22 +332,22 @@
             <div class="mt-6 grid gap-4 sm:grid-cols-2">
               <a href="tel:0983867632" class="card-hover rounded-3xl border border-school-gold/20 bg-school-cream/60 p-5">
                 <p class="text-xs font-bold uppercase section-label text-school-gold">Trưởng Ban Tổ chức</p>
-                <p class="mt-3 font-bold text-school-redDark">Ông/Bà: Vũ Đình Phàm</p>
+                <p class="mt-3 font-bold text-school-redDark">Ông: Vũ Đình Phàm</p>
                 <p class="mt-2 text-sm text-stone-600">0983867632</p>
               </a>
               <a href="tel:0983870504" class="card-hover rounded-3xl border border-school-gold/20 bg-school-cream/60 p-5">
                 <p class="text-xs font-bold uppercase section-label text-school-gold">Phó Trưởng Ban</p>
-                <p class="mt-3 font-bold text-school-redDark">Ông/Bà: Vũ Đình Thanh</p>
+                <p class="mt-3 font-bold text-school-redDark">Ông: Vũ Đình Thanh</p>
                 <p class="mt-2 text-sm text-stone-600">0983870504</p>
               </a>
               <a href="tel:0348219959" class="card-hover rounded-3xl border border-school-gold/20 bg-school-cream/60 p-5">
                 <p class="text-xs font-bold uppercase section-label text-school-gold">Phó Trưởng Ban</p>
-                <p class="mt-3 font-bold text-school-redDark">Ông/Bà: Nguyễn Thị Hồng</p>
+                <p class="mt-3 font-bold text-school-redDark">Bà: Nguyễn Thị Hồng</p>
                 <p class="mt-2 text-sm text-stone-600">0348219959</p>
               </a>
               <a href="tel:0377867369" class="card-hover rounded-3xl border border-school-gold/20 bg-school-cream/60 p-5">
                 <p class="text-xs font-bold uppercase section-label text-school-gold">Thư ký Ban Tổ chức</p>
-                <p class="mt-3 font-bold text-school-redDark">Ông/Bà: Nguyễn Thị Thơm</p>
+                <p class="mt-3 font-bold text-school-redDark">Bà: Nguyễn Thị Thơm</p>
                 <p class="mt-2 text-sm text-stone-600">0377867369</p>
               </a>
             </div>
@@ -368,10 +365,10 @@
         </p>
         <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <a href="tel:0983867632" class="rounded-full bg-white px-7 py-3.5 text-sm font-bold text-school-redDark transition hover:bg-school-goldLight">
-            Gọi Ban Tổ chức
+            Liên hệ Ban Tổ chức
           </a>
           <a href="mailto:c3luongtai3@bacninh.edu.vn" class="rounded-full border border-white/30 px-7 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">
-            Gửi email Nhà trường
+            Hòm thư điện tử
           </a>
         </div>
       </div>
@@ -386,10 +383,7 @@
 
   <div class="no-print fixed bottom-4 left-4 right-4 z-50 flex gap-3 sm:hidden">
     <a href="tel:0983867632" class="flex-1 rounded-full bg-school-red px-4 py-3 text-center text-sm font-bold text-white shadow-soft">
-      Gọi BTC
-    </a>
-    <a href="#lien-he" class="flex-1 rounded-full border border-school-gold/40 bg-white px-4 py-3 text-center text-sm font-bold text-school-redDark shadow-card">
-      Liên hệ
+      Liên hệ Ban Tổ chức
     </a>
   </div>
 
