@@ -251,7 +251,6 @@ class GatheringResource extends Resource
                             TextInput::make('content.payment.account_number')
                                 ->label('Số tài khoản')
                                 ->maxLength(100)
-                                ->copyable()
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 
                             TextInput::make('content.payment.account_holder')
