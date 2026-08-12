@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GatheringController;
 use App\Http\Controllers\ReunionController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,14 @@ Route::get('/{reunion:slug}/thu-cam-on-lop/{class}', [ReunionController::class, 
 Route::get('/{reunion:slug}/thong-bao', [ReunionController::class, 'showNotification'])->name('reunion.notification.show');
 Route::post('/{reunion:slug}/rsvp', [ReunionController::class, 'storeRsvp'])->name('reunion.rsvp.store');
 Route::post('/{reunion:slug}/message', [ReunionController::class, 'storeMessage'])->name('reunion.message.store');
+
+// Hội ngộ có module và URL riêng, không dùng chung dữ liệu với thiệp họp lớp.
+// Scoped bindings đảm bảo mã khách chỉ được mở trong đúng buổi hội ngộ của họ.
+Route::scopeBindings()->group(function (): void {
+    Route::get('/hoi-ngo/{gathering:slug}', [GatheringController::class, 'show'])->name('gathering.show');
+    Route::get('/hoi-ngo/{gathering:slug}/{guest:code}', [GatheringController::class, 'showInvitation'])->name('gathering.invitation.show');
+    Route::post('/hoi-ngo/{gathering:slug}/{guest:code}/xac-nhan', [GatheringController::class, 'storeRsvp'])->name('gathering.rsvp.store');
+});
 
 // Fallback: /{slug} can be reunion
 Route::get('/{slug}', [\App\Http\Controllers\HomeController::class, 'resolveSlug'])

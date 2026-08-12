@@ -10,6 +10,7 @@ class TemplateViewRegistry
     private const SUPPORTED_TYPES = [
         'reunion',
         'reunion_teacher',
+        'gathering',
     ];
 
     private const DIRECTORIES = [

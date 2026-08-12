@@ -27,6 +27,8 @@ class TemplateResource extends Resource
 
     public const TYPE_REUNION_TEACHER = 'reunion_teacher';
 
+    public const TYPE_GATHERING = 'gathering';
+
     public static function getNavigationIcon(): ?string
     {
         return 'heroicon-o-rectangle-stack';
@@ -70,6 +72,7 @@ class TemplateResource extends Resource
         return [
             self::TYPE_REUNION => 'Thiệp họp lớp',
             self::TYPE_REUNION_TEACHER => 'Thiệp thầy cô',
+            self::TYPE_GATHERING => 'Thiệp hội ngộ',
         ];
     }
 
@@ -93,7 +96,7 @@ class TemplateResource extends Resource
                                     ->default(self::TYPE_REUNION)
                                     ->required()
                                     ->live()
-                                    ->helperText('Chọn “Thiệp thầy cô” cho các mẫu chỉ dùng ở link /thay-co.'),
+                                    ->helperText('Chọn đúng loại thiệp để mẫu chỉ xuất hiện trong danh mục tương ứng.'),
 
                                 Forms\Components\TextInput::make('view_path')
                                     ->label('Đường dẫn file Blade')
@@ -326,7 +329,11 @@ class TemplateResource extends Resource
                     ->label('Loại')
                     ->formatStateUsing(fn (?string $state): string => self::templateTypeOptions()[$state] ?? (string) $state)
                     ->badge()
-                    ->color(fn (?string $state): string => $state === self::TYPE_REUNION_TEACHER ? 'warning' : 'info'),
+                    ->color(fn (?string $state): string => match ($state) {
+                        self::TYPE_REUNION_TEACHER => 'warning',
+                        self::TYPE_GATHERING => 'success',
+                        default => 'info',
+                    }),
 
                 Tables\Columns\TextColumn::make('media_schema')
                     ->label('Media')
