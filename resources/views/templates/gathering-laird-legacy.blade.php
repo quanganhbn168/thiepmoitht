@@ -181,8 +181,9 @@
         <div class="container">
             <section class="invite-letter" aria-labelledby="invite-title">
                 <div>
-                    <p class="formal-greeting">Trân trọng kính mời</p>
-                    <h2 id="invite-title">{{ $guest ? $event->greeting : ($gathering->host_name ?: 'Những người bạn từng đồng hành.') }}</h2>
+                    <p class="formal-greeting">Thiệp mời hội ngộ</p>
+                    <h2 id="invite-title">{{ $event->invitation_title }}</h2>
+                    <p class="invite-copy" style="margin:18px 0 0">{{ $event->invitation_description }}</p>
                     <div class="invite-copy">{!! $event->introduction !!}</div>
                 </div>
                 <div class="invite-aside">Sự có mặt của mỗi người không chỉ là một cuộc gặp. Đó là dịp để những ký ức chung được gọi tên và hành trình từng cùng dựng xây được nối tiếp.</div>

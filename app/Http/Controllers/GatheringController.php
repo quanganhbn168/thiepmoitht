@@ -100,6 +100,13 @@ class GatheringController extends Controller
             ])->filter()->implode("\n");
         }
         $paymentDeadline = trim((string) data_get($content, 'payment.deadline'));
+        $inviteeName = trim((string) $guest?->name);
+        $invitationTitle = $inviteeName !== ''
+            ? 'Trân trọng kính mời '.$inviteeName
+            : 'Trân trọng kính mời bạn';
+        $invitationDescription = $inviteeName !== ''
+            ? $inviteeName.', mời bạn đến chung vui trong buổi hội ngộ '.$gathering->title.'.'
+            : 'Mời bạn đến chung vui trong buổi hội ngộ '.$gathering->title.'.';
         $layoutValue = static function (string $key, string $default = '') use ($layout): string {
             $value = trim((string) data_get($layout, $key));
 
@@ -134,13 +141,21 @@ class GatheringController extends Controller
             : route('gathering.show', ['gathering' => $gathering->slug]);
 
         $event = (object) [
-            'title' => data_get($content, 'seo.title') ?: 'Lời mời hội ngộ | ' . $gathering->title,
-            'meta_title' => data_get($content, 'seo.title') ?: 'Lời mời hội ngộ | ' . $gathering->title,
-            'meta_description' => data_get($content, 'seo.description') ?: 'Trân trọng mời bạn đến buổi hội ngộ ' . $gathering->title . '.',
+            'title' => $inviteeName !== ''
+                ? $invitationTitle.' | '.$gathering->title
+                : (data_get($content, 'seo.title') ?: 'Lời mời hội ngộ | '.$gathering->title),
+            'meta_title' => $inviteeName !== ''
+                ? $invitationTitle.' | '.$gathering->title
+                : (data_get($content, 'seo.title') ?: 'Lời mời hội ngộ | '.$gathering->title),
+            'meta_description' => $inviteeName !== ''
+                ? $invitationDescription
+                : (data_get($content, 'seo.description') ?: $invitationDescription),
             'url' => $invitationUrl,
             'canonical_url' => $invitationUrl,
             'main_url' => route('gathering.show', ['gathering' => $gathering->slug]),
             'headline' => data_get($content, 'invitation_headline') ?: 'Kèo này không được vắng mặt',
+            'invitation_title' => $invitationTitle,
+            'invitation_description' => $invitationDescription,
             'greeting' => $guest?->greeting ?: ('Gửi ' . ($guest?->name ?: 'người bạn thân mến') . ','),
             'introduction' => data_get($content, 'introduction') ?: '<p>Đủ lâu rồi chúng ta chưa ngồi lại với nhau. Mời bạn đến một buổi gặp gỡ thật vui, kể chuyện cũ và cụng ly cho những ngày mới.</p>',
             'dress_code' => data_get($content, 'dress_code'),
