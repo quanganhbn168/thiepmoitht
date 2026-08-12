@@ -1,15 +1,25 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\DashboardController;
+use App\Filament\Customer\Pages\CustomerDashboard;
+use App\Filament\Pages\Dashboard;
 use App\Http\Controllers\GatheringController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReunionController;
+use App\Http\Controllers\WeddingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 // Profile routes
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return redirect()->to(
+            request()->user()->isCustomer()
+                ? CustomerDashboard::getUrl(panel: 'customer')
+                : Dashboard::getUrl(panel: 'admin')
+        );
+    })->name('dashboard');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -43,7 +53,9 @@ Route::scopeBindings()->group(function (): void {
     Route::post('/hoi-ngo/{gathering:slug}/{guest:code}/xac-nhan', [GatheringController::class, 'storeRsvp'])->name('gathering.rsvp.store');
 });
 
+Route::get('/thiep-cuoi/{wedding:slug}', [WeddingController::class, 'show'])->name('wedding.show');
+
 // Fallback: /{slug} can be reunion
 Route::get('/{slug}', [\App\Http\Controllers\HomeController::class, 'resolveSlug'])
-    ->where('slug', '^(?!admin|dashboard|login|register|profile|payment|api).*$')
+    ->where('slug', '^(?!admin|tai-khoan|thiep-cuoi|dashboard|login|register|profile|payment|api).*$')
     ->name('resolve.slug');

@@ -14,12 +14,12 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\BulkActionGroup;
@@ -104,7 +104,9 @@ class GatheringResource extends Resource
                                 ->relationship('user', 'name')
                                 ->label('Khách hàng sở hữu')
                                 ->searchable()
-                                ->preload(),
+                                ->preload()
+                                ->hidden(fn (): bool => auth()->user()?->isCustomer() ?? false)
+                                ->dehydrated(fn (): bool => ! (auth()->user()?->isCustomer() ?? false)),
 
                             DatePicker::make('event_date')
                                 ->label('Ngày tổ chức')
@@ -217,6 +219,106 @@ class GatheringResource extends Resource
                                 ->columnSpanFull(),
                         ]),
 
+                    Tab::make('Bố cục Ký ức')
+                        ->schema([
+                            TextInput::make('content.layout.hero_kicker')
+                                ->label('Dòng giới thiệu trên hero')
+                                ->placeholder('VD: Hội cựu nhân viên · Hội ngộ 2026')
+                                ->maxLength(255)
+                                ->columnSpanFull(),
+
+                            Textarea::make('content.layout.hero_title')
+                                ->label('Tiêu đề lớn trên hero')
+                                ->placeholder('VD: Hẹn gặp lại những người bạn cũ')
+                                ->helperText('Mẫu “Ký ức dựng xây”. Có thể xuống dòng bằng Enter.')
+                                ->rows(2)
+                                ->maxLength(255)
+                                ->columnSpanFull(),
+
+                            Textarea::make('content.layout.hero_note')
+                                ->label('Đoạn giới thiệu trên hero')
+                                ->rows(3)
+                                ->maxLength(500)
+                                ->columnSpanFull(),
+
+                            TextInput::make('content.layout.hero_photo_label')
+                                ->label('Nhãn ảnh hero')
+                                ->placeholder('VD: Laird Việt Nam')
+                                ->maxLength(255),
+
+                            Textarea::make('content.layout.hero_photo_caption')
+                                ->label('Chú thích ảnh hero')
+                                ->rows(2)
+                                ->maxLength(500),
+
+                            Repeater::make('content.layout.timeline')
+                                ->label('Hai dấu mốc kỷ niệm')
+                                ->addActionLabel('Thêm dấu mốc')
+                                ->default([
+                                    ['date' => 'Ngày ấy', 'title' => 'Những kỷ niệm còn đây', 'description' => 'Những con người từng đồng hành và một chặng đường đáng nhớ.'],
+                                    ['date' => 'Ngày gặp lại', 'title' => 'Hẹn gặp lại nhau', 'description' => 'Một cuộc hẹn để cùng nhìn lại và nối tiếp những kết nối đã từng có.'],
+                                ])
+                                ->schema([
+                                    TextInput::make('date')->label('Mốc thời gian')->required()->maxLength(50),
+                                    TextInput::make('title')->label('Tiêu đề')->required()->maxLength(255),
+                                    Textarea::make('description')->label('Mô tả')->rows(2)->columnSpanFull(),
+                                ])
+                                ->columns(2)
+                                ->columnSpanFull(),
+
+                            TextInput::make('content.layout.milestone_label')
+                                ->label('Nhãn ảnh kỷ niệm 1')
+                                ->placeholder('VD: Tư liệu kỷ niệm')
+                                ->maxLength(255),
+
+                            Textarea::make('content.layout.milestone_heading')
+                                ->label('Tiêu đề khu ảnh kỷ niệm 1')
+                                ->placeholder('VD: Một dấu mốc để nhớ')
+                                ->rows(2)
+                                ->maxLength(255),
+
+                            TextInput::make('content.layout.milestone_date')
+                                ->label('Mốc thời gian cho ảnh 1')
+                                ->placeholder('VD: 01 / 02 · 11.06.2014')
+                                ->maxLength(100),
+
+                            TextInput::make('content.layout.milestone_title')
+                                ->label('Tiêu đề ảnh kỷ niệm 1')
+                                ->maxLength(255),
+
+                            Textarea::make('content.layout.milestone_description')
+                                ->label('Chú thích ảnh kỷ niệm 1')
+                                ->rows(3)
+                                ->columnSpanFull(),
+
+                            TextInput::make('content.layout.team_label')
+                                ->label('Nhãn ảnh kỷ niệm 2')
+                                ->placeholder('VD: Những gương mặt năm ấy')
+                                ->maxLength(255),
+
+                            Textarea::make('content.layout.team_heading')
+                                ->label('Tiêu đề khu ảnh kỷ niệm 2')
+                                ->placeholder('VD: Tập thể ngày ấy')
+                                ->rows(2)
+                                ->maxLength(255),
+
+                            Textarea::make('content.layout.team_intro')
+                                ->label('Mô tả ảnh kỷ niệm 2')
+                                ->rows(3)
+                                ->columnSpanFull(),
+
+                            TextInput::make('content.layout.team_credit_label')
+                                ->label('Nhãn caption ảnh 2')
+                                ->placeholder('VD: Ký ức tập thể')
+                                ->maxLength(255),
+
+                            Textarea::make('content.layout.team_credit')
+                                ->label('Caption ảnh 2')
+                                ->rows(2)
+                                ->columnSpanFull(),
+                        ])
+                        ->columns(2),
+
                     Tab::make('QR đóng quỹ')
                         ->schema([
                             Toggle::make('content.payment.enabled')
@@ -232,6 +334,7 @@ class GatheringResource extends Resource
                                 ->image()
                                 ->imageEditor()
                                 ->maxSize(10240)
+                                ->helperText('Dùng đúng luồng thiệp cưới: tải ảnh QR tài khoản của ban tổ chức; thiệp sẽ hiển thị ảnh này.')
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 
                             TextInput::make('content.payment.amount')
@@ -239,7 +342,8 @@ class GatheringResource extends Resource
                                 ->numeric()
                                 ->minValue(0)
                                 ->suffix('đ')
-                                ->default(500000)
+                                ->placeholder('VD: 500000')
+                                ->helperText('Thiết lập riêng cho từng thiệp; để trống nếu không muốn ấn định số tiền.')
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 
                             TextInput::make('content.payment.bank_name')
@@ -317,7 +421,7 @@ class GatheringResource extends Resource
 
                                     $url = route('gathering.show', ['gathering' => $record->slug]);
 
-                                    return new HtmlString('<a href="' . e($url) . '" target="_blank" style="color:#2563eb;font-weight:600">' . e($url) . '</a>');
+                                    return new HtmlString('<a href="'.e($url).'" target="_blank" style="color:#2563eb;font-weight:600">'.e($url).'</a>');
                                 })
                                 ->visibleOn('edit')
                                 ->columnSpanFull(),

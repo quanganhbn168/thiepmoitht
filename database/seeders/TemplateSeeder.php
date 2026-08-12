@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class TemplateSeeder extends Seeder
@@ -26,6 +25,7 @@ class TemplateSeeder extends Seeder
                     ->update(['template_id' => $newTemplate->id]);
 
                 $oldTemplate->delete();
+
                 continue;
             }
 
@@ -91,9 +91,30 @@ class TemplateSeeder extends Seeder
                 'required_tier' => 'standard',
                 'is_active' => true,
             ],
+            [
+                'name' => 'Thiệp hội ngộ - Kèo thân tình',
+                'view_path' => 'templates.gathering-cheers',
+                'type' => 'gathering',
+                'required_tier' => 'standard',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Hội ngộ - Ký ức dựng xây',
+                'view_path' => 'templates.gathering-laird-legacy',
+                'type' => 'gathering',
+                'required_tier' => 'standard',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Thiệp cưới - Modern',
+                'view_path' => 'templates.wedding-modern',
+                'type' => 'wedding',
+                'required_tier' => 'standard',
+                'is_active' => true,
+            ],
         ];
 
-        \App\Models\Template::whereNotIn('type', ['reunion', 'reunion_teacher'])->delete();
+        \App\Models\Template::whereNotIn('type', ['reunion', 'reunion_teacher', 'gathering', 'wedding'])->delete();
 
         foreach ($templates as $template) {
             \App\Models\Template::updateOrCreate(

@@ -11,6 +11,7 @@ class TemplateViewRegistry
         'reunion',
         'reunion_teacher',
         'gathering',
+        'wedding',
     ];
 
     private const DIRECTORIES = [
@@ -66,7 +67,7 @@ class TemplateViewRegistry
     {
         $paths = [];
         $viewsRoot = str_replace('\\', '/', resource_path('views'));
-        $basePath = resource_path('views/' . $directory);
+        $basePath = resource_path('views/'.$directory);
 
         if (! File::isDirectory($basePath)) {
             return $paths;
@@ -78,7 +79,7 @@ class TemplateViewRegistry
             }
 
             $normalizedPath = str_replace('\\', '/', $file->getPathname());
-            $viewPath = str_replace($viewsRoot . '/', '', $normalizedPath);
+            $viewPath = str_replace($viewsRoot.'/', '', $normalizedPath);
             $viewPath = preg_replace('/\.blade\.php$/', '', $viewPath);
             $viewPath = str_replace('/', '.', $viewPath);
             $paths[$viewPath] = $file->getPathname();

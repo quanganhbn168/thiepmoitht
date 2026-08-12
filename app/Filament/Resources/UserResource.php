@@ -4,24 +4,21 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
+use App\Support\VietnamesePhoneNumber;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Facades\Filament;
-
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DateTimePicker;
-
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UserResource extends Resource
 {
@@ -71,17 +68,25 @@ class UserResource extends Resource
                             ->email()
                             ->required()
                             ->maxLength(255),
+                        TextInput::make('phone')
+                            ->label('Số điện thoại')
+                            ->tel()
+                            ->maxLength(20)
+                            ->dehydrateStateUsing(fn (mixed $state): ?string => filled($state)
+                                ? VietnamesePhoneNumber::normalize($state)
+                                : null)
+                            ->unique(ignoreRecord: true),
                         Select::make('roles')
                             ->relationship('roles', 'name')
                             ->multiple()
                             ->preload()
                             ->label('Quyền hạn (Shield)'),
                         TextInput::make('password')
-    ->label('Mật khẩu')
-    ->password()
-    ->dehydrated(fn($state) => filled($state))
-    ->required(fn(string $context): bool => $context === 'create')
-    ->maxLength(255),
+                            ->label('Mật khẩu')
+                            ->password()
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->maxLength(255),
                     ]),
             ]);
     }
@@ -96,10 +101,13 @@ class UserResource extends Resource
                     ->weight('bold'),
                 TextColumn::make('email')
                     ->searchable(),
+                TextColumn::make('phone')
+                    ->label('Số điện thoại')
+                    ->searchable(),
                 TextColumn::make('roles.name')
                     ->label('Quyền hạn')
                     ->badge()
-                    ->color(fn($state) => match ($state) {
+                    ->color(fn ($state) => match ($state) {
                         'super_admin' => 'danger',
                         'admin' => 'warning',
                         'customer' => 'success',
@@ -135,4 +143,3 @@ class UserResource extends Resource
         ];
     }
 }
-

@@ -13,7 +13,7 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::updateOrCreate(
+        $user = User::updateOrCreate(
             ['email' => 'quanganhadmin@thtmedia.com.vn'],
             [
                 'name' => 'Quang Anh Admin',
@@ -22,5 +22,7 @@ class AdminUserSeeder extends Seeder
                 'role' => 'admin',
             ]
         );
+
+        $user->syncRoles([User::ROLE_SUPER_ADMIN]);
     }
 }

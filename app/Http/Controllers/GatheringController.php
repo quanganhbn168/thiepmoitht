@@ -67,6 +67,7 @@ class GatheringController extends Controller
         abort_unless($this->isPublic($gathering), 404);
 
         $content = is_array($gathering->content) ? $gathering->content : [];
+        $layout = is_array(data_get($content, 'layout')) ? data_get($content, 'layout') : [];
         $viewPath = $this->resolveViewPath($gathering);
         $eventDateTime = $gathering->event_time
             ?: $gathering->event_date?->copy()->setTime(18, 0);
@@ -78,6 +79,35 @@ class GatheringController extends Controller
             ? trim($paymentPrefix . ' ' . $guest->code)
             : trim($paymentPrefix . ' ' . $gathering->slug);
         $paymentDeadline = trim((string) data_get($content, 'payment.deadline'));
+        $layoutValue = static function (string $key, string $default = '') use ($layout): string {
+            $value = trim((string) data_get($layout, $key));
+
+            return $value !== '' ? $value : $default;
+        };
+        $eventDateLabel = $eventDateTime?->locale('vi')->translatedFormat('d.m.Y') ?: 'Ngày gặp lại';
+        $timeline = collect(data_get($layout, 'timeline', []))
+            ->filter(fn ($item): bool => is_array($item) && filled($item['title'] ?? null))
+            ->map(fn (array $item) => (object) [
+                'date' => $item['date'] ?? '',
+                'title' => $item['title'] ?? '',
+                'description' => $item['description'] ?? '',
+            ])
+            ->values();
+
+        if ($timeline->isEmpty()) {
+            $timeline = collect([
+                (object) [
+                    'date' => 'Ngày ấy',
+                    'title' => 'Những kỷ niệm còn đây',
+                    'description' => 'Những con người từng đồng hành, những câu chuyện từng kể và một chặng đường đáng nhớ.',
+                ],
+                (object) [
+                    'date' => $eventDateLabel,
+                    'title' => 'Hẹn gặp lại nhau',
+                    'description' => 'Một cuộc hẹn để cùng nhìn lại, kể chuyện cũ và nối tiếp những kết nối đã từng có.',
+                ],
+            ]);
+        }
         $invitationUrl = $guest
             ? route('gathering.invitation.show', ['gathering' => $gathering->slug, 'guest' => $guest->code])
             : route('gathering.show', ['gathering' => $gathering->slug]);
@@ -95,6 +125,24 @@ class GatheringController extends Controller
             'dress_code' => data_get($content, 'dress_code'),
             'menu_note' => data_get($content, 'menu_note'),
             'host_note' => data_get($content, 'host_note'),
+            'layout' => (object) [
+                'hero_kicker' => $layoutValue('hero_kicker', ($gathering->host_name ?: $gathering->title).' · Hội ngộ '.($eventDateTime?->format('Y') ?: '')),
+                'hero_title' => $layoutValue('hero_title', "Hẹn gặp lại\nnhững người bạn cũ"),
+                'hero_note' => $layoutValue('hero_note', 'Một cuộc hẹn để cùng nhắc về những ngày đã qua và những câu chuyện vẫn còn nguyên trong ký ức.'),
+                'hero_photo_label' => $layoutValue('hero_photo_label', $gathering->host_name ?: $gathering->title),
+                'hero_photo_caption' => $layoutValue('hero_photo_caption', 'Một dấu mốc để chúng ta cùng trở về và gặp lại nhau.'),
+                'timeline' => $timeline,
+                'milestone_label' => $layoutValue('milestone_label', 'Tư liệu kỷ niệm'),
+                'milestone_heading' => $layoutValue('milestone_heading', "Một dấu mốc\nđể nhớ"),
+                'milestone_date' => $layoutValue('milestone_date', 'Ký ức chung'),
+                'milestone_title' => $layoutValue('milestone_title', $gathering->title),
+                'milestone_description' => $layoutValue('milestone_description', 'Một khoảnh khắc thật được lưu lại để những người từng có mặt có thể cùng nhớ về.'),
+                'team_label' => $layoutValue('team_label', 'Những gương mặt năm ấy'),
+                'team_heading' => $layoutValue('team_heading', "Tập thể\nngày ấy"),
+                'team_intro' => $layoutValue('team_intro', 'Bức ảnh được giữ lại như một phần tư liệu của hành trình chung.'),
+                'team_credit_label' => $layoutValue('team_credit_label', 'Ký ức tập thể'),
+                'team_credit' => $layoutValue('team_credit', 'Không chỉ là một tấm ảnh. Đó là những con người từng cùng bắt đầu.'),
+            ],
             'schedule' => collect(data_get($content, 'schedule', []))
                 ->filter(fn ($item) => is_array($item) && filled($item['title'] ?? null))
                 ->map(fn (array $item) => (object) [

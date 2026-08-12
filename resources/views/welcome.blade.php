@@ -142,9 +142,9 @@
                 <a href="#demo" class="hover:text-rose-700 transition">Xem Demo</a>
                 <a href="#contact" class="hover:text-rose-700 transition">Liên hệ</a>
                 @auth
-                    <a href="{{ url('/dashboard') }}" class="text-rose-700 font-semibold">Tài khoản</a>
+                    <a href="{{ route('dashboard') }}" class="text-rose-700 font-semibold">Tài khoản</a>
                 @else
-                    <a href="{{ route('login') }}" class="text-gray-900 font-semibold hover:text-rose-700 transition">Đăng nhập</a>
+                    <a href="{{ route('filament.customer.auth.login') }}" class="text-gray-900 font-semibold hover:text-rose-700 transition">Đăng nhập</a>
                 @endauth
             </div>
             <a href="tel:0375433678" class="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-full gradient-rose text-white font-semibold text-sm hover:opacity-90 transition shadow-lg shadow-rose-200">
