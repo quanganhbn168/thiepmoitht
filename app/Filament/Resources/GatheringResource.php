@@ -6,6 +6,7 @@ use App\Filament\Resources\GatheringResource\Pages;
 use App\Filament\Resources\GatheringResource\RelationManagers\GuestsRelationManager;
 use App\Models\Gathering;
 use App\Models\Template;
+use App\Support\VietQrBanks;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
@@ -328,13 +329,22 @@ class GatheringResource extends Resource
                                 ->live()
                                 ->columnSpanFull(),
 
-                            SpatieMediaLibraryFileUpload::make('payment_qr')
-                                ->label('Ảnh QR thanh toán')
-                                ->collection('payment_qr')
-                                ->image()
-                                ->imageEditor()
-                                ->maxSize(10240)
-                                ->helperText('Dùng đúng luồng thiệp cưới: tải ảnh QR tài khoản của ban tổ chức; thiệp sẽ hiển thị ảnh này.')
+                            Select::make('content.payment.bank_bin')
+                                ->label('Ngân hàng nhận tiền')
+                                ->options(fn (): array => VietQrBanks::options())
+                                ->searchable()
+                                ->preload()
+                                ->helperText('Chỉ chọn tên ngân hàng. Hệ thống tự dùng đúng mã VietQR, không phải nhập mã.')
+                                ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
+
+                            TextInput::make('content.payment.account_number')
+                                ->label('Số tài khoản')
+                                ->maxLength(100)
+                                ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
+
+                            TextInput::make('content.payment.account_holder')
+                                ->label('Chủ tài khoản')
+                                ->maxLength(255)
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 
                             TextInput::make('content.payment.amount')
@@ -346,20 +356,20 @@ class GatheringResource extends Resource
                                 ->helperText('Thiết lập riêng cho từng thiệp; để trống nếu không muốn ấn định số tiền.')
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 
-                            TextInput::make('content.payment.bank_name')
-                                ->label('Ngân hàng')
-                                ->placeholder('VD: MB Bank')
-                                ->maxLength(255)
+                            Textarea::make('content.payment.account_info')
+                                ->label('Thông tin tài khoản')
+                                ->placeholder("Ngân hàng: ...\nSố TK: ...\nChủ TK: ...")
+                                ->helperText('Không bắt buộc. Nếu ảnh QR đã có đủ thông tin thì để trống, đúng như thiệp cưới.')
+                                ->rows(4)
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 
-                            TextInput::make('content.payment.account_number')
-                                ->label('Số tài khoản')
-                                ->maxLength(100)
-                                ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
-
-                            TextInput::make('content.payment.account_holder')
-                                ->label('Chủ tài khoản')
-                                ->maxLength(255)
+                            SpatieMediaLibraryFileUpload::make('payment_qr')
+                                ->label('Ảnh QR dự phòng')
+                                ->collection('payment_qr')
+                                ->image()
+                                ->imageEditor()
+                                ->maxSize(10240)
+                                ->helperText('Không cần upload khi đã chọn ngân hàng và điền số tài khoản. Chỉ dùng làm QR dự phòng.')
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 
                             TextInput::make('content.payment.transfer_prefix')

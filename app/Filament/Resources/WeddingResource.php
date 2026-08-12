@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\WeddingResource\Pages;
 use App\Models\Template;
 use App\Models\Wedding;
+use App\Support\VietQrBanks;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
@@ -181,16 +182,12 @@ class WeddingResource extends Resource
                                 ->default(false)
                                 ->live()
                                 ->columnSpanFull(),
-                            SpatieMediaLibraryFileUpload::make('payment_qr')
-                                ->label('Ảnh QR thanh toán')
-                                ->collection('payment_qr')
-                                ->image()
-                                ->imageEditor()
-                                ->maxSize(10240)
-                                ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
-                            TextInput::make('content.payment.bank_name')
-                                ->label('Ngân hàng')
-                                ->maxLength(255)
+                            Select::make('content.payment.bank_bin')
+                                ->label('Ngân hàng nhận tiền')
+                                ->options(fn (): array => VietQrBanks::options())
+                                ->searchable()
+                                ->preload()
+                                ->helperText('Chỉ chọn tên ngân hàng. Hệ thống tự dùng đúng mã VietQR, không phải nhập mã.')
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
                             TextInput::make('content.payment.account_number')
                                 ->label('Số tài khoản')
@@ -199,6 +196,20 @@ class WeddingResource extends Resource
                             TextInput::make('content.payment.account_holder')
                                 ->label('Chủ tài khoản')
                                 ->maxLength(255)
+                                ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
+                            Textarea::make('content.payment.account_info')
+                                ->label('Thông tin tài khoản')
+                                ->placeholder("Ngân hàng: ...\nSố TK: ...\nChủ TK: ...")
+                                ->helperText('Không bắt buộc. Nếu ảnh QR đã có đủ thông tin thì để trống.')
+                                ->rows(4)
+                                ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
+                            SpatieMediaLibraryFileUpload::make('payment_qr')
+                                ->label('Ảnh QR dự phòng')
+                                ->collection('payment_qr')
+                                ->image()
+                                ->imageEditor()
+                                ->maxSize(10240)
+                                ->helperText('Không cần upload khi đã chọn ngân hàng và điền số tài khoản.')
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
                             TextInput::make('content.payment.transfer_note')
                                 ->label('Gợi ý nội dung chuyển khoản')

@@ -244,20 +244,29 @@
                 <section class="contribute" id="dong-quy">
                     <div>
                         <p class="section-label" style="color:#9bd5f6">Đóng quỹ hội ngộ</p>
-                        <h2>@if($guest && $event->payment->amount_for_guest > 0){{ number_format($event->payment->amount_for_guest, 0, ',', '.') }}đ cho {{ $event->payment->guest_count }} người@elseif($event->payment->amount > 0){{ number_format($event->payment->amount, 0, ',', '.') }}đ / người@else Quét mã để đóng quỹ@endif</h2>
+                        <h2>
+                            @if ($guest && $event->payment->amount_for_guest > 0)
+                                {{ number_format($event->payment->amount_for_guest, 0, ',', '.') }}đ cho {{ $event->payment->guest_count }} người
+                            @elseif ($event->payment->amount > 0)
+                                {{ number_format($event->payment->amount, 0, ',', '.') }}đ / người
+                            @else
+                                Quét mã để đóng quỹ
+                            @endif
+                        </h2>
                         <p class="contribute-copy">Mỗi khoản đóng góp giúp anh em mình chốt bàn tiệc và chuẩn bị cuộc gặp chu đáo hơn.</p>
-                        <div class="payment-meta">
-                            @if($event->payment->bank_name)<div><b>Ngân hàng</b><span>{{ $event->payment->bank_name }}</span></div>@endif
-                            @if($event->payment->account_number)<div><b>Số tài khoản</b><span>{{ $event->payment->account_number }}</span></div>@endif
-                            @if($event->payment->account_holder)<div><b>Chủ tài khoản</b><span>{{ $event->payment->account_holder }}</span></div>@endif
-                            @if($event->payment->transfer_reference)<div><b>Nội dung CK</b><span>{{ $event->payment->transfer_reference }}</span></div>@endif
-                            @if($event->payment->deadline)<div><b>Hạn đóng quỹ</b><span>{{ $event->payment->deadline->locale('vi')->translatedFormat('d/m/Y') }}</span></div>@endif
-                        </div>
+                        @if($event->payment->transfer_reference || $event->payment->deadline)
+                            <div class="payment-meta">
+                                @if($event->payment->transfer_reference)<div><b>Nội dung CK</b><span>{{ $event->payment->transfer_reference }}</span></div>@endif
+                                @if($event->payment->deadline)<div><b>Hạn đóng quỹ</b><span>{{ $event->payment->deadline->locale('vi')->translatedFormat('d/m/Y') }}</span></div>@endif
+                            </div>
+                        @endif
                         @if($event->payment->note)<p class="contribute-copy">{{ $event->payment->note }}</p>@endif
                     </div>
                     <div>
                         @if($event->payment->qr_url)
-                            <div class="qr-box"><img src="{{ $event->payment->qr_url }}" alt="Mã QR đóng quỹ {{ $gathering->title }}"></div><p class="qr-caption">Mở ứng dụng ngân hàng và quét mã QR</p>
+                            <div class="qr-box"><img src="{{ $event->payment->qr_url }}" alt="Mã QR đóng quỹ {{ $gathering->title }}"></div>
+                            @if($event->payment->account_info)<p class="qr-caption" style="white-space:pre-line">{{ $event->payment->account_info }}</p>@endif
+                            <p class="qr-caption">Mở ứng dụng ngân hàng và quét mã QR</p>
                         @else
                             <div class="qr-pending">Mã QR đóng quỹ sẽ được ban tổ chức cập nhật trước khi gửi link chính thức.</div>
                         @endif

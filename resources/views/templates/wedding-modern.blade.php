@@ -90,9 +90,7 @@
                 <div>
                     <p class="script">Mừng cưới</p>
                     <p class="lead" style="margin-left:0">Sự hiện diện của bạn là món quà quý giá nhất. Nếu tiện gửi lời chúc mừng, gia đình xin trân trọng cảm ơn.</p>
-                    @if($event->payment->bank_name)<p><b>Ngân hàng:</b> {{ $event->payment->bank_name }}</p>@endif
-                    @if($event->payment->account_number)<p><b>Số tài khoản:</b> {{ $event->payment->account_number }}</p>@endif
-                    @if($event->payment->account_holder)<p><b>Chủ tài khoản:</b> {{ $event->payment->account_holder }}</p>@endif
+                    @if($event->payment->account_info)<p style="white-space:pre-line">{{ $event->payment->account_info }}</p>@endif
                     @if($event->payment->transfer_note)<p><b>Nội dung CK:</b> {{ $event->payment->transfer_note }}</p>@endif
                     @if($event->payment->deadline)<p><b>Hạn mừng:</b> {{ $event->payment->deadline->locale('vi')->translatedFormat('d/m/Y') }}</p>@endif
                     @if($event->payment->note)<p class="lead" style="margin-left:0">{{ $event->payment->note }}</p>@endif

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Gathering;
 use App\Models\GatheringGuest;
+use App\Support\VietQrQuickLink;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -78,6 +79,26 @@ class GatheringController extends Controller
         $paymentReference = $guest
             ? trim($paymentPrefix . ' ' . $guest->code)
             : trim($paymentPrefix . ' ' . $gathering->slug);
+        $paymentAmountForInvitation = $guest ? $paymentAmount * $paymentGuestCount : $paymentAmount;
+        $paymentBankBin = trim((string) data_get($content, 'payment.bank_bin'));
+        $paymentAccountNumber = trim((string) data_get($content, 'payment.account_number'));
+        $paymentAccountHolder = trim((string) data_get($content, 'payment.account_holder'));
+        $paymentQrUrl = VietQrQuickLink::imageUrl(
+            $paymentBankBin,
+            $paymentAccountNumber,
+            $paymentAmountForInvitation,
+            $paymentReference,
+            $paymentAccountHolder,
+        ) ?: $gathering->getFirstMediaUrl('payment_qr');
+        $paymentAccountInfo = trim((string) data_get($content, 'payment.account_info'));
+
+        if ($paymentAccountInfo === '') {
+            $paymentAccountInfo = collect([
+                data_get($content, 'payment.bank_name') ? 'Ngân hàng: '.data_get($content, 'payment.bank_name') : null,
+                data_get($content, 'payment.account_number') ? 'Số TK: '.data_get($content, 'payment.account_number') : null,
+                data_get($content, 'payment.account_holder') ? 'Chủ TK: '.data_get($content, 'payment.account_holder') : null,
+            ])->filter()->implode("\n");
+        }
         $paymentDeadline = trim((string) data_get($content, 'payment.deadline'));
         $layoutValue = static function (string $key, string $default = '') use ($layout): string {
             $value = trim((string) data_get($layout, $key));
@@ -162,13 +183,15 @@ class GatheringController extends Controller
                 ->values(),
             'payment' => (object) [
                 'enabled' => $paymentEnabled,
-                'qr_url' => $gathering->getFirstMediaUrl('payment_qr') ?: null,
+                'qr_url' => $paymentQrUrl ?: null,
                 'amount' => $paymentAmount,
-                'amount_for_guest' => $guest ? $paymentAmount * $paymentGuestCount : null,
+                'amount_for_guest' => $guest ? $paymentAmountForInvitation : null,
                 'guest_count' => $paymentGuestCount,
+                'account_info' => $paymentAccountInfo,
+                'bank_bin' => $paymentBankBin,
                 'bank_name' => trim((string) data_get($content, 'payment.bank_name')),
-                'account_number' => trim((string) data_get($content, 'payment.account_number')),
-                'account_holder' => trim((string) data_get($content, 'payment.account_holder')),
+                'account_number' => $paymentAccountNumber,
+                'account_holder' => $paymentAccountHolder,
                 'transfer_prefix' => $paymentPrefix,
                 'transfer_reference' => $paymentReference,
                 'deadline' => $paymentDeadline !== '' ? Carbon::parse($paymentDeadline) : null,

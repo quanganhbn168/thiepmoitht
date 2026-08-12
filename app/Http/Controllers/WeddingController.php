@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Wedding;
+use App\Support\VietQrQuickLink;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\View;
 
@@ -18,6 +19,20 @@ class WeddingController extends Controller
         $eventDateTime = $wedding->event_time
             ?: $wedding->event_date?->copy()->setTime(11, 0);
         $paymentEnabled = (bool) data_get($content, 'payment.enabled', false);
+        $paymentAmount = max(0, (int) data_get($content, 'payment.amount', 0));
+        $paymentBankBin = trim((string) data_get($content, 'payment.bank_bin'));
+        $paymentAccountNumber = trim((string) data_get($content, 'payment.account_number'));
+        $paymentAccountHolder = trim((string) data_get($content, 'payment.account_holder'));
+        $paymentTransferNote = trim((string) data_get($content, 'payment.transfer_note'));
+        $paymentAccountInfo = trim((string) data_get($content, 'payment.account_info'));
+
+        if ($paymentAccountInfo === '') {
+            $paymentAccountInfo = collect([
+                data_get($content, 'payment.bank_name') ? 'Ngân hàng: '.data_get($content, 'payment.bank_name') : null,
+                data_get($content, 'payment.account_number') ? 'Số TK: '.data_get($content, 'payment.account_number') : null,
+                data_get($content, 'payment.account_holder') ? 'Chủ TK: '.data_get($content, 'payment.account_holder') : null,
+            ])->filter()->implode("\n");
+        }
         $paymentDeadline = trim((string) data_get($content, 'payment.deadline'));
         $url = route('wedding.show', ['wedding' => $wedding->slug]);
 
@@ -32,11 +47,17 @@ class WeddingController extends Controller
             'url' => $url,
             'payment' => (object) [
                 'enabled' => $paymentEnabled,
-                'qr_url' => $wedding->getFirstMediaUrl('payment_qr') ?: null,
-                'bank_name' => trim((string) data_get($content, 'payment.bank_name')),
-                'account_number' => trim((string) data_get($content, 'payment.account_number')),
-                'account_holder' => trim((string) data_get($content, 'payment.account_holder')),
-                'transfer_note' => trim((string) data_get($content, 'payment.transfer_note')),
+                'qr_url' => VietQrQuickLink::imageUrl(
+                    $paymentBankBin,
+                    $paymentAccountNumber,
+                    $paymentAmount,
+                    $paymentTransferNote,
+                    $paymentAccountHolder,
+                ) ?: $wedding->getFirstMediaUrl('payment_qr'),
+                'amount' => $paymentAmount,
+                'bank_bin' => $paymentBankBin,
+                'account_info' => $paymentAccountInfo,
+                'transfer_note' => $paymentTransferNote,
                 'deadline' => $paymentDeadline !== '' ? Carbon::parse($paymentDeadline) : null,
                 'note' => trim((string) data_get($content, 'payment.note')),
             ],
