@@ -63,6 +63,53 @@ class GatheringController extends Controller
             ->with('gathering_rsvp_success', true);
     }
 
+    public function storeSharedRsvp(Request $request, Gathering $gathering)
+    {
+        abort_unless($this->isPublic($gathering), 404);
+
+        $key = 'gathering-shared-rsvp:' . $gathering->id . ':' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($key, 10)) {
+            return back()->withErrors([
+                'rsvp' => 'Bạn đã gửi quá nhiều lần. Vui lòng thử lại sau.',
+            ]);
+        }
+
+        RateLimiter::hit($key, 3600);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'rsvp_status' => 'required|in:attending,declined',
+            'guest_count' => 'nullable|integer|min:1|max:50',
+            'phone' => 'nullable|string|max:30',
+            'note' => 'nullable|string|max:1000',
+        ]);
+
+        $name = trim((string) preg_replace('/\s+/', ' ', $validated['name']));
+
+        if ($name === '') {
+            return back()
+                ->withInput()
+                ->withErrors(['name' => 'Vui lòng nhập họ và tên của bạn.']);
+        }
+
+        $guest = $gathering->guests()->create([
+            'name' => $name,
+            'rsvp_status' => $validated['rsvp_status'],
+            'guest_count' => $validated['guest_count'] ?? 1,
+            'phone' => $validated['phone'] ?? null,
+            'note' => $validated['note'] ?? null,
+            'responded_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('gathering.invitation.show', [
+                'gathering' => $gathering->slug,
+                'guest' => $guest->code,
+            ])
+            ->with('gathering_rsvp_success', true);
+    }
+
     private function render(Gathering $gathering, ?GatheringGuest $guest = null)
     {
         abort_unless($this->isPublic($gathering), 404);
@@ -78,7 +125,7 @@ class GatheringController extends Controller
         $paymentPrefix = trim((string) data_get($content, 'payment.transfer_prefix', 'HOINGO'));
         $paymentReference = $guest
             ? trim($paymentPrefix . ' ' . $guest->code)
-            : trim($paymentPrefix . ' ' . $gathering->slug);
+            : $paymentPrefix;
         $paymentAmountForInvitation = $guest ? $paymentAmount * $paymentGuestCount : $paymentAmount;
         $paymentBankBin = trim((string) data_get($content, 'payment.bank_bin'));
         $paymentAccountNumber = trim((string) data_get($content, 'payment.account_number'));

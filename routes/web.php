@@ -49,6 +49,7 @@ Route::post('/{reunion:slug}/message', [ReunionController::class, 'storeMessage'
 // Scoped bindings đảm bảo mã khách chỉ được mở trong đúng buổi hội ngộ của họ.
 Route::scopeBindings()->group(function (): void {
     Route::get('/hoi-ngo/{gathering:slug}', [GatheringController::class, 'show'])->name('gathering.show');
+    Route::post('/hoi-ngo/{gathering:slug}/xac-nhan', [GatheringController::class, 'storeSharedRsvp'])->name('gathering.shared-rsvp.store');
     Route::get('/hoi-ngo/{gathering:slug}/{guest:code}', [GatheringController::class, 'showInvitation'])->name('gathering.invitation.show');
     Route::post('/hoi-ngo/{gathering:slug}/{guest:code}/xac-nhan', [GatheringController::class, 'storeRsvp'])->name('gathering.rsvp.store');
 });

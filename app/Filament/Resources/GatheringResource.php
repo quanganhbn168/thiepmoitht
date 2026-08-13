@@ -375,7 +375,7 @@ class GatheringResource extends Resource
                             TextInput::make('content.payment.transfer_prefix')
                                 ->label('Tiền tố nội dung chuyển khoản')
                                 ->default('HOINGO')
-                                ->helperText('Thiệp tên riêng tự ghép thêm mã khách. VD: HOINGO anh-minh.')
+                                ->helperText('Link chung dùng đúng tiền tố này; sau xác nhận, link riêng tự ghép thêm mã khách. VD: HOINGO anh-minh.')
                                 ->maxLength(50)
                                 ->visible(fn (Get $get): bool => (bool) $get('content.payment.enabled')),
 

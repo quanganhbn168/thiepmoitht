@@ -106,25 +106,33 @@
                                 Quét mã để đóng quỹ
                             @endif
                         </h2>
-                        <p class="payment-copy">Mỗi khoản đóng góp giúp ban tổ chức chốt bàn tiệc và chuẩn bị buổi gặp gỡ chu đáo hơn.</p>
+                        <p class="payment-copy">
+                            @if($guest)
+                                Mã QR đã được lập theo số người bạn xác nhận; nội dung chuyển khoản bên dưới cũng đã gắn riêng với lời mời này để BTC đối soát nhanh.
+                            @else
+                                Link chung đang hiển thị mức đóng quỹ cho 01 người; mã QR dùng đúng tiền tố chuyển khoản bên dưới. Hãy xác nhận nếu đi cùng người khác để nhận QR với đúng tổng tiền.
+                            @endif
+                        </p>
                         <div class="payment-meta">
                             @if($event->payment->bank_name)<div><b>Ngân hàng</b><span>{{ $event->payment->bank_name }}</span></div>@endif
                             @if($event->payment->account_number)<div><b>Số tài khoản</b><span>{{ $event->payment->account_number }}</span></div>@endif
                             @if($event->payment->account_holder)<div><b>Chủ tài khoản</b><span>{{ $event->payment->account_holder }}</span></div>@endif
-                            @if($event->payment->transfer_reference)<div><b>Nội dung CK</b><span>{{ $event->payment->transfer_reference }}</span></div>@endif
+                            @if($event->payment->transfer_reference)
+                                <div><b>Nội dung CK</b><span>{{ $event->payment->transfer_reference }}</span></div>
+                            @endif
                             @if($event->payment->deadline)<div><b>Hạn đóng quỹ</b><span>{{ $event->payment->deadline->locale('vi')->translatedFormat('d/m/Y') }}</span></div>@endif
                         </div>
                         @if($event->payment->note)<p class="payment-copy">{{ $event->payment->note }}</p>@endif
                     </div>
                     @if($event->payment->qr_url)
-                        <div><div class="qr-box"><img src="{{ $event->payment->qr_url }}" alt="Mã QR đóng quỹ {{ $gathering->title }}"></div><p class="qr-caption">Mở app ngân hàng và quét mã QR để chuyển khoản</p></div>
+                        <div><div class="qr-box"><img src="{{ $event->payment->qr_url }}" alt="Mã QR đóng quỹ {{ $gathering->title }}"></div><p class="qr-caption">@if($guest)Mở app ngân hàng và quét mã QR; nội dung chuyển khoản đã được điền sẵn.@else QR mặc định cho 01 người; nội dung chuyển khoản đã điền sẵn đúng tiền tố.@endif</p></div>
                     @endif
                 </section>
             @endif
 
             @if($guest)
                 <section class="card rsvp" id="xac-nhan">
-                    <p class="eyebrow" style="color:#6c301f">Xác nhận tham gia</p>
+                    <p class="eyebrow" style="color:#6c301f">Xác nhận tham dự</p>
                     <h2>Chốt kèo với {{ $guest->name }}</h2>
                     <p>Phản hồi của bạn giúp ban tổ chức chuẩn bị bàn tiệc chu đáo hơn.</p>
                     @if(session('gathering_rsvp_success'))<p class="flash">Đã nhận xác nhận của bạn. Hẹn gặp đúng giờ nhé!</p>@endif
@@ -139,6 +147,27 @@
                         <input name="guest_count" type="number" min="1" max="50" value="{{ old('guest_count', $guest->guest_count) }}" placeholder="Số người tham dự">
                         <input name="phone" value="{{ old('phone', $guest->phone) }}" placeholder="Số điện thoại (để BTC tiện liên hệ)">
                         <textarea name="note" placeholder="Có lời nhắn gì cho kèo này không?">{{ old('note', $guest->note) }}</textarea>
+                        <button type="submit">Gửi xác nhận</button>
+                    </form>
+                </section>
+            @else
+                <section class="card rsvp" id="xac-nhan">
+                    <p class="eyebrow" style="color:#6c301f">Xác nhận tham dự</p>
+                    <h2>Xác nhận ngay trên link chung</h2>
+                    <p>Điền thêm họ tên để ban tổ chức ghi nhận phản hồi. Sau khi gửi, thiệp sẽ mở link riêng có QR và nội dung chuyển khoản theo đúng số người bạn đăng ký.</p>
+                    @if(isset($errors) && $errors->has('rsvp'))<p class="errors">{{ $errors->first('rsvp') }}</p>@endif
+                    <form method="POST" action="{{ route('gathering.shared-rsvp.store', ['gathering' => $gathering->slug]) }}">
+                        @csrf
+                        <input name="name" value="{{ old('name') }}" placeholder="Họ và tên của bạn" autocomplete="name" required>
+                        @if(isset($errors) && $errors->has('name'))<p class="errors">{{ $errors->first('name') }}</p>@endif
+                        <div class="choices">
+                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status') === 'attending')> Có mặt, chốt kèo!</label>
+                            <label class="choice"><input type="radio" name="rsvp_status" value="declined" @checked(old('rsvp_status') === 'declined')> Xin phép vắng mặt</label>
+                        </div>
+                        @if(isset($errors) && $errors->has('rsvp_status'))<p class="errors">{{ $errors->first('rsvp_status') }}</p>@endif
+                        <input name="guest_count" type="number" min="1" max="50" value="{{ old('guest_count', 1) }}" placeholder="Số người tham dự">
+                        <input name="phone" value="{{ old('phone') }}" placeholder="Số điện thoại (để BTC tiện liên hệ)" autocomplete="tel">
+                        <textarea name="note" placeholder="Có lời nhắn gì cho kèo này không?">{{ old('note') }}</textarea>
                         <button type="submit">Gửi xác nhận</button>
                     </form>
                 </section>
