@@ -70,7 +70,6 @@ class GuestsRelationManager extends RelationManager
                 })->formatStateUsing(fn (string $state): string => match ($state) {
                     'attending' => 'Có mặt', 'declined' => 'Vắng mặt', default => 'Chưa phản hồi',
                 }),
-                TextColumn::make('guest_count')->label('Số người')->numeric(),
                 TextColumn::make('responded_at')->label('Phản hồi lúc')->dateTime('H:i d/m/Y')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('invitation_url')
                     ->label('Link mời riêng')
@@ -124,7 +123,6 @@ class GuestsRelationManager extends RelationManager
                         $this->getOwnerRecord()->guests()->createMany(
                             $names->map(fn (string $name): array => [
                                 'name' => $name,
-                                'guest_count' => 1,
                                 'rsvp_status' => 'pending',
                             ])->all()
                         );

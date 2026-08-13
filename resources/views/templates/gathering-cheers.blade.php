@@ -31,7 +31,7 @@
         .detail { padding:28px; border-right:1px solid rgba(122,31,43,.12); } .detail:last-child { border:0; } .detail b { display:block; margin-bottom:8px; font-size:.75rem; letter-spacing:.12em; text-transform:uppercase; color:var(--wine); } .detail span { font-size:1rem; font-weight:700; line-height:1.5; }
         .grid { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr); gap:24px; margin-top:24px; } .letter { padding:clamp(28px,5vw,58px); } h2 { margin:0; color:var(--wine); font-size:clamp(2rem,4vw,3.3rem); line-height:1.1; } .copy { margin-top:22px; color:#593e34; line-height:1.85; } .copy p:first-child { margin-top:0; }
         .aside { padding:30px; background:linear-gradient(155deg,#40201e,#7a1f2b); color:#fff8ec; } .aside h3 { margin:0; font-size:1.25rem; } .aside p { color:rgba(255,248,236,.77); line-height:1.7; } .agenda { margin:26px 0 0; padding:0; list-style:none; } .agenda li { padding:16px 0; border-top:1px solid rgba(255,255,255,.16); } .agenda strong { display:block; color:#ffd27b; font-size:.9rem; } .agenda span { display:block; margin-top:5px; font-size:.9rem; line-height:1.55; color:rgba(255,248,236,.8); }
-        .rsvp { margin-top:24px; padding:clamp(28px,5vw,48px); background:linear-gradient(135deg,#f3d98e,#e4a64a); } .rsvp h2 { color:#4a231d; } .rsvp > p { max-width:650px; color:#634022; line-height:1.7; } form { display:grid; gap:16px; margin-top:24px; } .choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; } .choice { display:flex; align-items:center; gap:10px; padding:15px; cursor:pointer; border:1px solid rgba(74,35,29,.22); border-radius:15px; color:#4a231d; background:rgba(255,252,246,.45); font-weight:800; } input,textarea { width:100%; border:1px solid rgba(74,35,29,.25); border-radius:13px; padding:14px; color:#3b241d; font:inherit; background:#fffaf1; } textarea { min-height:90px; resize:vertical; } button,.map-link { display:inline-flex; justify-content:center; align-items:center; min-height:52px; border:0; border-radius:14px; padding:0 22px; cursor:pointer; color:#fffaf1; background:#4a231d; font:800 .95rem inherit; text-decoration:none; transition:transform .2s,background .2s; } button:hover,.map-link:hover { transform:translateY(-2px); background:#26120f; } .flash { margin-top:24px; padding:15px 18px; border-radius:14px; color:#195f44; background:#dff5e8; font-weight:700; } .errors { margin-top:20px; color:#8b1d25; font-size:.93rem; }
+        .rsvp { margin-top:24px; padding:clamp(28px,5vw,48px); background:linear-gradient(135deg,#f3d98e,#e4a64a); } .rsvp h2 { color:#4a231d; } .rsvp > p { max-width:650px; color:#634022; line-height:1.7; } form { display:grid; gap:16px; margin-top:24px; } .choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; } .choice { display:flex; align-items:center; gap:10px; padding:15px; cursor:pointer; border:1px solid rgba(74,35,29,.22); border-radius:15px; color:#4a231d; background:rgba(255,252,246,.45); font-weight:800; transition:border-color .2s,background .2s,box-shadow .2s; } .choice:has(input:checked) { border-color:var(--wine); background:#fff0d5; box-shadow:inset 0 0 0 1px var(--wine); } .choice input[type="radio"] { flex:0 0 18px; width:18px; height:18px; min-height:0; margin:0; padding:0; accent-color:var(--wine); } input:not([type="radio"]),textarea { width:100%; border:1px solid rgba(74,35,29,.25); border-radius:13px; padding:14px; color:#3b241d; font:inherit; background:#fffaf1; } textarea { min-height:90px; resize:vertical; } button,.map-link { display:inline-flex; justify-content:center; align-items:center; min-height:52px; border:0; border-radius:14px; padding:0 22px; cursor:pointer; color:#fffaf1; background:#4a231d; font:800 .95rem inherit; text-decoration:none; transition:transform .2s,background .2s; } button:hover,.map-link:hover { transform:translateY(-2px); background:#26120f; } .flash { margin-top:24px; padding:15px 18px; border-radius:14px; color:#195f44; background:#dff5e8; font-weight:700; } .errors { margin-top:20px; color:#8b1d25; font-size:.93rem; }
         .memories { margin-top:24px; padding:clamp(28px,5vw,48px); } .memories-head { display:flex; justify-content:space-between; gap:18px; align-items:end; margin-bottom:24px; } .memories-head p { margin:0; max-width:440px; color:#7b6558; line-height:1.7; } .memory-grid { display:grid; grid-template-columns:1.2fr .8fr .8fr; grid-auto-rows:170px; gap:14px; } .memory { overflow:hidden; border-radius:18px; background:#e7d9c9; } .memory:first-child { grid-row:span 2; } .memory img { width:100%; height:100%; object-fit:cover; transition:transform .45s ease; } .memory:hover img { transform:scale(1.05); }
         .payment { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:34px; align-items:center; margin-top:24px; padding:clamp(28px,5vw,48px); color:#fff8ec; background:linear-gradient(135deg,#271514,#6b2029 58%,#9d4535); } .payment h2 { color:#fff5dc; } .payment-copy { margin:18px 0 0; color:rgba(255,248,236,.8); line-height:1.8; } .payment-meta { display:grid; gap:13px; margin-top:24px; } .payment-meta div { display:flex; gap:12px; align-items:baseline; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.15); } .payment-meta b { flex:0 0 128px; color:#f2c76d; font-size:.77rem; letter-spacing:.08em; text-transform:uppercase; } .payment-meta span { font-weight:700; word-break:break-word; } .qr-box { padding:12px; border-radius:22px; background:#fffaf1; box-shadow:0 14px 36px rgba(0,0,0,.22); } .qr-box img { display:block; width:100%; aspect-ratio:1; object-fit:contain; } .qr-caption { margin:13px 0 0; color:rgba(255,248,236,.72); text-align:center; font-size:.76rem; line-height:1.5; }
         .foot { padding:32px 0 12px; text-align:center; color:#7b6558; font-size:.9rem; } .foot a { color:var(--wine); font-weight:700; }
@@ -97,22 +97,8 @@
                 <section class="card payment" id="dong-quy">
                     <div>
                         <p class="eyebrow" style="color:#f2c76d">Đóng quỹ hội ngộ</p>
-                        <h2>
-                            @if($guest && $event->payment->amount_for_guest > 0)
-                                {{ number_format($event->payment->amount_for_guest, 0, ',', '.') }}đ cho {{ $event->payment->guest_count }} người
-                            @elseif($event->payment->amount > 0)
-                                {{ number_format($event->payment->amount, 0, ',', '.') }}đ / người
-                            @else
-                                Quét mã để đóng quỹ
-                            @endif
-                        </h2>
-                        <p class="payment-copy">
-                            @if($guest)
-                                Mã QR đã được lập theo số người bạn xác nhận; nội dung chuyển khoản bên dưới cũng đã gắn riêng với lời mời này để BTC đối soát nhanh.
-                            @else
-                                Link chung đang hiển thị mức đóng quỹ cho 01 người; mã QR dùng đúng tiền tố chuyển khoản bên dưới. Hãy xác nhận nếu đi cùng người khác để nhận QR với đúng tổng tiền.
-                            @endif
-                        </p>
+                        <h2>{{ $event->payment->amount > 0 ? number_format($event->payment->amount, 0, ',', '.') . 'đ' : 'Quét mã để đóng quỹ' }}</h2>
+                        <p class="payment-copy">Mỗi khoản đóng góp giúp ban tổ chức chuẩn bị buổi gặp gỡ chu đáo hơn.</p>
                         <div class="payment-meta">
                             @if($event->payment->bank_name)<div><b>Ngân hàng</b><span>{{ $event->payment->bank_name }}</span></div>@endif
                             @if($event->payment->account_number)<div><b>Số tài khoản</b><span>{{ $event->payment->account_number }}</span></div>@endif
@@ -125,7 +111,7 @@
                         @if($event->payment->note)<p class="payment-copy">{{ $event->payment->note }}</p>@endif
                     </div>
                     @if($event->payment->qr_url)
-                        <div><div class="qr-box"><img src="{{ $event->payment->qr_url }}" alt="Mã QR đóng quỹ {{ $gathering->title }}"></div><p class="qr-caption">@if($guest)Mở app ngân hàng và quét mã QR; nội dung chuyển khoản đã được điền sẵn.@else QR mặc định cho 01 người; nội dung chuyển khoản đã điền sẵn đúng tiền tố.@endif</p></div>
+                        <div><div class="qr-box"><img src="{{ $event->payment->qr_url }}" alt="Mã QR đóng quỹ {{ $gathering->title }}"></div><p class="qr-caption">Mở ứng dụng ngân hàng và quét mã QR để chuyển khoản.</p></div>
                     @endif
                 </section>
             @endif
@@ -140,11 +126,10 @@
                     <form method="POST" action="{{ route('gathering.rsvp.store', ['gathering' => $gathering->slug, 'guest' => $guest->code]) }}">
                         @csrf
                         <div class="choices">
-                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status', $guest->rsvp_status) === 'attending')> Có mặt, chốt kèo!</label>
+                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status', $guest->rsvp_status) === 'attending') required> Có mặt, chốt kèo!</label>
                             <label class="choice"><input type="radio" name="rsvp_status" value="declined" @checked(old('rsvp_status') === 'declined')> Xin phép vắng mặt</label>
                         </div>
                         @if(isset($errors) && $errors->has('rsvp_status'))<p class="errors">{{ $errors->first('rsvp_status') }}</p>@endif
-                        <input name="guest_count" type="number" min="1" max="50" value="{{ old('guest_count', $guest->guest_count) }}" placeholder="Số người tham dự">
                         <input name="phone" value="{{ old('phone', $guest->phone) }}" placeholder="Số điện thoại (để BTC tiện liên hệ)">
                         <textarea name="note" placeholder="Có lời nhắn gì cho kèo này không?">{{ old('note', $guest->note) }}</textarea>
                         <button type="submit">Gửi xác nhận</button>
@@ -154,18 +139,17 @@
                 <section class="card rsvp" id="xac-nhan">
                     <p class="eyebrow" style="color:#6c301f">Xác nhận tham dự</p>
                     <h2>Xác nhận ngay trên link chung</h2>
-                    <p>Điền thêm họ tên để ban tổ chức ghi nhận phản hồi. Sau khi gửi, thiệp sẽ mở link riêng có QR và nội dung chuyển khoản theo đúng số người bạn đăng ký.</p>
+                    <p>Điền họ và tên để ban tổ chức ghi nhận phản hồi.</p>
                     @if(isset($errors) && $errors->has('rsvp'))<p class="errors">{{ $errors->first('rsvp') }}</p>@endif
                     <form method="POST" action="{{ route('gathering.shared-rsvp.store', ['gathering' => $gathering->slug]) }}">
                         @csrf
                         <input name="name" value="{{ old('name') }}" placeholder="Họ và tên của bạn" autocomplete="name" required>
                         @if(isset($errors) && $errors->has('name'))<p class="errors">{{ $errors->first('name') }}</p>@endif
                         <div class="choices">
-                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status') === 'attending')> Có mặt, chốt kèo!</label>
+                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status') === 'attending') required> Có mặt, chốt kèo!</label>
                             <label class="choice"><input type="radio" name="rsvp_status" value="declined" @checked(old('rsvp_status') === 'declined')> Xin phép vắng mặt</label>
                         </div>
                         @if(isset($errors) && $errors->has('rsvp_status'))<p class="errors">{{ $errors->first('rsvp_status') }}</p>@endif
-                        <input name="guest_count" type="number" min="1" max="50" value="{{ old('guest_count', 1) }}" placeholder="Số người tham dự">
                         <input name="phone" value="{{ old('phone') }}" placeholder="Số điện thoại (để BTC tiện liên hệ)" autocomplete="tel">
                         <textarea name="note" placeholder="Có lời nhắn gì cho kèo này không?">{{ old('note') }}</textarea>
                         <button type="submit">Gửi xác nhận</button>

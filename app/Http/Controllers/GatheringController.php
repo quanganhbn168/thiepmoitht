@@ -42,14 +42,12 @@ class GatheringController extends Controller
 
         $validated = $request->validate([
             'rsvp_status' => 'required|in:attending,declined',
-            'guest_count' => 'nullable|integer|min:1|max:50',
             'phone' => 'nullable|string|max:30',
             'note' => 'nullable|string|max:1000',
         ]);
 
         $guest->update([
             'rsvp_status' => $validated['rsvp_status'],
-            'guest_count' => $validated['guest_count'] ?? 1,
             'phone' => $validated['phone'] ?? $guest->phone,
             'note' => $validated['note'] ?? $guest->note,
             'responded_at' => now(),
@@ -80,7 +78,6 @@ class GatheringController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'rsvp_status' => 'required|in:attending,declined',
-            'guest_count' => 'nullable|integer|min:1|max:50',
             'phone' => 'nullable|string|max:30',
             'note' => 'nullable|string|max:1000',
         ]);
@@ -96,7 +93,6 @@ class GatheringController extends Controller
         $guest = $gathering->guests()->create([
             'name' => $name,
             'rsvp_status' => $validated['rsvp_status'],
-            'guest_count' => $validated['guest_count'] ?? 1,
             'phone' => $validated['phone'] ?? null,
             'note' => $validated['note'] ?? null,
             'responded_at' => now(),
@@ -121,19 +117,17 @@ class GatheringController extends Controller
             ?: $gathering->event_date?->copy()->setTime(18, 0);
         $paymentEnabled = (bool) data_get($content, 'payment.enabled', false);
         $paymentAmount = max(0, (int) data_get($content, 'payment.amount', 0));
-        $paymentGuestCount = max(1, (int) ($guest?->guest_count ?: 1));
         $paymentPrefix = trim((string) data_get($content, 'payment.transfer_prefix', 'HOINGO'));
         $paymentReference = $guest
             ? trim($paymentPrefix . ' ' . $guest->code)
             : $paymentPrefix;
-        $paymentAmountForInvitation = $guest ? $paymentAmount * $paymentGuestCount : $paymentAmount;
         $paymentBankBin = trim((string) data_get($content, 'payment.bank_bin'));
         $paymentAccountNumber = trim((string) data_get($content, 'payment.account_number'));
         $paymentAccountHolder = trim((string) data_get($content, 'payment.account_holder'));
         $paymentQrUrl = VietQrQuickLink::imageUrl(
             $paymentBankBin,
             $paymentAccountNumber,
-            $paymentAmountForInvitation,
+            $paymentAmount,
             $paymentReference,
             $paymentAccountHolder,
         ) ?: $gathering->getFirstMediaUrl('payment_qr');
@@ -247,8 +241,6 @@ class GatheringController extends Controller
                 'enabled' => $paymentEnabled,
                 'qr_url' => $paymentQrUrl ?: null,
                 'amount' => $paymentAmount,
-                'amount_for_guest' => $guest ? $paymentAmountForInvitation : null,
-                'guest_count' => $paymentGuestCount,
                 'account_info' => $paymentAccountInfo,
                 'bank_bin' => $paymentBankBin,
                 'bank_name' => trim((string) data_get($content, 'payment.bank_name')),

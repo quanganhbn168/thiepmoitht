@@ -113,8 +113,10 @@
         .rsvp > p { max-width:650px; color:#526779; font-size:.94rem; line-height:1.75; }
         form { display:grid; gap:15px; margin-top:26px; }
         .choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-        .choice { display:flex; align-items:center; gap:10px; min-height:54px; padding:14px 16px; border:1px solid #bcd1df; cursor:pointer; color:#193957; background:#fff; font-weight:800; }
-        input,textarea { width:100%; padding:14px; border:1px solid #bcd1df; border-radius:0; color:#17314d; background:#fff; font:inherit; }
+        .choice { display:flex; align-items:center; gap:10px; min-height:54px; padding:14px 16px; border:1px solid #bcd1df; cursor:pointer; color:#193957; background:#fff; font-weight:800; transition:border-color .2s,background .2s,box-shadow .2s; }
+        .choice:has(input:checked) { border-color:var(--blue); background:#eaf6fd; box-shadow:inset 0 0 0 1px var(--blue); }
+        .choice input[type="radio"] { flex:0 0 18px; width:18px; height:18px; min-height:0; margin:0; padding:0; accent-color:var(--blue); }
+        input:not([type="radio"]),textarea { width:100%; padding:14px; border:1px solid #bcd1df; border-radius:0; color:#17314d; background:#fff; font:inherit; }
         textarea { min-height:94px; resize:vertical; }
         button { min-height:52px; border:0; border-radius:0; padding:0 22px; cursor:pointer; color:#fff; background:var(--blue); font:800 .95rem "Be Vietnam Pro",sans-serif; transition:background .2s,transform .2s; }
         button:hover { background:#074f90; transform:translateY(-2px); }
@@ -245,22 +247,8 @@
                 <section class="contribute" id="dong-quy">
                     <div>
                         <p class="section-label" style="color:#9bd5f6">Đóng quỹ hội ngộ</p>
-                        <h2>
-                            @if ($guest && $event->payment->amount_for_guest > 0)
-                                {{ number_format($event->payment->amount_for_guest, 0, ',', '.') }}đ cho {{ $event->payment->guest_count }} người
-                            @elseif ($event->payment->amount > 0)
-                                {{ number_format($event->payment->amount, 0, ',', '.') }}đ / người
-                            @else
-                                Quét mã để đóng quỹ
-                            @endif
-                        </h2>
-                        <p class="contribute-copy">
-                            @if($guest)
-                                Mã QR đã được lập theo số người bạn xác nhận; nội dung chuyển khoản bên dưới cũng đã gắn riêng với lời mời này để BTC đối soát nhanh.
-                            @else
-                                Link chung đang hiển thị mức đóng quỹ cho 01 người; mã QR dùng đúng tiền tố chuyển khoản bên dưới. Hãy xác nhận nếu đi cùng người khác để nhận QR với đúng tổng tiền.
-                            @endif
-                        </p>
+                        <h2>{{ $event->payment->amount > 0 ? number_format($event->payment->amount, 0, ',', '.') . 'đ' : 'Quét mã để đóng quỹ' }}</h2>
+                        <p class="contribute-copy">Mỗi khoản đóng góp giúp ban tổ chức chuẩn bị buổi gặp gỡ chu đáo hơn.</p>
                         @if($event->payment->bank_name || $event->payment->account_number || $event->payment->account_holder || $event->payment->transfer_reference || $event->payment->deadline)
                             <div class="payment-meta">
                                 @if($event->payment->bank_name)<div><b>Ngân hàng</b><span>{{ $event->payment->bank_name }}</span></div>@endif
@@ -278,13 +266,7 @@
                         @if($event->payment->qr_url)
                             <div class="qr-box"><img src="{{ $event->payment->qr_url }}" alt="Mã QR đóng quỹ {{ $gathering->title }}"></div>
                             @if($event->payment->account_info)<p class="qr-caption" style="white-space:pre-line">{{ $event->payment->account_info }}</p>@endif
-                            <p class="qr-caption">
-                                @if($guest)
-                                    Mở ứng dụng ngân hàng và quét mã QR; nội dung chuyển khoản đã được điền sẵn.
-                                @else
-                                    QR mặc định cho 01 người; nội dung chuyển khoản đã điền sẵn đúng tiền tố.
-                                @endif
-                            </p>
+                            <p class="qr-caption">Mở ứng dụng ngân hàng và quét mã QR để chuyển khoản.</p>
                         @else
                             <div class="qr-pending">Mã QR đóng quỹ sẽ được ban tổ chức cập nhật trước khi gửi link chính thức.</div>
                         @endif
@@ -302,29 +284,27 @@
                     <form method="POST" action="{{ route('gathering.rsvp.store', ['gathering' => $gathering->slug, 'guest' => $guest->code]) }}">
                         @csrf
                         <div class="choices">
-                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status', $guest->rsvp_status) === 'attending')> Có mặt, hẹn gặp anh em!</label>
+                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status', $guest->rsvp_status) === 'attending') required> Có mặt, hẹn gặp anh em!</label>
                             <label class="choice"><input type="radio" name="rsvp_status" value="declined" @checked(old('rsvp_status') === 'declined')> Xin phép chưa tham dự được</label>
                         </div>
                         @if(isset($errors) && $errors->has('rsvp_status'))<p class="errors">{{ $errors->first('rsvp_status') }}</p>@endif
-                        <input name="guest_count" type="number" min="1" max="50" value="{{ old('guest_count', $guest->guest_count) }}" placeholder="Số người tham dự">
                         <input name="phone" value="{{ old('phone', $guest->phone) }}" placeholder="Số điện thoại để tiện liên hệ">
                         <textarea name="note" placeholder="Có lời nhắn nào cho anh em không?">{{ old('note', $guest->note) }}</textarea>
                         <button type="submit">Gửi xác nhận</button>
                     </form>
                 @else
                     <h2>Xác nhận ngay<br>trên link chung.</h2>
-                    <p>Điền thêm họ tên để BTC ghi nhận phản hồi. Sau khi gửi, thiệp sẽ mở link riêng có QR và nội dung chuyển khoản theo đúng số người bạn đăng ký.</p>
+                    <p>Điền họ và tên để BTC ghi nhận phản hồi.</p>
                     @if(isset($errors) && $errors->has('rsvp'))<p class="errors">{{ $errors->first('rsvp') }}</p>@endif
                     <form method="POST" action="{{ route('gathering.shared-rsvp.store', ['gathering' => $gathering->slug]) }}">
                         @csrf
                         <input name="name" value="{{ old('name') }}" placeholder="Họ và tên của bạn" autocomplete="name" required>
                         @if(isset($errors) && $errors->has('name'))<p class="errors">{{ $errors->first('name') }}</p>@endif
                         <div class="choices">
-                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status') === 'attending')> Có mặt, hẹn gặp anh em!</label>
+                            <label class="choice"><input type="radio" name="rsvp_status" value="attending" @checked(old('rsvp_status') === 'attending') required> Có mặt, hẹn gặp anh em!</label>
                             <label class="choice"><input type="radio" name="rsvp_status" value="declined" @checked(old('rsvp_status') === 'declined')> Xin phép chưa tham dự được</label>
                         </div>
                         @if(isset($errors) && $errors->has('rsvp_status'))<p class="errors">{{ $errors->first('rsvp_status') }}</p>@endif
-                        <input name="guest_count" type="number" min="1" max="50" value="{{ old('guest_count', 1) }}" placeholder="Số người tham dự">
                         <input name="phone" value="{{ old('phone') }}" placeholder="Số điện thoại để tiện liên hệ" autocomplete="tel">
                         <textarea name="note" placeholder="Có lời nhắn nào cho anh em không?">{{ old('note') }}</textarea>
                         <button type="submit">Gửi xác nhận</button>

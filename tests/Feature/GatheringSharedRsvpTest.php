@@ -34,12 +34,12 @@ class GatheringSharedRsvpTest extends TestCase
         $this->get(route('gathering.show', $gathering))
             ->assertOk()
             ->assertSee('Họ và tên của bạn')
+            ->assertDontSee('name="guest_count"', false)
             ->assertSee('HOINGO');
 
         $response = $this->post(route('gathering.shared-rsvp.store', $gathering), [
             'name' => 'Nguyễn Văn A',
             'rsvp_status' => 'attending',
-            'guest_count' => 2,
             'phone' => '0912345678',
             'note' => 'Hẹn gặp mọi người.',
         ]);
@@ -56,7 +56,7 @@ class GatheringSharedRsvpTest extends TestCase
             'name' => 'Nguyễn Văn A',
             'code' => 'nguyen-van-a',
             'rsvp_status' => 'attending',
-            'guest_count' => 2,
+            'guest_count' => 1,
             'phone' => '0912345678',
             'note' => 'Hẹn gặp mọi người.',
         ]);
@@ -66,7 +66,7 @@ class GatheringSharedRsvpTest extends TestCase
             'guest' => $guest,
         ]))
             ->assertOk()
-            ->assertSee('1.000.000đ cho 2 người')
+            ->assertSee('500.000đ')
             ->assertSee('HOINGO nguyen-van-a');
     }
 }
